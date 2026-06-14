@@ -1,0 +1,29 @@
+# Enforce LF line endings for all text files (cross-platform: Windows dev, Android/iOS target)
+* text=auto eol=lf
+
+# Godot files
+*.gd text eol=lf
+*.tscn text eol=lf
+*.tres text eol=lf
+*.godot text eol=lf
+*.cfg text eol=lf
+*.uid text eol=lf
+
+# Web / markup
+*.svg text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+
+# Binary — no line ending conversion
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.ttf binary
+*.otf binary
+*.fnt binary
+*.import binary

@@ -1,0 +1,28 @@
+# Claude Code working files — local only, NEVER public
+CLAUDE.md
+PROGRESS.md
+
+# Godot engine cache
+.godot/
+
+# Build outputs
+export/
+*.apk
+*.aab
+*.ipa
+
+# Signing keys — CRITICAL, never commit
+*.keystore
+*.jks
+release.keystore
+
+# Real AdMob / IAP IDs (use config/ad_ids.example.gd as template)
+config/ad_ids.gd
+
+# IDE config — personal, not project
+.vscode/
+.idea/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
