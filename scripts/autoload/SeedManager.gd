@@ -1,7 +1,5 @@
 extends Node
 
-class_name SeedManager
-
 ## Provides the daily deterministic seed for arena and enemy layout.
 ## Populated in Step 09 (daily seed system).
 

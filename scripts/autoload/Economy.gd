@@ -1,7 +1,5 @@
 extends Node
 
-class_name Economy
-
 ## Manages soft currency: earning, spending, and balance queries.
 ## Populated in Step 11 (save/load & economy).
 

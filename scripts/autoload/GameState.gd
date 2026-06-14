@@ -1,7 +1,5 @@
 extends Node
 
-class_name GameState
-
 ## Manages global game session state: active run, lives, score, and game mode.
 ## Populated in Step 05 (score/combo/game loop).
 
