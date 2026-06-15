@@ -1,27 +1,36 @@
-[gd_scene format=3 uid="uid://nel7mn3oehfi"]
+[gd_scene load_steps=5 format=3 uid="uid://nel7mn3oehfi"]
 
 [ext_resource type="Script" uid="uid://b18w21sy3wuk8" path="res://scripts/core/game.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/Arena.tscn" id="2_arena"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/Player.tscn" id="3_player"]
-[ext_resource type="Script" uid="uid://clo3o5sdg5jpn" path="res://scripts/ui/dpad_view.gd" id="4_dpad"]
+[ext_resource type="Script" path="res://scripts/ui/dpad_view.gd" id="4_dpad"]
 
-[node name="Game" type="Node2D" unique_id=1620099640]
+[node name="Game" type="Node2D"]
 script = ExtResource("1_game")
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=608793738]
+[node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(360, 640)
 
-[node name="Arena" parent="." unique_id=311275237 instance=ExtResource("2_arena")]
+[node name="Arena" parent="." instance=ExtResource("2_arena")]
 
-[node name="Player" parent="." unique_id=946663320 instance=ExtResource("3_player")]
-move_interval = 0.04
+[node name="Player" parent="." instance=ExtResource("3_player")]
 
-[node name="UILayer" type="CanvasLayer" parent="." unique_id=1369032228]
+[node name="Enemies" type="Node2D" parent="."]
 
-[node name="DpadView" type="Control" parent="UILayer" unique_id=799794525]
-layout_mode = 3
-anchors_preset = 15
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="DpadView" type="Control" parent="UILayer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("4_dpad")
+
+[node name="GameOverLabel" type="Label" parent="UILayer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "OYUN BİTTİ"
+theme_override_colors/font_color = Color(1, 0.25, 0.2, 1)
+theme_override_font_sizes/font_size = 64

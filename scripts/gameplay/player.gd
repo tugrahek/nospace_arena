@@ -7,6 +7,7 @@ extends Node2D
 
 signal trail_started()
 signal returned_to_safe()
+signal loop_closed()
 signal control_scheme_changed(id: int)
 
 enum SchemeId { TAP_TURN, SWIPE, DPAD }
@@ -16,6 +17,7 @@ enum SchemeId { TAP_TURN, SWIPE, DPAD }
 
 var _arena: ArenaController
 var _grid_pos: Vector2i = Vector2i.ZERO
+var _safe_cell: Vector2i = Vector2i.ZERO  # last safe cell, used on respawn
 var _direction: Vector2i = Vector2i.ZERO
 var _queued_dir: Vector2i = Vector2i.ZERO
 var _is_drawing: bool = false
@@ -32,10 +34,24 @@ var _kb_was_held: bool = false
 func setup(arena: ArenaController) -> void:
 	_arena = arena
 	_grid_pos = Vector2i.ZERO
+	_safe_cell = Vector2i.ZERO
 	_queued_dir = Vector2i.ZERO
 	_is_drawing = false
 	_move_timer = 0.0
 	_apply_scheme(control_scheme)
+	_start_world = _arena.cell_to_world(_grid_pos)
+	_target_world = _start_world
+	position = _start_world
+
+
+## Returns the player to its last safe cell after a life loss and drops the trail
+## state. Direction follows the scheme model (auto glides, hold rests).
+func respawn() -> void:
+	_is_drawing = false
+	_grid_pos = _safe_cell
+	_queued_dir = Vector2i.ZERO
+	_direction = Vector2i.RIGHT if _scheme.auto_advance else Vector2i.ZERO
+	_move_timer = 0.0
 	_start_world = _arena.cell_to_world(_grid_pos)
 	_target_world = _start_world
 	position = _start_world
@@ -62,7 +78,7 @@ func _make_scheme(id: SchemeId) -> ControlScheme:
 
 
 func _process(delta: float) -> void:
-	if _arena == null:
+	if _arena == null or not GameState.is_playing():
 		return
 	_update_intent()
 	_move_timer += delta
@@ -100,7 +116,7 @@ func _update_intent() -> void:
 
 
 ## Advances one cell. Blocked steps (edge / own trail) keep the heading so the
-## player stays steerable instead of freezing (real death comes in Step 04).
+## player stays steerable instead of freezing (real death is the enemy's job).
 func _try_step() -> void:
 	if _direction == Vector2i.ZERO:
 		return
@@ -110,13 +126,15 @@ func _try_step() -> void:
 	var state: int = _arena.cell_state(target)
 	if state == CaptureGrid.Cell.CAPTURED:
 		_grid_pos = target
+		_safe_cell = target
 		if _is_drawing:
 			_is_drawing = false
-			_arena.close_capture([])
+			loop_closed.emit()  # Game performs the capture with enemy seeds
 			returned_to_safe.emit()
 	elif state == CaptureGrid.Cell.FREE:
 		if not _is_drawing:
 			_is_drawing = true
+			_safe_cell = _grid_pos  # the captured cell we dove from
 			trail_started.emit()
 		_arena.add_trail(target)
 		_grid_pos = target
