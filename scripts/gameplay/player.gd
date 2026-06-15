@@ -21,6 +21,7 @@ var _safe_cell: Vector2i = Vector2i.ZERO  # last safe cell, used on respawn
 var _direction: Vector2i = Vector2i.ZERO
 var _queued_dir: Vector2i = Vector2i.ZERO
 var _is_drawing: bool = false
+var _trail_path: Array[Vector2i] = []  # ordered trail cells; back() == _grid_pos while drawing
 var _move_timer: float = 0.0
 var _start_world: Vector2 = Vector2.ZERO
 var _target_world: Vector2 = Vector2.ZERO
@@ -30,27 +31,32 @@ var _kb_was_held: bool = false
 
 
 ## Wires the player to the arena, builds the control scheme, and rests it on the
-## top-left frame corner.
+## top-left frame corner. Always starts still regardless of auto_advance scheme.
 func setup(arena: ArenaController) -> void:
 	_arena = arena
 	_grid_pos = Vector2i.ZERO
 	_safe_cell = Vector2i.ZERO
+	_trail_path.clear()
 	_queued_dir = Vector2i.ZERO
 	_is_drawing = false
 	_move_timer = 0.0
 	_apply_scheme(control_scheme)
+	# Always start still — first input initiates movement.
+	_direction = Vector2i.ZERO
+	_queued_dir = Vector2i.ZERO
 	_start_world = _arena.cell_to_world(_grid_pos)
 	_target_world = _start_world
 	position = _start_world
 
 
 ## Returns the player to its last safe cell after a life loss and drops the trail
-## state. Direction follows the scheme model (auto glides, hold rests).
+## state. Always starts still so the player can orient before re-entering the void.
 func respawn() -> void:
 	_is_drawing = false
+	_trail_path.clear()
 	_grid_pos = _safe_cell
 	_queued_dir = Vector2i.ZERO
-	_direction = Vector2i.RIGHT if _scheme.auto_advance else Vector2i.ZERO
+	_direction = Vector2i.ZERO  # always still on respawn
 	_move_timer = 0.0
 	_start_world = _arena.cell_to_world(_grid_pos)
 	_target_world = _start_world
@@ -61,7 +67,6 @@ func _apply_scheme(id: SchemeId) -> void:
 	control_scheme = id
 	_scheme = _make_scheme(id)
 	_kb_was_held = false
-	# Auto-advance schemes start gliding; hold schemes wait for input.
 	_direction = Vector2i.RIGHT if _scheme.auto_advance else Vector2i.ZERO
 	_queued_dir = Vector2i.ZERO
 	control_scheme_changed.emit(int(id))
@@ -115,8 +120,9 @@ func _update_intent() -> void:
 		_queued_dir = Vector2i.ZERO
 
 
-## Advances one cell. Blocked steps (edge / own trail) keep the heading so the
-## player stays steerable instead of freezing (real death is the enemy's job).
+## Advances one cell. Handles: trail extension, loop close, backtracking (undo
+## last trail cell), and backtrack-cancel (abort trail with zero cells left).
+## Blocked steps (edge / non-adjacent trail) keep heading so player stays steerable.
 func _try_step() -> void:
 	if _direction == Vector2i.ZERO:
 		return
@@ -125,20 +131,35 @@ func _try_step() -> void:
 		return
 	var state: int = _arena.cell_state(target)
 	if state == CaptureGrid.Cell.CAPTURED:
-		_grid_pos = target
-		_safe_cell = target
-		if _is_drawing:
+		if _is_drawing and _trail_path.size() == 1 and target == _safe_cell:
+			# Backtrack-cancel: only one trail cell, stepping back to safe start.
+			_arena.remove_trail(_grid_pos)
+			_trail_path.clear()
+			_grid_pos = target
 			_is_drawing = false
-			loop_closed.emit()  # Game performs the capture with enemy seeds
-			returned_to_safe.emit()
+		else:
+			_grid_pos = target
+			_safe_cell = target
+			if _is_drawing:
+				_is_drawing = false
+				_trail_path.clear()
+				loop_closed.emit()  # Game performs the capture with enemy seeds
+				returned_to_safe.emit()
 	elif state == CaptureGrid.Cell.FREE:
 		if not _is_drawing:
 			_is_drawing = true
 			_safe_cell = _grid_pos  # the captured cell we dove from
 			trail_started.emit()
 		_arena.add_trail(target)
+		_trail_path.append(target)
 		_grid_pos = target
-	# else: TRAIL -> blocked, keep heading
+	elif state == CaptureGrid.Cell.TRAIL:
+		if _is_drawing and _trail_path.size() >= 2 and target == _trail_path[_trail_path.size() - 2]:
+			# Backtrack: undo the last trail step, freeing the current cell.
+			_arena.remove_trail(_grid_pos)
+			_trail_path.pop_back()
+			_grid_pos = target
+		# else: non-adjacent trail (loop) — blocked, keep heading
 
 
 func _keyboard_dir() -> Vector2i:

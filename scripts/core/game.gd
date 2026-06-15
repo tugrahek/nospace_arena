@@ -7,7 +7,7 @@ const ENEMY_SCENE: PackedScene = preload("res://scenes/gameplay/Enemy.tscn")
 @onready var _player: Player = $Player
 @onready var _enemies_root: Node2D = $Enemies
 @onready var _dpad_view: Control = $UILayer/DpadView
-@onready var _game_over_label: Label = $UILayer/GameOverLabel
+@onready var _hud: HUD = $HUD
 
 var _enemies: Array[Enemy] = []
 
@@ -19,10 +19,12 @@ func _ready() -> void:
 	_player.loop_closed.connect(_on_loop_closed)
 	GameState.life_lost.connect(_on_life_lost)
 	GameState.game_over.connect(_on_game_over)
-	_game_over_label.visible = false
+	GameState.run_won.connect(_on_run_won)
+	_hud.retry_pressed.connect(_on_retry)
 	_on_scheme_changed(int(_player.control_scheme))
 	_spawn_enemies()
-	GameState.start_run(BALANCE.start_lives)
+	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
+	_hud.setup(BALANCE.start_lives)
 
 
 func _spawn_enemies() -> void:
@@ -35,8 +37,7 @@ func _spawn_enemies() -> void:
 		_enemies.append(enemy)
 
 
-## Player closed a loop: capture using the live enemy cells as danger seeds, so
-## the region containing an enemy stays free and the sealed-off region is taken.
+## Player closed a loop: capture using the live enemy cells as danger seeds.
 func _on_loop_closed() -> void:
 	_arena.close_capture(_enemy_cells())
 
@@ -56,21 +57,32 @@ func _on_enemy_hit_trail() -> void:
 	GameState.lose_life()
 
 
-func _on_life_lost(remaining: int) -> void:
-	print("Can kaybı! Kalan: %d" % remaining)
+func _on_life_lost(_remaining: int) -> void:
+	pass  # HUD handles display via GameState.life_lost signal
 
 
 func _on_game_over(_final_score: int) -> void:
-	_game_over_label.visible = true
-	print("OYUN BİTTİ")
+	pass  # HUD handles display via GameState.game_over signal
 
 
-func _on_area_captured(percent: float, _cells: Array) -> void:
-	print("Ele geçirilen: %.1f%%" % percent)
+func _on_run_won(_final_score: int) -> void:
+	pass  # HUD handles display via GameState.run_won signal
+
+
+func _on_area_captured(percent: float, cells: Array) -> void:
+	_hud.update_percent(percent)
+	var now: float = Time.get_ticks_msec() / 1000.0
+	GameState.register_capture(cells.size(), now)
+	if percent >= BALANCE.target_percent and GameState.is_playing():
+		GameState.win_run()
 
 
 func _on_scheme_changed(id: int) -> void:
 	_dpad_view.set_active(id == Player.SchemeId.DPAD)
+
+
+func _on_retry() -> void:
+	get_tree().reload_current_scene()
 
 
 func _input(event: InputEvent) -> void:

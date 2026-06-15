@@ -88,6 +88,12 @@ func clear_trail() -> void:
 			_cells[i] = Cell.FREE
 
 
+## Reverts a single TRAIL cell to FREE (used during player backtracking).
+func remove_trail_cell(cell: Vector2i) -> void:
+	if cell_at(cell.x, cell.y) == Cell.TRAIL:
+		_cells[_index(cell.x, cell.y)] = Cell.FREE
+
+
 ## Marks a contiguous 4-connected path of FREE cells as TRAIL in one shot.
 ## Returns false (leaving the grid unchanged) on out-of-bounds, non-FREE,
 ## non-adjacent, or self-intersecting paths. Used mainly by tests.

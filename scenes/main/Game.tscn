@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://nel7mn3oehfi"]
+[gd_scene load_steps=6 format=3 uid="uid://nel7mn3oehfi"]
 
 [ext_resource type="Script" uid="uid://b18w21sy3wuk8" path="res://scripts/core/game.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/Arena.tscn" id="2_arena"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/Player.tscn" id="3_player"]
 [ext_resource type="Script" path="res://scripts/ui/dpad_view.gd" id="4_dpad"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="5_hud"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
@@ -25,12 +26,4 @@ anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("4_dpad")
 
-[node name="GameOverLabel" type="Label" parent="UILayer"]
-visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-horizontal_alignment = 1
-vertical_alignment = 1
-text = "OYUN BİTTİ"
-theme_override_colors/font_color = Color(1, 0.25, 0.2, 1)
-theme_override_font_sizes/font_size = 64
+[node name="HUD" parent="." instance=ExtResource("5_hud")]

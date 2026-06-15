@@ -108,6 +108,14 @@ func test_percent_never_exceeds_bounds() -> void:
 	assert_between(g.captured_percent(), 0.0, 100.0)
 
 
+func test_remove_trail_cell_frees_the_cell() -> void:
+	var g = CaptureGrid.new(7, 7, 1.0, Vector2.ZERO)
+	g.add_trail_cell(Vector2i(1, 1))
+	assert_eq(g.cell_at(1, 1), CaptureGrid.Cell.TRAIL)
+	g.remove_trail_cell(Vector2i(1, 1))
+	assert_eq(g.cell_at(1, 1), CaptureGrid.Cell.FREE)
+
+
 func test_capture_is_deterministic() -> void:
 	# Same path + same seed strategy -> identical captured sets.
 	var a = CaptureGrid.new(7, 7, 1.0, Vector2.ZERO)

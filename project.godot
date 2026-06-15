@@ -40,6 +40,11 @@ enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
 pointing/emulate_touch_from_mouse=true
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://locale/translations.csv")
+locale/fallback="tr"
+
 [rendering]
 
 renderer/rendering_method="mobile"

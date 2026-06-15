@@ -65,6 +65,12 @@ func fail_trail() -> void:
 	capture_failed.emit()
 
 
+## Reverts a single trail cell to FREE during player backtracking.
+func remove_trail(cell: Vector2i) -> void:
+	grid.remove_trail_cell(cell)
+	queue_redraw()
+
+
 func _draw() -> void:
 	draw_rect(arena_rect, void_color)
 	if grid == null:

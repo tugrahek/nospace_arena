@@ -7,3 +7,6 @@ script = ExtResource("1_bal")
 start_lives = 3
 enemy_speed = 180.0
 enemy_count = 1
+target_percent = 75.0
+base_points = 10
+combo_window = 2.0

@@ -51,3 +51,35 @@ func test_reset_restores_idle() -> void:
 	_gs.reset()
 	assert_eq(_gs.lives, 0)
 	assert_false(_gs.is_playing())
+
+
+func test_register_capture_adds_score_and_emits() -> void:
+	_gs.start_run(3)
+	watch_signals(_gs)
+	var earned: int = _gs.register_capture(5, 0.0)
+	assert_eq(earned, 50, "5 cells * 10 pts * x1")
+	assert_eq(_gs.get_score(), 50)
+	assert_signal_emitted_with_parameters(_gs, "score_changed", [50, 0])
+
+
+func test_win_run_transitions_to_won_and_emits() -> void:
+	_gs.start_run(3)
+	_gs.register_capture(1, 0.0)  # score = 10
+	watch_signals(_gs)
+	_gs.win_run()
+	assert_false(_gs.is_playing())
+	assert_signal_emitted(_gs, "run_won")
+
+
+func test_game_over_carries_real_score() -> void:
+	_gs.start_run(1)
+	_gs.register_capture(5, 0.0)  # score = 50
+	watch_signals(_gs)
+	_gs.lose_life()
+	assert_signal_emitted_with_parameters(_gs, "game_over", [50])
+
+
+func test_register_capture_noop_when_not_playing() -> void:
+	var earned: int = _gs.register_capture(10, 0.0)
+	assert_eq(earned, 0)
+	assert_eq(_gs.get_score(), 0)
