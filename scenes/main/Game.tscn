@@ -3,14 +3,25 @@
 [ext_resource type="Script" uid="uid://b18w21sy3wuk8" path="res://scripts/core/game.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/Arena.tscn" id="2_arena"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/Player.tscn" id="3_player"]
+[ext_resource type="Script" uid="uid://clo3o5sdg5jpn" path="res://scripts/ui/dpad_view.gd" id="4_dpad"]
 
-[node name="Game" type="Node2D" unique_id=263773536]
+[node name="Game" type="Node2D" unique_id=1620099640]
 script = ExtResource("1_game")
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1454371444]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=608793738]
 position = Vector2(360, 640)
 
-[node name="Arena" parent="." unique_id=1408523189 instance=ExtResource("2_arena")]
+[node name="Arena" parent="." unique_id=311275237 instance=ExtResource("2_arena")]
 
-[node name="Player" parent="." unique_id=1296329817 instance=ExtResource("3_player")]
-speed = 290.0
+[node name="Player" parent="." unique_id=946663320 instance=ExtResource("3_player")]
+move_interval = 0.04
+
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=1369032228]
+
+[node name="DpadView" type="Control" parent="UILayer" unique_id=799794525]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("4_dpad")
