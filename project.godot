@@ -15,6 +15,7 @@ config/description="2D mobile territory capture arcade game"
 config/version="0.1.0"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://assets/icon.svg"
+run/main_scene="res://scenes/main/Game.tscn"
 
 [autoload]
 
@@ -39,3 +40,4 @@ enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
 renderer/rendering_method="mobile"
 renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.04, 0.02, 0.1, 1)
