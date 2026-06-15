@@ -46,6 +46,17 @@ func in_bounds_cell(cell: Vector2i) -> bool:
 	return grid.in_bounds(cell.x, cell.y)
 
 
+## True if the cell is captured AND not part of the starting outer frame ring,
+## i.e. territory the player actually claimed. Living-territory effects emanate
+## only from this — the initial border must never trigger them.
+func is_player_captured(cell: Vector2i) -> bool:
+	if not in_bounds_cell(cell):
+		return false
+	if cell_state(cell) != CaptureGrid.Cell.CAPTURED:
+		return false
+	return not (cell.x == 0 or cell.y == 0 or cell.x == grid.cols - 1 or cell.y == grid.rows - 1)
+
+
 func add_trail(cell: Vector2i) -> bool:
 	var ok: bool = grid.add_trail_cell(cell)
 	if ok:

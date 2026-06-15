@@ -6,6 +6,7 @@ const ENEMY_SCENE: PackedScene = preload("res://scenes/gameplay/Enemy.tscn")
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
 @onready var _enemies_root: Node2D = $Enemies
+@onready var _living_territory: LivingTerritory = $LivingTerritory
 @onready var _dpad_view: Control = $UILayer/DpadView
 @onready var _hud: HUD = $HUD
 
@@ -23,6 +24,7 @@ func _ready() -> void:
 	_hud.retry_pressed.connect(_on_retry)
 	_on_scheme_changed(int(_player.control_scheme))
 	_spawn_enemies()
+	_living_territory.setup(_arena, _enemies)
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
 

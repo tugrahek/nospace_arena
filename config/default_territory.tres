@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="PushEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/push_effect.gd" id="1_push"]
+
+[resource]
+script = ExtResource("1_push")
+push_radius = 80.0
+push_max_turn_deg = 8.0

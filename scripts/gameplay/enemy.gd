@@ -11,13 +11,26 @@ signal hit_trail()
 
 var _arena: ArenaController
 var _velocity: Vector2 = Vector2.ZERO
+var _steered: bool = false  # TEMP: debug tint while in a territory effect (Step 15 juice replaces)
 
 
 func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2) -> void:
 	_arena = arena
 	position = start_pos
 	_velocity = velocity
+	_steered = false
 	queue_redraw()
+
+
+## Lets the living territory steer this enemy. The enemy keeps ownership of its
+## velocity; the effect only returns a new (same-magnitude) heading.
+func apply_territory(effect: TerritoryEffect, arena: ArenaController) -> void:
+	var new_vel: Vector2 = effect.compute_velocity(_velocity, position, arena)
+	var was_steered: bool = not new_vel.is_equal_approx(_velocity)
+	_velocity = new_vel
+	if was_steered != _steered:
+		_steered = was_steered
+		queue_redraw()
 
 
 func _physics_process(delta: float) -> void:
@@ -67,4 +80,7 @@ func _state_at(world: Vector2) -> int:
 
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, radius, color)
+	# TEMP (Step 15): tint lighter while inside a territory effect so the push is
+	# visible during playtest before real VFX exist.
+	var draw_color: Color = color.lightened(0.5) if _steered else color
+	draw_circle(Vector2.ZERO, radius, draw_color)
