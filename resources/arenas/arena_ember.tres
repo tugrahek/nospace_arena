@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ArenaData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/arena_data.gd" id="1_arena"]
+[ext_resource type="Resource" path="res://resources/themes/theme_ember.tres" id="2_theme"]
+
+[resource]
+script = ExtResource("1_arena")
+id = &"ember"
+display_name_key = "ARENA_EMBER"
+cols = 56
+rows = 120
+theme = ExtResource("2_theme")
+enemy_count = 2
+enemy_speed_cells = 16.0
+target_percent = 70.0
+unlock_cost = 0

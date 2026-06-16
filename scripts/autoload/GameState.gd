@@ -16,6 +16,7 @@ enum Status { IDLE, PLAYING, GAME_OVER, WON }
 var lives: int = 0
 var status: int = Status.IDLE
 var selected_character_index: int = 0  # survives scene reload; persistence is Step 11
+var selected_arena_index: int = 0  # survives scene reload; Step 09 seed will drive this
 
 var _scorer: ScoreKeeperScript = null
 
@@ -23,6 +24,11 @@ var _scorer: ScoreKeeperScript = null
 ## Sets the active character index (clamped >= 0). Persists across runs/reload.
 func set_character(index: int) -> void:
 	selected_character_index = maxi(index, 0)
+
+
+## Sets the active arena index (clamped >= 0). Persists across runs/reload.
+func set_arena(index: int) -> void:
+	selected_arena_index = maxi(index, 0)
 
 
 ## Starts a new run. Resets lives, score, and combo. Passes balance knobs to scorer.

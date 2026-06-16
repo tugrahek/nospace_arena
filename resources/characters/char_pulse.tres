@@ -1,12 +1,10 @@
-[gd_resource type="Resource" script_class="CharacterData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://l1vko7kk3svu"]
 
-[ext_resource type="Script" path="res://scripts/meta/character_data.gd" id="1_char"]
-[ext_resource type="Resource" path="res://config/default_territory.tres" id="2_effect"]
+[ext_resource type="Script" uid="uid://mkwcs08hcoyu" path="res://scripts/meta/character_data.gd" id="1_char"]
+[ext_resource type="Resource" uid="uid://cjeua2rblhmxr" path="res://config/default_territory.tres" id="2_effect"]
 
 [resource]
 script = ExtResource("1_char")
 id = &"pulse"
 display_name_key = "CHAR_PULSE"
-accent_color = Color(0.12, 0.5, 0.95, 0.55)
 effect = ExtResource("2_effect")
-unlock_cost = 0

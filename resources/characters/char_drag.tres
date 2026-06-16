@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="CharacterData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="CharacterData" format=3 uid="uid://b8okolsj0yumu"]
 
-[ext_resource type="Script" path="res://scripts/meta/character_data.gd" id="1_char"]
-[ext_resource type="Resource" path="res://config/slow_territory.tres" id="2_effect"]
+[ext_resource type="Script" uid="uid://mkwcs08hcoyu" path="res://scripts/meta/character_data.gd" id="1_char"]
+[ext_resource type="Resource" uid="uid://p4gc0gbtws1k" path="res://config/slow_territory.tres" id="2_effect"]
 
 [resource]
 script = ExtResource("1_char")
@@ -9,4 +9,3 @@ id = &"drag"
 display_name_key = "CHAR_DRAG"
 accent_color = Color(0.85, 0.2, 0.85, 0.55)
 effect = ExtResource("2_effect")
-unlock_cost = 0

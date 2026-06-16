@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ArenaData" format=3 uid="uid://quysd0on2sxh"]
+
+[ext_resource type="Script" uid="uid://d2r15vdv78jfw" path="res://scripts/meta/arena_data.gd" id="1_arena"]
+[ext_resource type="Resource" path="res://resources/themes/theme_frost.tres" id="2_theme"]
+
+[resource]
+script = ExtResource("1_arena")
+id = &"frost"
+display_name_key = "ARENA_FROST"
+cols = 80
+rows = 96
+theme = ExtResource("2_theme")
+enemy_speed_cells = 32.0
+target_percent = 80.0

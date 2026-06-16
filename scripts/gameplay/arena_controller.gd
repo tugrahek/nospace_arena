@@ -18,11 +18,33 @@ signal capture_failed()
 
 var grid: CaptureGrid
 
+const Catalog = preload("res://scripts/meta/arena_catalog.gd")
+
+var _configured: bool = false
+
 
 func _ready() -> void:
-	var cols: int = int(arena_rect.size.x / cell_size)
-	var rows: int = int(arena_rect.size.y / cell_size)
-	grid = CaptureGrid.new(cols, rows, cell_size, arena_rect.position)
+	if not _configured:
+		var cols: int = int(arena_rect.size.x / cell_size)
+		var rows: int = int(arena_rect.size.y / cell_size)
+		grid = CaptureGrid.new(cols, rows, cell_size, arena_rect.position)
+	queue_redraw()
+
+
+## Configures the arena from data: fit-to-rect sizing (cell_size/origin derived to
+## center the logical grid in play_rect), theme colors, and a fresh grid. Captured
+## glow is left to the character (applied after this). Call before Player.setup.
+func configure(data, play_rect: Rect2) -> void:
+	var fit: Dictionary = Catalog.compute_fit(data.cols, data.rows, play_rect)
+	cell_size = fit["cell_size"]
+	arena_rect = Rect2(fit["origin"], Vector2(data.cols * cell_size, data.rows * cell_size))
+	if data.theme != null:
+		void_color = data.theme.void_color
+		border_color = data.theme.border_color
+		trail_color = data.theme.trail_color
+		border_width = data.theme.border_width
+	grid = CaptureGrid.new(data.cols, data.rows, cell_size, arena_rect.position)
+	_configured = true
 	queue_redraw()
 
 

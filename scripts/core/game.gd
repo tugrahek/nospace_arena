@@ -7,6 +7,12 @@ const CHARACTERS: Array[CharacterData] = [
 	preload("res://resources/characters/char_drag.tres"),
 	preload("res://resources/characters/char_halt.tres"),
 ]
+const ARENAS: Array[ArenaData] = [
+	preload("res://resources/arenas/arena_void.tres"),
+	preload("res://resources/arenas/arena_ember.tres"),
+	preload("res://resources/arenas/arena_frost.tres"),
+]
+const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; HUD reserved above
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -16,9 +22,11 @@ const CHARACTERS: Array[CharacterData] = [
 @onready var _hud: HUD = $HUD
 
 var _enemies: Array[Enemy] = []
+var _arena_data: ArenaData
 
 
 func _ready() -> void:
+	_apply_arena(GameState.selected_arena_index)
 	_player.setup(_arena)
 	_arena.area_captured.connect(_on_area_captured)
 	_player.control_scheme_changed.connect(_on_scheme_changed)
@@ -35,6 +43,18 @@ func _ready() -> void:
 	_hud.setup(BALANCE.start_lives)
 
 
+## Applies an arena (fit-to-rect grid + theme) deterministically via the catalog.
+## Must run before Player.setup (player reads the grid). Difficulty is read on spawn.
+func _apply_arena(index: int) -> void:
+	var i: int = ArenaCatalog.select(ARENAS.size(), index)
+	if i < 0:
+		i = 0
+	GameState.set_arena(i)
+	_arena_data = ARENAS[i]
+	_arena.configure(_arena_data, PLAY_RECT)
+	print("Arena: %s" % tr(_arena_data.display_name_key))
+
+
 ## Applies a character: its territory effect drives the living territory, and its
 ## accent color tints the captured glow. Dev key `C` cycles for playtest (UI in Step 13).
 func _apply_character(index: int) -> void:
@@ -49,10 +69,14 @@ func _apply_character(index: int) -> void:
 
 func _spawn_enemies() -> void:
 	var center: Vector2 = _arena.get_rect().get_center()
-	for i in BALANCE.enemy_count:
+	# enemy_speed is grid-relative (cells/s); convert to px/s with the fitted cell_size.
+	var speed_px: float = _arena_data.enemy_speed_cells * _arena.cell_size
+	for i in _arena_data.enemy_count:
 		var enemy: Enemy = ENEMY_SCENE.instantiate()
 		_enemies_root.add_child(enemy)
-		enemy.setup(_arena, center, EnemyMotion.start_velocity(i, BALANCE.enemy_speed))
+		if _arena_data.theme != null:
+			enemy.color = _arena_data.theme.enemy_color
+		enemy.setup(_arena, center, EnemyMotion.start_velocity(i, speed_px))
 		enemy.hit_trail.connect(_on_enemy_hit_trail)
 		_enemies.append(enemy)
 
@@ -93,7 +117,7 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 	_hud.update_percent(percent)
 	var now: float = Time.get_ticks_msec() / 1000.0
 	GameState.register_capture(cells.size(), now)
-	if percent >= BALANCE.target_percent and GameState.is_playing():
+	if percent >= _arena_data.target_percent and GameState.is_playing():
 		GameState.win_run()
 
 
@@ -111,3 +135,7 @@ func _input(event: InputEvent) -> void:
 			get_tree().reload_current_scene()
 		elif event.keycode == KEY_C:
 			_apply_character(GameState.selected_character_index + 1)
+		elif event.keycode == KEY_V:
+			# Arena resize needs a full rebuild -> reload (index persists in GameState).
+			GameState.set_arena(GameState.selected_arena_index + 1)
+			get_tree().reload_current_scene()
