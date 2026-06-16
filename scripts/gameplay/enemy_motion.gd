@@ -32,10 +32,15 @@ static func clamp_to_wall(center: float, wall: float, body_radius: float, moving
 
 
 ## Deterministic starting velocity for enemy `index` at `speed` (no RNG).
-## Varies direction per index so multiple enemies diverge. Step 09 seed will
-## later drive this; the signature stays the same.
+## Varies direction per index so multiple enemies diverge (free-play default).
 static func start_velocity(index: int, speed: float) -> Vector2:
 	var dirs: Array[Vector2] = [
 		Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1),
 	]
 	return dirs[index % dirs.size()].normalized() * speed
+
+
+## Starting velocity from a seed-derived direction index (0..3) — daily mode picks the
+## direction from the daily seed so the layout is the same for everyone that day.
+static func start_velocity_seeded(dir_index: int, speed: float) -> Vector2:
+	return start_velocity(dir_index, speed)

@@ -1,6 +1,46 @@
 extends Node
 
-## Provides the daily deterministic seed for arena and enemy layout.
-## Populated in Step 09 (daily seed system).
+## Holds the daily deterministic seed for arena / character / enemy layout selection.
+## The seed is derived from today's date (the only impure call); all derivation from it
+## is pure (DailySeed). No class_name (autoload singleton).
+
+const DailySeed = preload("res://scripts/meta/daily_seed.gd")
 
 signal daily_seed_ready(seed_value: int)
+
+var daily_seed: int = 0
+var is_daily: bool = false
+var day_offset: int = 0  # DEV ONLY: preview other days' challenges (0 = real today)
+
+
+## Computes the active day's seed (system date + dev day_offset). Impure point
+## (system clock); the seed derivation from it stays pure (DailySeed).
+func compute_today() -> int:
+	var base: Dictionary = Time.get_date_dict_from_system()
+	var unix: int = int(Time.get_unix_time_from_datetime_dict(base)) + day_offset * 86400
+	var d: Dictionary = Time.get_datetime_dict_from_unix_time(unix)
+	return DailySeed.seed_for_date(d.year, d.month, d.day)
+
+
+## DEV: advance to the next day's challenge (re-derives the seed). Real today = offset 0.
+func advance_day() -> void:
+	day_offset += 1
+	daily_seed = compute_today()
+	daily_seed_ready.emit(daily_seed)
+
+
+func enter_daily() -> void:
+	is_daily = true
+	daily_seed = compute_today()
+	daily_seed_ready.emit(daily_seed)
+
+
+func exit_daily() -> void:
+	is_daily = false
+
+
+func toggle_daily() -> void:
+	if is_daily:
+		exit_daily()
+	else:
+		enter_daily()

@@ -10,6 +10,7 @@ signal retry_pressed()
 @onready var _score_label: Label = $TopBar/ScoreLabel
 @onready var _percent_label: Label = $TopBar/PercentLabel
 @onready var _combo_label: Label = $ComboLabel
+@onready var _daily_label: Label = $DailyLabel
 @onready var _result_panel: Control = $ResultPanel
 @onready var _result_title: Label = $ResultPanel/VBox/TitleLabel
 @onready var _result_score: Label = $ResultPanel/VBox/ResultScore
@@ -24,7 +25,15 @@ func _ready() -> void:
 	GameState.run_won.connect(_on_run_won)
 	_result_panel.visible = false
 	_combo_label.visible = false
+	_daily_label.visible = false
 	_retry_button.pressed.connect(func() -> void: retry_pressed.emit())
+
+
+## Shows/hides the daily-mode badge. Full daily UI (countdown etc.) is Step 14.
+func set_daily(active: bool, seed: int) -> void:
+	if active:
+		_daily_label.text = tr("HUD_DAILY") + " • " + DailySeed.date_string(seed)
+	_daily_label.visible = active
 
 
 ## Called by game.gd after start_run to seed the initial display.

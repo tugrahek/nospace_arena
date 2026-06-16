@@ -13,6 +13,8 @@ const ARENAS: Array[ArenaData] = [
 	preload("res://resources/arenas/arena_frost.tres"),
 ]
 const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; HUD reserved above
+const ARENA_SALT: int = 1   # daily seed salts (distinct draws)
+const CHAR_SALT: int = 2
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -23,10 +25,18 @@ const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; H
 
 var _enemies: Array[Enemy] = []
 var _arena_data: ArenaData
+var _daily: bool = false
+var _daily_seed: int = 0
 
 
 func _ready() -> void:
-	_apply_arena(GameState.selected_arena_index)
+	# Daily: arena + character + enemy dirs all come from the shared seed (same for
+	# everyone that day). Free-play: player's own indices (dev C/V cycle).
+	_daily = SeedManager.is_daily
+	_daily_seed = SeedManager.daily_seed
+	var arena_idx: int = DailySeed.to_index(_daily_seed, ARENA_SALT, ARENAS.size()) if _daily else GameState.selected_arena_index
+	var char_idx: int = DailySeed.to_index(_daily_seed, CHAR_SALT, CHARACTERS.size()) if _daily else GameState.selected_character_index
+	_apply_arena(arena_idx, not _daily)  # persist index only in free-play
 	_player.setup(_arena)
 	_arena.area_captured.connect(_on_area_captured)
 	_player.control_scheme_changed.connect(_on_scheme_changed)
@@ -38,18 +48,22 @@ func _ready() -> void:
 	_on_scheme_changed(int(_player.control_scheme))
 	_spawn_enemies()
 	_living_territory.setup(_arena, _enemies, _player)
-	_apply_character(GameState.selected_character_index)
+	_apply_character(char_idx, not _daily)
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
+	_hud.set_daily(_daily, _daily_seed)
+	if _daily:
+		print("Daily mode: seed=%d arena=%d char=%d" % [_daily_seed, arena_idx, char_idx])
 
 
 ## Applies an arena (fit-to-rect grid + theme) deterministically via the catalog.
 ## Must run before Player.setup (player reads the grid). Difficulty is read on spawn.
-func _apply_arena(index: int) -> void:
+func _apply_arena(index: int, persist: bool) -> void:
 	var i: int = ArenaCatalog.select(ARENAS.size(), index)
 	if i < 0:
 		i = 0
-	GameState.set_arena(i)
+	if persist:
+		GameState.set_arena(i)
 	_arena_data = ARENAS[i]
 	_arena.configure(_arena_data, PLAY_RECT)
 	print("Arena: %s" % tr(_arena_data.display_name_key))
@@ -57,10 +71,11 @@ func _apply_arena(index: int) -> void:
 
 ## Applies a character: its territory effect drives the living territory, and its
 ## accent color tints the captured glow. Dev key `C` cycles for playtest (UI in Step 13).
-func _apply_character(index: int) -> void:
+func _apply_character(index: int, persist: bool = true) -> void:
 	var i: int = index % CHARACTERS.size()
 	var ch: CharacterData = CHARACTERS[i]
-	GameState.set_character(i)
+	if persist:
+		GameState.set_character(i)
 	_living_territory.effect = ch.effect
 	_arena.captured_color = ch.accent_color
 	_arena.queue_redraw()
@@ -78,7 +93,9 @@ func _spawn_enemies() -> void:
 		if _arena_data.theme != null:
 			enemy.color = _arena_data.theme.enemy_color
 		enemy.shape = type.shape
-		enemy.setup(_arena, center, EnemyMotion.start_velocity(i, speed_px), type.behavior, speed_px)
+		var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(_daily_seed, i), speed_px) \
+			if _daily else EnemyMotion.start_velocity(i, speed_px)
+		enemy.setup(_arena, center, vel, type.behavior, speed_px)
 		enemy.hit_trail.connect(_on_enemy_hit_trail)
 		_enemies.append(enemy)
 		i += 1
@@ -136,9 +153,17 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_R:
 			get_tree().reload_current_scene()
-		elif event.keycode == KEY_C:
+		elif event.keycode == KEY_G:
+			# Toggle daily mode (seed-driven arena/character/dirs) and rebuild.
+			SeedManager.toggle_daily()
+			get_tree().reload_current_scene()
+		elif event.keycode == KEY_H and SeedManager.is_daily:
+			# DEV: preview the next day's challenge.
+			SeedManager.advance_day()
+			get_tree().reload_current_scene()
+		elif event.keycode == KEY_C and not SeedManager.is_daily:
 			_apply_character(GameState.selected_character_index + 1)
-		elif event.keycode == KEY_V:
+		elif event.keycode == KEY_V and not SeedManager.is_daily:
 			# Arena resize needs a full rebuild -> reload (index persists in GameState).
 			GameState.set_arena(GameState.selected_arena_index + 1)
 			get_tree().reload_current_scene()
