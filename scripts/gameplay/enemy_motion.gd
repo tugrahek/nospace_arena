@@ -14,6 +14,13 @@ static func reflect(velocity: Vector2, block_x: bool, block_y: bool) -> Vector2:
 	return v
 
 
+## True while the enemy's behavior decision should be suppressed (keep the current,
+## reflected heading): during a contact freeze and the short recovery window after it,
+## so a homing enemy peels off the wall instead of camping + re-freezing. Pure.
+static func is_behavior_suppressed(freeze_timer: float, recovery_timer: float) -> bool:
+	return freeze_timer > 0.0 or recovery_timer > 0.0
+
+
 ## Clamps a 1-D center coordinate so a body of `body_radius` stays on the near side
 ## of a wall face at `wall`. moving_sign = +1 (approaching from the low side) or
 ## -1 (from the high side). Guarantees |result - wall| >= body_radius on that side,

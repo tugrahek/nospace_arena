@@ -57,3 +57,18 @@ func test_clamp_guarantees_radius_gap() -> void:
 	# After clamp, center-to-wall distance is at least radius (body doesn't overlap)
 	var c: float = EnemyMotion.clamp_to_wall(98.0, 100.0, 9.0, 1.0)
 	assert_true(100.0 - c >= 9.0, "gövde duvara binmemeli")
+
+
+# --- is_behavior_suppressed (Halt post-freeze recovery: peel off, no homing camp) ---
+
+func test_behavior_suppressed_while_frozen() -> void:
+	assert_true(EnemyMotion.is_behavior_suppressed(0.1, 0.0))
+
+
+func test_behavior_suppressed_during_recovery() -> void:
+	assert_true(EnemyMotion.is_behavior_suppressed(0.0, 0.1))
+
+
+func test_behavior_active_when_idle() -> void:
+	# No freeze, no recovery -> behavior (homing) runs normally
+	assert_false(EnemyMotion.is_behavior_suppressed(0.0, 0.0))

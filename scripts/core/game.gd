@@ -37,7 +37,7 @@ func _ready() -> void:
 	_hud.retry_pressed.connect(_on_retry)
 	_on_scheme_changed(int(_player.control_scheme))
 	_spawn_enemies()
-	_living_territory.setup(_arena, _enemies)
+	_living_territory.setup(_arena, _enemies, _player)
 	_apply_character(GameState.selected_character_index)
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
@@ -69,16 +69,19 @@ func _apply_character(index: int) -> void:
 
 func _spawn_enemies() -> void:
 	var center: Vector2 = _arena.get_rect().get_center()
-	# enemy_speed is grid-relative (cells/s); convert to px/s with the fitted cell_size.
-	var speed_px: float = _arena_data.enemy_speed_cells * _arena.cell_size
-	for i in _arena_data.enemy_count:
+	var i: int = 0
+	for type in _arena_data.enemies:
+		# Grid-relative speed: type base (cells/s) × arena modifier × fitted cell_size.
+		var speed_px: float = type.base_speed_cells * _arena_data.speed_mult * _arena.cell_size
 		var enemy: Enemy = ENEMY_SCENE.instantiate()
 		_enemies_root.add_child(enemy)
 		if _arena_data.theme != null:
 			enemy.color = _arena_data.theme.enemy_color
-		enemy.setup(_arena, center, EnemyMotion.start_velocity(i, speed_px))
+		enemy.shape = type.shape
+		enemy.setup(_arena, center, EnemyMotion.start_velocity(i, speed_px), type.behavior, speed_px)
 		enemy.hit_trail.connect(_on_enemy_hit_trail)
 		_enemies.append(enemy)
+		i += 1
 
 
 ## Player closed a loop: capture using the live enemy cells as danger seeds.

@@ -13,7 +13,7 @@ extends Resource
 @export var cols: int = 64  # logical grid incl. the 1-cell frame ring
 @export var rows: int = 110
 @export var theme: ThemeData
-@export var enemy_count: int = 1
-@export var enemy_speed_cells: float = 18.0  # cells/second (px/s = ×cell_size at runtime)
+@export var enemies: Array[EnemyType] = []  # one entry per spawned enemy (composition)
+@export var speed_mult: float = 1.0  # arena pace modifier; final cells/s = type base × this
 @export var target_percent: float = 75.0
 @export var unlock_cost: int = 0  # Step 13 reserved

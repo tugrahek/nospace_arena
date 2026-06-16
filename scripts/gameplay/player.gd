@@ -30,6 +30,12 @@ var _scheme: ControlScheme
 var _kb_was_held: bool = false
 
 
+## True while drawing a trail in the open (vulnerable). State-aware enemies hunt only
+## then; while safe on captured territory the player is not a target.
+func is_exposed() -> bool:
+	return _is_drawing
+
+
 ## Wires the player to the arena, builds the control scheme, and rests it on the
 ## top-left frame corner. Always starts still regardless of auto_advance scheme.
 func setup(arena: ArenaController) -> void:

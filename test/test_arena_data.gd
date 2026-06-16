@@ -15,9 +15,12 @@ func test_arenas_are_valid() -> void:
 		var a = load(path)
 		assert_gt(a.cols, 2, "%s cols" % path)
 		assert_gt(a.rows, 2, "%s rows" % path)
-		assert_gte(a.enemy_count, 1, "%s enemy_count" % path)
-		assert_gt(a.enemy_speed_cells, 0.0, "%s speed" % path)
+		assert_gt(a.enemies.size(), 0, "%s boş olmayan kompozisyon" % path)
+		assert_gt(a.speed_mult, 0.0, "%s speed_mult" % path)
 		assert_not_null(a.theme, "%s theme ref" % path)
+		for t in a.enemies:
+			assert_not_null(t, "%s EnemyType null değil" % path)
+			assert_not_null(t.behavior, "%s behavior null değil" % path)
 
 
 func test_arenas_are_distinct() -> void:

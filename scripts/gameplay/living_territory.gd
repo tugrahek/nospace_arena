@@ -9,20 +9,27 @@ extends Node
 
 var _arena: ArenaController
 var _enemies: Array[Enemy] = []
+var _player: Player = null
 
 
 func _ready() -> void:
-	process_priority = -10  # apply steering before enemies move
+	process_priority = -10  # run before enemies move
 
 
-func setup(arena: ArenaController, enemies: Array[Enemy]) -> void:
+func setup(arena: ArenaController, enemies: Array[Enemy], player: Player) -> void:
 	_arena = arena
 	_enemies = enemies
+	_player = player
 
 
-## Applies the effect to each enemy every physics frame (runs before enemies move).
+## Per enemy, per physics frame (before they move): behavior decides the base velocity
+## (homing/heading), then the territory effect is layered on top. Effects thus apply
+## to every enemy type uniformly.
 func _physics_process(_delta: float) -> void:
-	if _arena == null or effect == null or not GameState.is_playing():
+	if _arena == null or effect == null or _player == null or not GameState.is_playing():
 		return
+	var player_pos: Vector2 = _player.position
+	var exposed: bool = _player.is_exposed()
 	for enemy in _enemies:
-		enemy.apply_territory(effect, _arena)
+		var base: Vector2 = enemy.decide_velocity(player_pos, exposed)
+		enemy.apply_territory(effect, _arena, base)

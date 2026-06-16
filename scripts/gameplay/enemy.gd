@@ -8,43 +8,64 @@ extends Node2D
 
 signal hit_trail()
 
+enum Shape { CIRCLE, TRIANGLE }
+
 @export var radius: float = 9.0
 @export var color: Color = Color(1.0, 0.25, 0.2, 1.0)
+@export var recovery_time: float = 0.18  # after a freeze, suppress homing so it peels off the wall
+
+var shape: int = Shape.CIRCLE  # placeholder type tell (Step 14 sprites)
 
 var _arena: ArenaController
+var _behavior: EnemyBehavior = null
+var _base_speed_px: float = 0.0
 var _velocity: Vector2 = Vector2.ZERO
 var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
 var _active_effect: TerritoryEffect = null  # set each frame by LivingTerritory
 var _freeze_timer: float = 0.0  # > 0 while contact-frozen (Stasis); no movement
 var _freeze_cooldown_timer: float = 0.0  # blocks re-freeze (prevents boundary jitter re-lock)
 var _pending_cooldown: float = 0.0
+var _recovery_timer: float = 0.0  # post-freeze: behavior suppressed, moves on reflected heading
 var _steered: bool = false  # TEMP: debug tint while steered/slowed (Step 15 juice replaces)
 var _frozen: bool = false  # TEMP: distinct tint while contact-frozen
 
 
-func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2) -> void:
+func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavior: EnemyBehavior, base_speed_px: float) -> void:
 	_arena = arena
 	position = start_pos
 	_velocity = velocity
+	_behavior = behavior
+	_base_speed_px = base_speed_px
 	_speed_scale = 1.0
 	_active_effect = null
 	_freeze_timer = 0.0
 	_freeze_cooldown_timer = 0.0
 	_pending_cooldown = 0.0
+	_recovery_timer = 0.0
 	_steered = false
 	_frozen = false
 	queue_redraw()
 
 
-## Lets the living territory influence this enemy each frame. steer changes the
-## persistent heading (Push, magnitude kept); speed_scale transiently slows (Drag).
-## The effect is also cached so a contact bounce can trigger Stasis freeze.
-func apply_territory(effect: TerritoryEffect, arena: ArenaController) -> void:
+## This frame's behavior decision (homing/heading), before any effect or collision.
+## Pure per type; the effect + collision layer is applied on top by apply_territory/_move.
+func decide_velocity(player_pos: Vector2, player_exposed: bool) -> Vector2:
+	# While frozen or recovering, keep the reflected heading (peel off the wall) instead
+	# of re-deciding — avoids a re-freeze loop right after a Halt freeze.
+	if _behavior == null or EnemyMotion.is_behavior_suppressed(_freeze_timer, _recovery_timer):
+		return _velocity
+	return _behavior.decide(_velocity, position, player_pos, player_exposed, _base_speed_px)
+
+
+## Applies the living-territory effect on top of the behavior's base velocity. steer
+## changes the heading (Push, magnitude kept); speed_scale transiently slows (Drag).
+## The effect is cached so a contact bounce can trigger Stasis freeze. Pipeline order:
+## behavior.decide -> steer -> speed_scale -> (collision/contact-freeze in _move).
+func apply_territory(effect: TerritoryEffect, arena: ArenaController, base_velocity: Vector2) -> void:
 	_active_effect = effect
-	var old_vel: Vector2 = _velocity
-	_velocity = effect.steer(_velocity, position, arena)
+	_velocity = effect.steer(base_velocity, position, arena)
 	_speed_scale = effect.speed_scale(position, arena)
-	var active: bool = (not _velocity.is_equal_approx(old_vel)) or _speed_scale < 0.999
+	var active: bool = (not _velocity.is_equal_approx(base_velocity)) or _speed_scale < 0.999
 	if active != _steered:
 		_steered = active
 		queue_redraw()
@@ -58,11 +79,14 @@ func _physics_process(delta: float) -> void:
 		_freeze_timer -= delta
 		if _freeze_timer <= 0.0:
 			_freeze_cooldown_timer = _pending_cooldown
+			_recovery_timer = recovery_time  # peel off the wall before homing resumes
 			_frozen = false
 			queue_redraw()
 		return
 	if _freeze_cooldown_timer > 0.0:
 		_freeze_cooldown_timer -= delta
+	if _recovery_timer > 0.0:
+		_recovery_timer -= delta
 	_move(delta)
 
 
@@ -153,4 +177,12 @@ func _draw() -> void:
 		draw_color = color.lerp(Color.WHITE, 0.8)
 	elif _steered:
 		draw_color = color.lightened(0.5)
-	draw_circle(Vector2.ZERO, radius, draw_color)
+	if shape == Shape.TRIANGLE:
+		var pts := PackedVector2Array([
+			Vector2(0, -radius),
+			Vector2(-radius * 0.866, radius * 0.5),
+			Vector2(radius * 0.866, radius * 0.5),
+		])
+		draw_colored_polygon(pts, draw_color)
+	else:
+		draw_circle(Vector2.ZERO, radius, draw_color)

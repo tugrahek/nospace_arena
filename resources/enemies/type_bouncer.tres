@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EnemyType" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/enemy_type.gd" id="1_type"]
+[ext_resource type="Resource" path="res://config/behaviors/bouncer.tres" id="2_behavior"]
+
+[resource]
+script = ExtResource("1_type")
+id = &"bouncer"
+behavior = ExtResource("2_behavior")
+base_speed_cells = 18.0
+shape = 0
