@@ -1,12 +1,6 @@
-[gd_resource type="Resource" script_class="BalanceConfig" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="BalanceConfig" format=3 uid="uid://cl20v1ngeo54e"]
 
-[ext_resource type="Script" path="res://scripts/core/balance_config.gd" id="1_bal"]
+[ext_resource type="Script" uid="uid://dsv4h6cx77sjw" path="res://scripts/core/balance_config.gd" id="1_bal"]
 
 [resource]
 script = ExtResource("1_bal")
-start_lives = 3
-enemy_speed = 180.0
-enemy_count = 1
-target_percent = 75.0
-base_points = 10
-combo_window = 2.0

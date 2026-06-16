@@ -14,6 +14,16 @@ static func reflect(velocity: Vector2, block_x: bool, block_y: bool) -> Vector2:
 	return v
 
 
+## Clamps a 1-D center coordinate so a body of `body_radius` stays on the near side
+## of a wall face at `wall`. moving_sign = +1 (approaching from the low side) or
+## -1 (from the high side). Guarantees |result - wall| >= body_radius on that side,
+## so the body never overlaps the wall. Pure geometry — deterministic.
+static func clamp_to_wall(center: float, wall: float, body_radius: float, moving_sign: float) -> float:
+	if moving_sign > 0.0:
+		return minf(center, wall - body_radius)
+	return maxf(center, wall + body_radius)
+
+
 ## Deterministic starting velocity for enemy `index` at `speed` (no RNG).
 ## Varies direction per index so multiple enemies diverge. Step 09 seed will
 ## later drive this; the signature stays the same.

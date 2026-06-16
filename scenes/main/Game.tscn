@@ -1,35 +1,37 @@
-[gd_scene load_steps=8 format=3 uid="uid://nel7mn3oehfi"]
+[gd_scene format=3 uid="uid://nel7mn3oehfi"]
 
 [ext_resource type="Script" uid="uid://b18w21sy3wuk8" path="res://scripts/core/game.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/Arena.tscn" id="2_arena"]
 [ext_resource type="PackedScene" path="res://scenes/gameplay/Player.tscn" id="3_player"]
-[ext_resource type="Script" path="res://scripts/ui/dpad_view.gd" id="4_dpad"]
+[ext_resource type="Script" uid="uid://clo3o5sdg5jpn" path="res://scripts/ui/dpad_view.gd" id="4_dpad"]
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="5_hud"]
-[ext_resource type="Script" path="res://scripts/gameplay/living_territory.gd" id="6_living"]
-[ext_resource type="Resource" path="res://config/default_territory.tres" id="7_effect"]
+[ext_resource type="Script" uid="uid://mwv1q046svec" path="res://scripts/gameplay/living_territory.gd" id="6_living"]
+[ext_resource type="Resource" uid="uid://cjeua2rblhmxr" path="res://config/default_territory.tres" id="7_effect"]
 
-[node name="Game" type="Node2D"]
+[node name="Game" type="Node2D" unique_id=779454124]
 script = ExtResource("1_game")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=446350047]
 position = Vector2(360, 640)
 
-[node name="Arena" parent="." instance=ExtResource("2_arena")]
+[node name="Arena" parent="." unique_id=415805073 instance=ExtResource("2_arena")]
 
-[node name="Player" parent="." instance=ExtResource("3_player")]
+[node name="Player" parent="." unique_id=1981173742 instance=ExtResource("3_player")]
 
-[node name="LivingTerritory" type="Node" parent="."]
+[node name="LivingTerritory" type="Node" parent="." unique_id=1253991442]
 script = ExtResource("6_living")
 effect = ExtResource("7_effect")
 
-[node name="Enemies" type="Node2D" parent="."]
+[node name="Enemies" type="Node2D" parent="." unique_id=390345501]
 
-[node name="UILayer" type="CanvasLayer" parent="."]
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=1411990868]
 
-[node name="DpadView" type="Control" parent="UILayer"]
+[node name="DpadView" type="Control" parent="UILayer" unique_id=981476802]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("4_dpad")
 
-[node name="HUD" parent="." instance=ExtResource("5_hud")]
+[node name="HUD" parent="." unique_id=1417517464 instance=ExtResource("5_hud")]

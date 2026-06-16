@@ -2,6 +2,11 @@ extends Node2D
 
 const BALANCE: BalanceConfig = preload("res://config/balance.tres")
 const ENEMY_SCENE: PackedScene = preload("res://scenes/gameplay/Enemy.tscn")
+const CHARACTERS: Array[CharacterData] = [
+	preload("res://resources/characters/char_pulse.tres"),
+	preload("res://resources/characters/char_drag.tres"),
+	preload("res://resources/characters/char_halt.tres"),
+]
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -25,8 +30,21 @@ func _ready() -> void:
 	_on_scheme_changed(int(_player.control_scheme))
 	_spawn_enemies()
 	_living_territory.setup(_arena, _enemies)
+	_apply_character(GameState.selected_character_index)
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
+
+
+## Applies a character: its territory effect drives the living territory, and its
+## accent color tints the captured glow. Dev key `C` cycles for playtest (UI in Step 13).
+func _apply_character(index: int) -> void:
+	var i: int = index % CHARACTERS.size()
+	var ch: CharacterData = CHARACTERS[i]
+	GameState.set_character(i)
+	_living_territory.effect = ch.effect
+	_arena.captured_color = ch.accent_color
+	_arena.queue_redraw()
+	print("Karakter: %s" % tr(ch.display_name_key))
 
 
 func _spawn_enemies() -> void:
@@ -88,5 +106,8 @@ func _on_retry() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
-		get_tree().reload_current_scene()
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_R:
+			get_tree().reload_current_scene()
+		elif event.keycode == KEY_C:
+			_apply_character(GameState.selected_character_index + 1)

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/character_data.gd" id="1_char"]
+[ext_resource type="Resource" path="res://config/stasis_territory.tres" id="2_effect"]
+
+[resource]
+script = ExtResource("1_char")
+id = &"halt"
+display_name_key = "CHAR_HALT"
+accent_color = Color(0.15, 0.9, 0.8, 0.55)
+effect = ExtResource("2_effect")
+unlock_cost = 0

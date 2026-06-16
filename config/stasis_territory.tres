@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="StasisEffect" format=3 uid="uid://1usihyrs2xri"]
+
+[ext_resource type="Script" uid="uid://dihdnmrqj5snc" path="res://scripts/core/stasis_effect.gd" id="1_stasis"]
+
+[resource]
+script = ExtResource("1_stasis")
+freeze_duration = 0.12

@@ -57,6 +57,26 @@ func is_player_captured(cell: Vector2i) -> bool:
 	return not (cell.x == 0 or cell.y == 0 or cell.x == grid.cols - 1 or cell.y == grid.rows - 1)
 
 
+## Returns the world-space center of the nearest player-captured cell within
+## max_radius of world_pos, or Vector2(INF, INF) if none. Shared by territory effects.
+func nearest_player_captured(world_pos: Vector2, max_radius: float) -> Vector2:
+	var center: Vector2i = world_to_cell(world_pos)
+	var r: int = ceili(max_radius / cell_size) + 1
+	var best: Vector2 = Vector2(INF, INF)
+	var best_dist: float = max_radius  # cells at/beyond radius are ignored
+	for dy in range(-r, r + 1):
+		for dx in range(-r, r + 1):
+			var cell := Vector2i(center.x + dx, center.y + dy)
+			if not is_player_captured(cell):
+				continue
+			var wp: Vector2 = cell_to_world(cell)
+			var d: float = world_pos.distance_to(wp)
+			if d < best_dist:
+				best_dist = d
+				best = wp
+	return best
+
+
 func add_trail(cell: Vector2i) -> bool:
 	var ok: bool = grid.add_trail_cell(cell)
 	if ok:

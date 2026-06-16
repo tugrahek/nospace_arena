@@ -3,6 +3,8 @@ extends Node2D
 
 ## Roams the FREE arena area, bouncing off CAPTURED cells and the arena edge.
 ## Touching the active TRAIL is lethal to the player (emits hit_trail).
+## Living-territory effects act via the active effect: Push steers, Drag slows,
+## Stasis freezes ON CONTACT with player-captured territory.
 
 signal hit_trail()
 
@@ -11,31 +13,56 @@ signal hit_trail()
 
 var _arena: ArenaController
 var _velocity: Vector2 = Vector2.ZERO
-var _steered: bool = false  # TEMP: debug tint while in a territory effect (Step 15 juice replaces)
+var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
+var _active_effect: TerritoryEffect = null  # set each frame by LivingTerritory
+var _freeze_timer: float = 0.0  # > 0 while contact-frozen (Stasis); no movement
+var _freeze_cooldown_timer: float = 0.0  # blocks re-freeze (prevents boundary jitter re-lock)
+var _pending_cooldown: float = 0.0
+var _steered: bool = false  # TEMP: debug tint while steered/slowed (Step 15 juice replaces)
+var _frozen: bool = false  # TEMP: distinct tint while contact-frozen
 
 
 func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2) -> void:
 	_arena = arena
 	position = start_pos
 	_velocity = velocity
+	_speed_scale = 1.0
+	_active_effect = null
+	_freeze_timer = 0.0
+	_freeze_cooldown_timer = 0.0
+	_pending_cooldown = 0.0
 	_steered = false
+	_frozen = false
 	queue_redraw()
 
 
-## Lets the living territory steer this enemy. The enemy keeps ownership of its
-## velocity; the effect only returns a new (same-magnitude) heading.
+## Lets the living territory influence this enemy each frame. steer changes the
+## persistent heading (Push, magnitude kept); speed_scale transiently slows (Drag).
+## The effect is also cached so a contact bounce can trigger Stasis freeze.
 func apply_territory(effect: TerritoryEffect, arena: ArenaController) -> void:
-	var new_vel: Vector2 = effect.compute_velocity(_velocity, position, arena)
-	var was_steered: bool = not new_vel.is_equal_approx(_velocity)
-	_velocity = new_vel
-	if was_steered != _steered:
-		_steered = was_steered
+	_active_effect = effect
+	var old_vel: Vector2 = _velocity
+	_velocity = effect.steer(_velocity, position, arena)
+	_speed_scale = effect.speed_scale(position, arena)
+	var active: bool = (not _velocity.is_equal_approx(old_vel)) or _speed_scale < 0.999
+	if active != _steered:
+		_steered = active
 		queue_redraw()
 
 
 func _physics_process(delta: float) -> void:
 	if _arena == null or not GameState.is_playing():
 		return
+	# Contact freeze (Stasis): hold still while the timer runs, then start cooldown.
+	if _freeze_timer > 0.0:
+		_freeze_timer -= delta
+		if _freeze_timer <= 0.0:
+			_freeze_cooldown_timer = _pending_cooldown
+			_frozen = false
+			queue_redraw()
+		return
+	if _freeze_cooldown_timer > 0.0:
+		_freeze_cooldown_timer -= delta
 	_move(delta)
 
 
@@ -43,7 +70,7 @@ func _physics_process(delta: float) -> void:
 func _move(delta: float) -> void:
 	if _velocity == Vector2.ZERO:
 		return
-	var remaining: float = _velocity.length() * delta
+	var remaining: float = _velocity.length() * _speed_scale * delta
 	var step_len: float = _arena.cell_size * 0.5
 	while remaining > 0.0:
 		var step: float = minf(step_len, remaining)
@@ -52,25 +79,64 @@ func _move(delta: float) -> void:
 			return
 
 
-## Advances one sub-step. Bounces off CAPTURED, dies on TRAIL (returns false).
+## Advances one sub-step. Enemies move diagonally (signf never 0). TRAIL is checked
+## at the center path (lethality unchanged from S04); CAPTURED bounce is radius-aware
+## (probes the body's leading edge + clamps the center so the body never overlaps).
+## Bouncing off PLAYER-captured territory can trigger a contact freeze (Stasis).
 func _advance(step: float) -> bool:
 	var dir: Vector2 = _velocity.normalized()
 	var next_pos: Vector2 = position + dir * step
-	var sx: int = _state_at(Vector2(next_pos.x, position.y))
-	var sy: int = _state_at(Vector2(position.x, next_pos.y))
-	var sd: int = _state_at(next_pos)
-	if sx == CaptureGrid.Cell.TRAIL or sy == CaptureGrid.Cell.TRAIL or sd == CaptureGrid.Cell.TRAIL:
+	# TRAIL (lethal): center path, unchanged difficulty.
+	if _state_at(Vector2(next_pos.x, position.y)) == CaptureGrid.Cell.TRAIL \
+		or _state_at(Vector2(position.x, next_pos.y)) == CaptureGrid.Cell.TRAIL \
+		or _state_at(next_pos) == CaptureGrid.Cell.TRAIL:
 		hit_trail.emit()
 		return false
-	var block_x: bool = sx == CaptureGrid.Cell.CAPTURED
-	var block_y: bool = sy == CaptureGrid.Cell.CAPTURED
+	# CAPTURED bounce: probe the body's leading edge (radius ahead of center).
+	var sgx: float = signf(_velocity.x)
+	var sgy: float = signf(_velocity.y)
+	var cx: Vector2i = _arena.world_to_cell(Vector2(next_pos.x + sgx * radius, position.y))
+	var cy: Vector2i = _arena.world_to_cell(Vector2(position.x, next_pos.y + sgy * radius))
+	var block_x: bool = _arena.cell_state(cx) == CaptureGrid.Cell.CAPTURED
+	var block_y: bool = _arena.cell_state(cy) == CaptureGrid.Cell.CAPTURED
+	if block_x:
+		var face_x: float = _arena.cell_to_world(cx).x - sgx * _arena.cell_size * 0.5
+		position.x = EnemyMotion.clamp_to_wall(position.x, face_x, radius, sgx)
+	if block_y:
+		var face_y: float = _arena.cell_to_world(cy).y - sgy * _arena.cell_size * 0.5
+		position.y = EnemyMotion.clamp_to_wall(position.y, face_y, radius, sgy)
 	if block_x or block_y:
 		_velocity = EnemyMotion.reflect(_velocity, block_x, block_y)
+		queue_redraw()
+		var on_player: bool = (block_x and _arena.is_player_captured(cx)) \
+			or (block_y and _arena.is_player_captured(cy))
+		if on_player and _try_contact_freeze():
+			return false  # frozen: stop this frame's substeps
 		return true
-	if sd == CaptureGrid.Cell.CAPTURED:
-		_velocity = EnemyMotion.reflect(_velocity, true, true)  # diagonal corner
+	# Diagonal corner: leading-edge probe on both axes.
+	var cd: Vector2i = _arena.world_to_cell(Vector2(next_pos.x + sgx * radius, next_pos.y + sgy * radius))
+	if _arena.cell_state(cd) == CaptureGrid.Cell.CAPTURED:
+		_velocity = EnemyMotion.reflect(_velocity, true, true)
+		queue_redraw()
+		if _arena.is_player_captured(cd) and _try_contact_freeze():
+			return false
 		return true
 	position = next_pos
+	queue_redraw()
+	return true
+
+
+## Starts a contact freeze if the active effect provides one and cooldown is clear.
+## Returns true if a freeze began (caller should stop moving this frame).
+func _try_contact_freeze() -> bool:
+	if _active_effect == null or _freeze_cooldown_timer > 0.0:
+		return false
+	var dur: float = _active_effect.contact_freeze_duration()
+	if dur <= 0.0:
+		return false
+	_freeze_timer = dur
+	_pending_cooldown = _active_effect.contact_freeze_cooldown()
+	_frozen = true
 	queue_redraw()
 	return true
 
@@ -80,7 +146,11 @@ func _state_at(world: Vector2) -> int:
 
 
 func _draw() -> void:
-	# TEMP (Step 15): tint lighter while inside a territory effect so the push is
-	# visible during playtest before real VFX exist.
-	var draw_color: Color = color.lightened(0.5) if _steered else color
+	# TEMP (Step 15): debug tints so effects are visible before real VFX exist.
+	# Contact-frozen (Stasis) reads as near-white; other active effects just lighten.
+	var draw_color: Color = color
+	if _frozen:
+		draw_color = color.lerp(Color.WHITE, 0.8)
+	elif _steered:
+		draw_color = color.lightened(0.5)
 	draw_circle(Vector2.ZERO, radius, draw_color)

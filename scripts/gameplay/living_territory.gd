@@ -20,6 +20,7 @@ func setup(arena: ArenaController, enemies: Array[Enemy]) -> void:
 	_enemies = enemies
 
 
+## Applies the effect to each enemy every physics frame (runs before enemies move).
 func _physics_process(_delta: float) -> void:
 	if _arena == null or effect == null or not GameState.is_playing():
 		return
