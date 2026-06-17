@@ -16,7 +16,24 @@ const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; H
 const ARENA_SALT: int = 1   # daily seed salts (distinct draws)
 const CHAR_SALT: int = 2
 const LEADERBOARD_PATH: String = "user://leaderboard.json"
-const RUN_REWARD_DIVISOR: int = 100  # PLACEHOLDER: currency = score / this (Step 13 balances)
+const MISSIONS_PATH: String = "user://missions.json"
+const MISSION_COUNT: int = 3
+const MISSIONS: Array[MissionDef] = [
+	preload("res://resources/missions/m_score_800.tres"),
+	preload("res://resources/missions/m_score_1000.tres"),
+	preload("res://resources/missions/m_score_2500.tres"),
+	preload("res://resources/missions/m_score_5000.tres"),
+	preload("res://resources/missions/m_percent_50.tres"),
+	preload("res://resources/missions/m_percent_80.tres"),
+	preload("res://resources/missions/m_percent_95.tres"),
+	preload("res://resources/missions/m_areas_8.tres"),
+	preload("res://resources/missions/m_areas_12.tres"),
+	preload("res://resources/missions/m_areas_30.tres"),
+	preload("res://resources/missions/m_areas_50.tres"),
+	preload("res://resources/missions/m_win_1.tres"),
+	preload("res://resources/missions/m_win_2.tres"),
+	preload("res://resources/missions/m_win_3.tres"),
+]
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -32,6 +49,11 @@ var _daily_seed: int = 0
 var _leaderboard: Leaderboard = null
 var _recording: GhostTrack = null
 var _ghost: Ghost = null
+var _missions: Array[Mission] = []
+var _mission_date: int = 0
+var _areas_this_run: int = 0
+var _last_percent: float = 0.0
+var _won: bool = false
 
 
 func _ready() -> void:
@@ -58,6 +80,7 @@ func _ready() -> void:
 	_hud.setup(BALANCE.start_lives)
 	_hud.set_daily(_daily, _daily_seed)
 	_setup_leaderboard_and_ghost()
+	_setup_missions()
 	if _daily:
 		print("Daily mode: seed=%d arena=%d char=%d" % [_daily_seed, arena_idx, char_idx])
 
@@ -76,6 +99,41 @@ func _setup_leaderboard_and_ghost() -> void:
 		_ghost = Ghost.new()
 		add_child(_ghost)
 		_ghost.play(best_track)
+
+
+## Builds today's 3 missions (seed-derived, same for everyone) with saved progress.
+## Today's date drives selection regardless of daily/free-play (missions count in any run).
+func _setup_missions() -> void:
+	_mission_date = SeedManager.compute_today()
+	var indices: Array[int] = MissionCatalog.pick_daily(MISSIONS.size(), _mission_date, MISSION_COUNT)
+	var saved: Dictionary = MissionStore.load_progress(MISSIONS_PATH, _mission_date)
+	_missions = []
+	for idx in indices:
+		var def: MissionDef = MISSIONS[idx]
+		var m := Mission.new(def)
+		var id_str: String = String(def.id)
+		if saved.has(id_str):
+			m.apply_dict(saved[id_str])
+		_missions.append(m)
+	_hud.show_missions(_missions)
+
+
+## Evaluates missions against this run's stats, pays newly-completed rewards once, saves.
+func _update_missions(score: int) -> void:
+	var stats: Dictionary = {
+		"score": score, "percent": _last_percent, "areas": _areas_this_run, "won": _won,
+	}
+	var reward: int = 0
+	for m in _missions:
+		m.advance(stats)
+		reward += m.claim()  # 0 unless newly complete; idempotent (no double reward)
+	if reward > 0:
+		Economy.earn(reward)
+	var progress: Dictionary = {}
+	for m in _missions:
+		progress[String(m.def.id)] = m.to_dict()
+	MissionStore.save_progress(MISSIONS_PATH, _mission_date, progress)
+	_hud.show_missions(_missions)
 
 
 ## Records the player path at the physics rate (daily only) for the ghost.
@@ -167,17 +225,20 @@ func _on_game_over(final_score: int) -> void:
 
 
 func _on_run_won(final_score: int) -> void:
+	_won = true
 	_on_run_ended(final_score)  # HUD result panel handled via GameState signal
 
 
-## Run reward (PLACEHOLDER — real economy is Step 13 missions) + daily leaderboard submit.
+## Run end: daily leaderboard submit + mission evaluation (missions are the currency source).
 func _on_run_ended(score: int) -> void:
-	Economy.earn(score / RUN_REWARD_DIVISOR)  # HUD currency updates via Economy.currency_changed
 	_submit_run(score)
+	_update_missions(score)
 
 
 func _on_area_captured(percent: float, cells: Array) -> void:
 	_hud.update_percent(percent)
+	_areas_this_run += 1
+	_last_percent = percent
 	var now: float = Time.get_ticks_msec() / 1000.0
 	GameState.register_capture(cells.size(), now)
 	if percent >= _arena_data.target_percent and GameState.is_playing():

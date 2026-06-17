@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MissionDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/mission_def.gd" id="1_m"]
+
+[resource]
+script = ExtResource("1_m")
+id = &"areas_8"
+description_key = "MISSION_TOTAL_AREAS"
+goal_type = 2
+goal_amount = 8
+reward = 40

@@ -13,6 +13,7 @@ signal retry_pressed()
 @onready var _daily_label: Label = $DailyLabel
 @onready var _best_label: Label = $BestLabel
 @onready var _currency_label: Label = $CurrencyLabel
+@onready var _mission_label: Label = $MissionLabel
 @onready var _result_panel: Control = $ResultPanel
 @onready var _result_title: Label = $ResultPanel/VBox/TitleLabel
 @onready var _result_score: Label = $ResultPanel/VBox/ResultScore
@@ -96,3 +97,13 @@ func _on_run_won(final_score: int) -> void:
 ## DEV currency indicator (Step 13/14 replace with real currency UI).
 func _on_currency_changed(balance: int) -> void:
 	_currency_label.text = tr("HUD_CURRENCY") + ": " + str(balance)
+
+
+## Minimal today's-missions list (placeholder; full panel in Step 14).
+func show_missions(missions: Array) -> void:
+	var lines: Array[String] = []
+	for m in missions:
+		var desc: String = tr(m.def.description_key) % m.def.goal_amount
+		var mark: String = " ✓" if m.is_complete() else ""
+		lines.append("%s  %d/%d%s" % [desc, m.progress, m.def.goal_amount, mark])
+	_mission_label.text = "\n".join(lines)
