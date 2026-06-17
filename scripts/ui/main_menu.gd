@@ -18,6 +18,10 @@ const MISSION_COUNT: int = 3
 @onready var _coins: Label = $Coins
 @onready var _loadout: Label = $Loadout
 @onready var _missions: Label = $Missions
+@onready var _reward_popup: Control = $RewardPopup
+@onready var _reward_title: Label = $RewardPopup/Box/RewardTitle
+@onready var _reward_body: Label = $RewardPopup/Box/RewardBody
+@onready var _claim_button: Button = $RewardPopup/Box/ClaimButton
 
 
 func _ready() -> void:
@@ -30,6 +34,26 @@ func _ready() -> void:
 	_daily_button.pressed.connect(_on_daily)
 	_store_button.pressed.connect(_on_store)
 	_credits_button.pressed.connect(_on_credits)
+	_reward_title.text = tr("DAILY_REWARD_TITLE")
+	_claim_button.text = tr("DAILY_REWARD_CLAIM")
+	_claim_button.pressed.connect(_on_claim_reward)
+	_refresh()
+	_maybe_show_reward()
+
+
+## Shows the login-reward popup if a reward is claimable today (Step 15 polishes it).
+func _maybe_show_reward() -> void:
+	var status: Dictionary = Economy.login_reward_status()
+	if not status["claimable"]:
+		_reward_popup.visible = false
+		return
+	_reward_body.text = tr("DAILY_REWARD_BODY") % [status["new_streak"], status["reward"]]
+	_reward_popup.visible = true
+
+
+func _on_claim_reward() -> void:
+	Economy.claim_login_reward()
+	_reward_popup.visible = false
 	_refresh()
 
 

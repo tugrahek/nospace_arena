@@ -9,6 +9,8 @@ var currency: int = 0
 var unlocked: Dictionary = {}  # kind:String -> Array[String] of ids
 var selected_character_id: String = "pulse"  # persisted loadout (free-play)
 var selected_arena_id: String = "void"
+var last_claim_epoch_day: int = -1  # daily login reward; -1 = never claimed
+var streak_day: int = 0  # 1..7 login streak
 
 
 ## Fresh profile: no currency, default content unlocked + selected (free baseline).
@@ -55,6 +57,8 @@ func to_dict() -> Dictionary:
 		"unlocked": unlocked.duplicate(true),
 		"selected_character": selected_character_id,
 		"selected_arena": selected_arena_id,
+		"last_claim_epoch_day": last_claim_epoch_day,
+		"streak_day": streak_day,
 	}
 
 
@@ -63,6 +67,8 @@ static func from_dict(d: Dictionary) -> SaveData:
 	data.currency = int(d.get("currency", 0))
 	data.selected_character_id = String(d.get("selected_character", "pulse"))
 	data.selected_arena_id = String(d.get("selected_arena", "void"))
+	data.last_claim_epoch_day = int(d.get("last_claim_epoch_day", -1))
+	data.streak_day = int(d.get("streak_day", 0))
 	var u: Variant = d.get("unlocked", {})
 	if typeof(u) == TYPE_DICTIONARY:
 		for kind in u:

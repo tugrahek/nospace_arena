@@ -85,3 +85,18 @@ func test_round_trip_preserves_selection() -> void:
 	var restored := SaveData.from_dict(d.to_dict())
 	assert_eq(restored.selected_character_id, "halt")
 	assert_eq(restored.selected_arena_id, "frost")
+
+
+func test_default_streak_state() -> void:
+	var d := SaveData.new_default()
+	assert_eq(d.last_claim_epoch_day, -1)
+	assert_eq(d.streak_day, 0)
+
+
+func test_round_trip_preserves_streak() -> void:
+	var d := SaveData.new_default()
+	d.last_claim_epoch_day = 20567
+	d.streak_day = 4
+	var restored := SaveData.from_dict(d.to_dict())
+	assert_eq(restored.last_claim_epoch_day, 20567)
+	assert_eq(restored.streak_day, 4)

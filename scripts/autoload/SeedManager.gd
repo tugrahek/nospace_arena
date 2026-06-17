@@ -5,6 +5,7 @@ extends Node
 ## is pure (DailySeed). No class_name (autoload singleton).
 
 const DailySeed = preload("res://scripts/meta/daily_seed.gd")
+const EpochDay = preload("res://scripts/meta/epoch_day.gd")
 
 signal daily_seed_ready(seed_value: int)
 
@@ -20,6 +21,15 @@ func compute_today() -> int:
 	var unix: int = int(Time.get_unix_time_from_datetime_dict(base)) + day_offset * 86400
 	var d: Dictionary = Time.get_datetime_dict_from_unix_time(unix)
 	return DailySeed.seed_for_date(d.year, d.month, d.day)
+
+
+## Today's epoch-day (days since 1970-01-01), honoring the dev day_offset. Used by the
+## login-streak so "consecutive day" math is correct (and dev-previewable via H).
+func today_epoch() -> int:
+	var base: Dictionary = Time.get_date_dict_from_system()
+	var unix: int = int(Time.get_unix_time_from_datetime_dict(base)) + day_offset * 86400
+	var d: Dictionary = Time.get_datetime_dict_from_unix_time(unix)
+	return EpochDay.from_date(d.year, d.month, d.day)
 
 
 ## DEV: advance to the next day's challenge (re-derives the seed). Real today = offset 0.

@@ -5,10 +5,13 @@ extends Node
 ## no data loss). No class_name (autoload singleton). Leaderboard is separate (Step 11).
 
 const SaveStore = preload("res://scripts/meta/save_store.gd")
+const LoginStreak = preload("res://scripts/meta/login_streak.gd")
 const SAVE_PATH: String = "user://save.json"
+const LOGIN_REWARDS: Array[int] = [50, 75, 100, 125, 150, 200, 300]  # day 1..7 (first-pass)
 
 signal currency_changed(new_balance: int)
 signal unlocks_changed()
+signal login_reward_claimed(day: int, amount: int)
 
 var _data  # SaveData
 
@@ -81,6 +84,27 @@ func set_selected_character(id: StringName) -> void:
 func set_selected_arena(id: StringName) -> void:
 	_data.selected_arena_id = String(id)
 	_flush()
+
+
+## { claimable, reward, new_streak } for today's login reward (for the menu popup).
+func login_reward_status() -> Dictionary:
+	return LoginStreak.evaluate(SeedManager.today_epoch(), _data.last_claim_epoch_day, _data.streak_day, LOGIN_REWARDS)
+
+
+## Claims today's login reward if claimable: earns + advances the streak + persists.
+## Idempotent — a second call the same day returns 0 (already claimed). Returns the amount.
+func claim_login_reward() -> int:
+	var today: int = SeedManager.today_epoch()
+	var r: Dictionary = LoginStreak.evaluate(today, _data.last_claim_epoch_day, _data.streak_day, LOGIN_REWARDS)
+	if not r["claimable"]:
+		return 0
+	_data.earn(r["reward"])
+	_data.last_claim_epoch_day = today
+	_data.streak_day = r["new_streak"]
+	_flush()
+	currency_changed.emit(_data.currency)
+	login_reward_claimed.emit(r["new_streak"], r["reward"])
+	return r["reward"]
 
 
 func _flush() -> void:
