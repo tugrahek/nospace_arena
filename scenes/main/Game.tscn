@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="5_hud"]
 [ext_resource type="Script" uid="uid://mwv1q046svec" path="res://scripts/gameplay/living_territory.gd" id="6_living"]
 [ext_resource type="Resource" uid="uid://cjeua2rblhmxr" path="res://config/default_territory.tres" id="7_effect"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PauseOverlay.tscn" id="8_pause"]
 
 [node name="Game" type="Node2D" unique_id=779454124]
 script = ExtResource("1_game")
@@ -37,3 +38,5 @@ mouse_filter = 2
 script = ExtResource("4_dpad")
 
 [node name="HUD" parent="." unique_id=1417517464 instance=ExtResource("5_hud")]
+
+[node name="PauseOverlay" parent="." instance=ExtResource("8_pause")]

@@ -1,23 +1,20 @@
 extends Control
 
-## Main hub: Play (free-play), Daily (seed challenge), Store, Credits. Shows the active
-## loadout, coins, and today's missions (read-only). Functional scaffold — void-neon
-## visual polish is Step 15.
+## Main hub: Play (free-play), Daily, Store, Missions, Credits. Shows active loadout + coins
+## + daily login reward popup. Missions have their own panel. Visual polish is Step 15.
 
 const GAME_SCENE: String = "res://scenes/main/Game.tscn"
 const STORE_SCENE: String = "res://scenes/ui/Store.tscn"
+const MISSIONS_SCENE: String = "res://scenes/ui/Missions.tscn"
 const CREDITS_SCENE: String = "res://scenes/ui/Credits.tscn"
-const MISSIONS_PATH: String = "user://missions.json"
-const MISSION_COUNT: int = 3
 
 @onready var _title: Label = $Title
 @onready var _play_button: Button = $VBox/PlayButton
 @onready var _daily_button: Button = $VBox/DailyButton
 @onready var _store_button: Button = $VBox/StoreButton
+@onready var _missions_button: Button = $VBox/MissionsButton
 @onready var _credits_button: Button = $VBox/CreditsButton
 @onready var _coins: Label = $Coins
-@onready var _loadout: Label = $Loadout
-@onready var _missions: Label = $Missions
 @onready var _reward_popup: Control = $RewardPopup
 @onready var _reward_title: Label = $RewardPopup/Box/RewardTitle
 @onready var _reward_body: Label = $RewardPopup/Box/RewardBody
@@ -29,10 +26,12 @@ func _ready() -> void:
 	_play_button.text = tr("MENU_PLAY")
 	_daily_button.text = tr("MENU_DAILY")
 	_store_button.text = tr("MENU_STORE")
+	_missions_button.text = tr("MISSIONS_TITLE")
 	_credits_button.text = tr("MENU_CREDITS")
 	_play_button.pressed.connect(_on_play)
 	_daily_button.pressed.connect(_on_daily)
 	_store_button.pressed.connect(_on_store)
+	_missions_button.pressed.connect(_on_missions)
 	_credits_button.pressed.connect(_on_credits)
 	_reward_title.text = tr("DAILY_REWARD_TITLE")
 	_claim_button.text = tr("DAILY_REWARD_CLAIM")
@@ -71,21 +70,14 @@ func _on_store() -> void:
 	get_tree().change_scene_to_file(STORE_SCENE)
 
 
+func _on_missions() -> void:
+	get_tree().change_scene_to_file(MISSIONS_SCENE)
+
+
 func _on_credits() -> void:
 	get_tree().change_scene_to_file(CREDITS_SCENE)
 
 
 func _refresh() -> void:
+	# Missions + loadout/selection have their own panels (Missions/Store) — not here.
 	_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
-	var ch: CharacterData = ContentCatalog.CHARACTERS[ContentCatalog.character_index(Economy.selected_character())]
-	var ar: ArenaData = ContentCatalog.ARENAS[ContentCatalog.arena_index(Economy.selected_arena())]
-	_loadout.text = "%s: %s / %s" % [tr("MENU_LOADOUT"), tr(ch.display_name_key), tr(ar.display_name_key)]
-	var date: int = SeedManager.compute_today()
-	var saved: Dictionary = MissionStore.load_progress(MISSIONS_PATH, date)
-	var missions: Array = MissionService.build(ContentCatalog.MISSIONS, date, MISSION_COUNT, saved)
-	var lines: Array[String] = [tr("MENU_MISSIONS") + ":"]
-	for m in missions:
-		var mark: String = " ✓" if m.is_complete() else ""
-		var desc: String = tr(m.def.description_key) % m.def.goal_amount
-		lines.append("  %s  %d/%d%s" % [desc, m.progress, m.def.goal_amount, mark])
-	_missions.text = "\n".join(lines)

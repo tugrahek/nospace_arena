@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://bjfil3mkhtfs0"]
+
+[ext_resource type="Script" path="res://scripts/ui/pause_overlay.gd" id="1_pause"]
+
+[node name="PauseOverlay" type="CanvasLayer"]
+layer = 3
+process_mode = 3
+script = ExtResource("1_pause")
+
+[node name="PauseButton" type="Button" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -84.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 84.0
+text = "II"
+theme_override_font_sizes/font_size = 28
+
+[node name="Overlay" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+
+[node name="Dim" type="ColorRect" parent="Overlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.01, 0.06, 0.85)
+mouse_filter = 2
+
+[node name="Box" type="VBoxContainer" parent="Overlay"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -150.0
+offset_right = 160.0
+offset_bottom = 150.0
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="ResumeButton" type="Button" parent="Overlay/Box"]
+layout_mode = 2
+custom_minimum_size = Vector2(280, 70)
+text = "Resume"
+theme_override_font_sizes/font_size = 28
+
+[node name="RestartButton" type="Button" parent="Overlay/Box"]
+layout_mode = 2
+custom_minimum_size = Vector2(280, 70)
+text = "Restart"
+theme_override_font_sizes/font_size = 28
+
+[node name="MenuButton" type="Button" parent="Overlay/Box"]
+layout_mode = 2
+custom_minimum_size = Vector2(280, 70)
+text = "Menu"
+theme_override_font_sizes/font_size = 28

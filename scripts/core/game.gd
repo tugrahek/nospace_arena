@@ -16,6 +16,7 @@ const MISSION_COUNT: int = 3
 @onready var _living_territory: LivingTerritory = $LivingTerritory
 @onready var _dpad_view: Control = $UILayer/DpadView
 @onready var _hud: HUD = $HUD
+@onready var _pause_overlay: CanvasLayer = $PauseOverlay
 
 var _enemies: Array[Enemy] = []
 var _arena_data: ArenaData
@@ -49,6 +50,8 @@ func _ready() -> void:
 	GameState.run_won.connect(_on_run_won)
 	_hud.retry_pressed.connect(_on_retry)
 	_hud.menu_pressed.connect(_on_menu)
+	_pause_overlay.restart_requested.connect(_on_retry)
+	_pause_overlay.menu_requested.connect(_on_menu)
 	_on_scheme_changed(int(_player.control_scheme))
 	_spawn_enemies()
 	_living_territory.setup(_arena, _enemies, _player)
@@ -106,9 +109,15 @@ func _update_missions(score: int) -> void:
 
 
 ## Records the player path at the physics rate (daily only) for the ghost.
+## Pause freezes _physics_process -> no samples while paused -> ghost stays deterministic.
 func _physics_process(_delta: float) -> void:
 	if _daily and _recording != null and GameState.is_playing():
 		_recording.add_sample(_player.position)
+
+
+## Ghost recording length (frames) — used to verify pause stops sampling.
+func recording_frame_count() -> int:
+	return _recording.length_frames() if _recording != null else 0
 
 
 ## Submits this run's score to the daily leaderboard; persists + updates BEST if new best.
