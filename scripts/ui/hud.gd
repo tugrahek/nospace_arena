@@ -11,6 +11,7 @@ signal retry_pressed()
 @onready var _percent_label: Label = $TopBar/PercentLabel
 @onready var _combo_label: Label = $ComboLabel
 @onready var _daily_label: Label = $DailyLabel
+@onready var _best_label: Label = $BestLabel
 @onready var _result_panel: Control = $ResultPanel
 @onready var _result_title: Label = $ResultPanel/VBox/TitleLabel
 @onready var _result_score: Label = $ResultPanel/VBox/ResultScore
@@ -26,6 +27,7 @@ func _ready() -> void:
 	_result_panel.visible = false
 	_combo_label.visible = false
 	_daily_label.visible = false
+	_best_label.visible = false
 	_retry_button.pressed.connect(func() -> void: retry_pressed.emit())
 
 
@@ -34,6 +36,15 @@ func set_daily(active: bool, seed: int) -> void:
 	if active:
 		_daily_label.text = tr("HUD_DAILY") + " • " + DailySeed.date_string(seed)
 	_daily_label.visible = active
+
+
+## Shows today's best score (daily only). score < 0 hides it.
+func set_best(score: int) -> void:
+	if score >= 0:
+		_best_label.text = tr("HUD_BEST") + ": " + str(score)
+		_best_label.visible = true
+	else:
+		_best_label.visible = false
 
 
 ## Called by game.gd after start_run to seed the initial display.

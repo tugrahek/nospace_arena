@@ -15,6 +15,7 @@ const ARENAS: Array[ArenaData] = [
 const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; HUD reserved above
 const ARENA_SALT: int = 1   # daily seed salts (distinct draws)
 const CHAR_SALT: int = 2
+const LEADERBOARD_PATH: String = "user://leaderboard.json"
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -27,6 +28,9 @@ var _enemies: Array[Enemy] = []
 var _arena_data: ArenaData
 var _daily: bool = false
 var _daily_seed: int = 0
+var _leaderboard: Leaderboard = null
+var _recording: GhostTrack = null
+var _ghost: Ghost = null
 
 
 func _ready() -> void:
@@ -52,8 +56,40 @@ func _ready() -> void:
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
 	_hud.set_daily(_daily, _daily_seed)
+	_setup_leaderboard_and_ghost()
 	if _daily:
 		print("Daily mode: seed=%d arena=%d char=%d" % [_daily_seed, arena_idx, char_idx])
+
+
+## Daily only: load the leaderboard, show today's best, and play its ghost (recorded
+## path of the best run). Also starts recording this run. Free-play: nothing.
+func _setup_leaderboard_and_ghost() -> void:
+	if not _daily:
+		_hud.set_best(-1)
+		return
+	_leaderboard = LeaderboardStore.load_from(LEADERBOARD_PATH)
+	_recording = GhostTrack.new()
+	_hud.set_best(_leaderboard.best_score(_daily_seed))
+	var best_track: GhostTrack = _leaderboard.best_track(_daily_seed)
+	if best_track != null and not best_track.is_empty():
+		_ghost = Ghost.new()
+		add_child(_ghost)
+		_ghost.play(best_track)
+
+
+## Records the player path at the physics rate (daily only) for the ghost.
+func _physics_process(_delta: float) -> void:
+	if _daily and _recording != null and GameState.is_playing():
+		_recording.add_sample(_player.position)
+
+
+## Submits this run's score to the daily leaderboard; persists + updates BEST if new best.
+func _submit_run(score: int) -> void:
+	if not _daily or _leaderboard == null or _recording == null:
+		return
+	if _leaderboard.submit(_daily_seed, score, _recording):
+		LeaderboardStore.save_to(LEADERBOARD_PATH, _leaderboard)
+		_hud.set_best(_leaderboard.best_score(_daily_seed))
 
 
 ## Applies an arena (fit-to-rect grid + theme) deterministically via the catalog.
@@ -125,12 +161,12 @@ func _on_life_lost(_remaining: int) -> void:
 	pass  # HUD handles display via GameState.life_lost signal
 
 
-func _on_game_over(_final_score: int) -> void:
-	pass  # HUD handles display via GameState.game_over signal
+func _on_game_over(final_score: int) -> void:
+	_submit_run(final_score)  # HUD result panel handled via GameState signal
 
 
-func _on_run_won(_final_score: int) -> void:
-	pass  # HUD handles display via GameState.run_won signal
+func _on_run_won(final_score: int) -> void:
+	_submit_run(final_score)  # HUD result panel handled via GameState signal
 
 
 func _on_area_captured(percent: float, cells: Array) -> void:
