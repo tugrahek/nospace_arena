@@ -5,6 +5,7 @@ extends CanvasLayer
 ## ResultPanel (win / lose) appears at run end with a retry button.
 
 signal retry_pressed()
+signal menu_pressed()
 
 @onready var _lives_label: Label = $TopBar/LivesLabel
 @onready var _score_label: Label = $TopBar/ScoreLabel
@@ -18,6 +19,7 @@ signal retry_pressed()
 @onready var _result_title: Label = $ResultPanel/VBox/TitleLabel
 @onready var _result_score: Label = $ResultPanel/VBox/ResultScore
 @onready var _retry_button: Button = $ResultPanel/VBox/RetryButton
+@onready var _menu_button: Button = $ResultPanel/VBox/MenuButton
 
 
 func _ready() -> void:
@@ -32,7 +34,10 @@ func _ready() -> void:
 	_combo_label.visible = false
 	_daily_label.visible = false
 	_best_label.visible = false
+	_retry_button.text = tr("RESULT_RETRY")
+	_menu_button.text = tr("RESULT_MENU")
 	_retry_button.pressed.connect(func() -> void: retry_pressed.emit())
+	_menu_button.pressed.connect(func() -> void: menu_pressed.emit())
 
 
 ## Shows/hides the daily-mode badge. Full daily UI (countdown etc.) is Step 14.

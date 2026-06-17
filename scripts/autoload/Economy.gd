@@ -52,5 +52,36 @@ func unlock(kind: String, id: StringName) -> void:
 	unlocks_changed.emit()
 
 
+## Buys a locked item if affordable: spends then unlocks. Returns success.
+func purchase(kind: String, id: StringName, cost: int) -> bool:
+	if _data.is_unlocked(kind, id):
+		return false
+	if not _data.spend(cost):
+		return false
+	_data.unlock(kind, id)
+	_flush()
+	currency_changed.emit(_data.currency)
+	unlocks_changed.emit()
+	return true
+
+
+func selected_character() -> StringName:
+	return StringName(_data.selected_character_id)
+
+
+func selected_arena() -> StringName:
+	return StringName(_data.selected_arena_id)
+
+
+func set_selected_character(id: StringName) -> void:
+	_data.selected_character_id = String(id)
+	_flush()
+
+
+func set_selected_arena(id: StringName) -> void:
+	_data.selected_arena_id = String(id)
+	_flush()
+
+
 func _flush() -> void:
 	SaveStore.save_to(SAVE_PATH, _data)

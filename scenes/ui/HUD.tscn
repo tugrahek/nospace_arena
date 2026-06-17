@@ -134,5 +134,12 @@ theme_override_font_sizes/font_size = 32
 layout_mode = 2
 custom_minimum_size = Vector2(200, 60)
 size_flags_horizontal = 4
-text = "TEKRAR"
+text = "RETRY"
 theme_override_font_sizes/font_size = 28
+
+[node name="MenuButton" type="Button" parent="ResultPanel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 56)
+size_flags_horizontal = 4
+text = "MENU"
+theme_override_font_sizes/font_size = 24

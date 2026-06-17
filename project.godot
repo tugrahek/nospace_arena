@@ -13,7 +13,7 @@ config_version=5
 config/name="NoSpace: Arena"
 config/description="2D mobile territory capture arcade game"
 config/version="0.1.0"
-run/main_scene="res://scenes/main/Game.tscn"
+run/main_scene="res://scenes/main/MainMenu.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://assets/icon.svg"
 

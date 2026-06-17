@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://cjqjcc4qykbcb"]
+
+[ext_resource type="Script" path="res://scripts/ui/store.gd" id="1_store"]
+
+[node name="Store" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_store")
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.03, 0.02, 0.08, 1)
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="."]
+anchor_right = 1.0
+offset_top = 32.0
+offset_bottom = 84.0
+horizontal_alignment = 1
+text = "Store"
+theme_override_font_sizes/font_size = 36
+theme_override_colors/font_color = Color(0.2, 0.95, 1, 1)
+
+[node name="Coins" type="Label" parent="."]
+anchor_right = 1.0
+offset_left = -260.0
+offset_top = 24.0
+offset_right = -24.0
+horizontal_alignment = 2
+text = "Coins: 0"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 110.0
+offset_right = -40.0
+offset_bottom = -110.0
+
+[node name="List" type="VBoxContainer" parent="Scroll"]
+custom_minimum_size = Vector2(640, 0)
+theme_override_constants/separation = 14
+
+[node name="BackButton" type="Button" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -84.0
+offset_right = 120.0
+offset_bottom = -28.0
+text = "Back"
+theme_override_font_sizes/font_size = 26

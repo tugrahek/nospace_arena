@@ -70,3 +70,18 @@ func test_round_trip_preserves_currency_and_unlocks() -> void:
 	assert_true(restored.is_unlocked("character", &"pulse"))
 	assert_true(restored.is_unlocked("arena", &"ember"))
 	assert_false(restored.is_unlocked("arena", &"frost"))
+
+
+func test_default_selection() -> void:
+	var d := SaveData.new_default()
+	assert_eq(d.selected_character_id, "pulse")
+	assert_eq(d.selected_arena_id, "void")
+
+
+func test_round_trip_preserves_selection() -> void:
+	var d := SaveData.new_default()
+	d.selected_character_id = "halt"
+	d.selected_arena_id = "frost"
+	var restored := SaveData.from_dict(d.to_dict())
+	assert_eq(restored.selected_character_id, "halt")
+	assert_eq(restored.selected_arena_id, "frost")

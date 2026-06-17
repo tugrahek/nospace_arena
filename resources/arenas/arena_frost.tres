@@ -14,3 +14,4 @@ theme = ExtResource("2_theme")
 enemies = Array[Resource]([ExtResource("3_chaser")])
 speed_mult = 1.0
 target_percent = 80.0
+unlock_cost = 700

@@ -7,9 +7,11 @@ extends RefCounted
 
 var currency: int = 0
 var unlocked: Dictionary = {}  # kind:String -> Array[String] of ids
+var selected_character_id: String = "pulse"  # persisted loadout (free-play)
+var selected_arena_id: String = "void"
 
 
-## Fresh profile: no currency, default content unlocked (free baseline).
+## Fresh profile: no currency, default content unlocked + selected (free baseline).
 static func new_default() -> SaveData:
 	var d := SaveData.new()
 	d.unlock("character", &"pulse")
@@ -48,12 +50,19 @@ func unlock(kind: String, id: StringName) -> void:
 
 
 func to_dict() -> Dictionary:
-	return {"currency": currency, "unlocked": unlocked.duplicate(true)}
+	return {
+		"currency": currency,
+		"unlocked": unlocked.duplicate(true),
+		"selected_character": selected_character_id,
+		"selected_arena": selected_arena_id,
+	}
 
 
 static func from_dict(d: Dictionary) -> SaveData:
 	var data := SaveData.new()
 	data.currency = int(d.get("currency", 0))
+	data.selected_character_id = String(d.get("selected_character", "pulse"))
+	data.selected_arena_id = String(d.get("selected_arena", "void"))
 	var u: Variant = d.get("unlocked", {})
 	if typeof(u) == TYPE_DICTIONARY:
 		for kind in u:

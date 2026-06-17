@@ -2,38 +2,13 @@ extends Node2D
 
 const BALANCE: BalanceConfig = preload("res://config/balance.tres")
 const ENEMY_SCENE: PackedScene = preload("res://scenes/gameplay/Enemy.tscn")
-const CHARACTERS: Array[CharacterData] = [
-	preload("res://resources/characters/char_pulse.tres"),
-	preload("res://resources/characters/char_drag.tres"),
-	preload("res://resources/characters/char_halt.tres"),
-]
-const ARENAS: Array[ArenaData] = [
-	preload("res://resources/arenas/arena_void.tres"),
-	preload("res://resources/arenas/arena_ember.tres"),
-	preload("res://resources/arenas/arena_frost.tres"),
-]
+const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; HUD reserved above
 const ARENA_SALT: int = 1   # daily seed salts (distinct draws)
 const CHAR_SALT: int = 2
 const LEADERBOARD_PATH: String = "user://leaderboard.json"
 const MISSIONS_PATH: String = "user://missions.json"
 const MISSION_COUNT: int = 3
-const MISSIONS: Array[MissionDef] = [
-	preload("res://resources/missions/m_score_800.tres"),
-	preload("res://resources/missions/m_score_1000.tres"),
-	preload("res://resources/missions/m_score_2500.tres"),
-	preload("res://resources/missions/m_score_5000.tres"),
-	preload("res://resources/missions/m_percent_50.tres"),
-	preload("res://resources/missions/m_percent_80.tres"),
-	preload("res://resources/missions/m_percent_95.tres"),
-	preload("res://resources/missions/m_areas_8.tres"),
-	preload("res://resources/missions/m_areas_12.tres"),
-	preload("res://resources/missions/m_areas_30.tres"),
-	preload("res://resources/missions/m_areas_50.tres"),
-	preload("res://resources/missions/m_win_1.tres"),
-	preload("res://resources/missions/m_win_2.tres"),
-	preload("res://resources/missions/m_win_3.tres"),
-]
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -61,9 +36,10 @@ func _ready() -> void:
 	# everyone that day). Free-play: player's own indices (dev C/V cycle).
 	_daily = SeedManager.is_daily
 	_daily_seed = SeedManager.daily_seed
-	var arena_idx: int = DailySeed.to_index(_daily_seed, ARENA_SALT, ARENAS.size()) if _daily else GameState.selected_arena_index
-	var char_idx: int = DailySeed.to_index(_daily_seed, CHAR_SALT, CHARACTERS.size()) if _daily else GameState.selected_character_index
-	_apply_arena(arena_idx, not _daily)  # persist index only in free-play
+	# Daily: seed-derived. Free-play: the player's saved loadout (Economy/SaveData).
+	var arena_idx: int = DailySeed.to_index(_daily_seed, ARENA_SALT, ContentCatalog.ARENAS.size()) if _daily else ContentCatalog.arena_index(Economy.selected_arena())
+	var char_idx: int = DailySeed.to_index(_daily_seed, CHAR_SALT, ContentCatalog.CHARACTERS.size()) if _daily else ContentCatalog.character_index(Economy.selected_character())
+	_apply_arena(arena_idx)
 	_player.setup(_arena)
 	_arena.area_captured.connect(_on_area_captured)
 	_player.control_scheme_changed.connect(_on_scheme_changed)
@@ -72,10 +48,11 @@ func _ready() -> void:
 	GameState.game_over.connect(_on_game_over)
 	GameState.run_won.connect(_on_run_won)
 	_hud.retry_pressed.connect(_on_retry)
+	_hud.menu_pressed.connect(_on_menu)
 	_on_scheme_changed(int(_player.control_scheme))
 	_spawn_enemies()
 	_living_territory.setup(_arena, _enemies, _player)
-	_apply_character(char_idx, not _daily)
+	_apply_character(char_idx)
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
 	_hud.set_daily(_daily, _daily_seed)
@@ -105,16 +82,8 @@ func _setup_leaderboard_and_ghost() -> void:
 ## Today's date drives selection regardless of daily/free-play (missions count in any run).
 func _setup_missions() -> void:
 	_mission_date = SeedManager.compute_today()
-	var indices: Array[int] = MissionCatalog.pick_daily(MISSIONS.size(), _mission_date, MISSION_COUNT)
 	var saved: Dictionary = MissionStore.load_progress(MISSIONS_PATH, _mission_date)
-	_missions = []
-	for idx in indices:
-		var def: MissionDef = MISSIONS[idx]
-		var m := Mission.new(def)
-		var id_str: String = String(def.id)
-		if saved.has(id_str):
-			m.apply_dict(saved[id_str])
-		_missions.append(m)
+	_missions = MissionService.build(ContentCatalog.MISSIONS, _mission_date, MISSION_COUNT, saved)
 	_hud.show_missions(_missions)
 
 
@@ -153,24 +122,20 @@ func _submit_run(score: int) -> void:
 
 ## Applies an arena (fit-to-rect grid + theme) deterministically via the catalog.
 ## Must run before Player.setup (player reads the grid). Difficulty is read on spawn.
-func _apply_arena(index: int, persist: bool) -> void:
-	var i: int = ArenaCatalog.select(ARENAS.size(), index)
+func _apply_arena(index: int) -> void:
+	var i: int = ArenaCatalog.select(ContentCatalog.ARENAS.size(), index)
 	if i < 0:
 		i = 0
-	if persist:
-		GameState.set_arena(i)
-	_arena_data = ARENAS[i]
+	_arena_data = ContentCatalog.ARENAS[i]
 	_arena.configure(_arena_data, PLAY_RECT)
 	print("Arena: %s" % tr(_arena_data.display_name_key))
 
 
 ## Applies a character: its territory effect drives the living territory, and its
-## accent color tints the captured glow. Dev key `C` cycles for playtest (UI in Step 13).
-func _apply_character(index: int, persist: bool = true) -> void:
-	var i: int = index % CHARACTERS.size()
-	var ch: CharacterData = CHARACTERS[i]
-	if persist:
-		GameState.set_character(i)
+## accent color tints the captured glow. Selection persistence is Economy (Store/menu).
+func _apply_character(index: int) -> void:
+	var i: int = index % ContentCatalog.CHARACTERS.size()
+	var ch: CharacterData = ContentCatalog.CHARACTERS[i]
 	_living_territory.effect = ch.effect
 	_arena.captured_color = ch.accent_color
 	_arena.queue_redraw()
@@ -253,21 +218,29 @@ func _on_retry() -> void:
 	get_tree().reload_current_scene()
 
 
+func _on_menu() -> void:
+	get_tree().change_scene_to_file(MENU_SCENE)
+
+
+## DEV shortcuts — debug/editor only; auto-disabled in release export (no cheats shipped).
 func _input(event: InputEvent) -> void:
+	if not OS.is_debug_build():
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_R:
 			get_tree().reload_current_scene()
 		elif event.keycode == KEY_G:
-			# Toggle daily mode (seed-driven arena/character/dirs) and rebuild.
 			SeedManager.toggle_daily()
 			get_tree().reload_current_scene()
 		elif event.keycode == KEY_H and SeedManager.is_daily:
-			# DEV: preview the next day's challenge.
-			SeedManager.advance_day()
+			SeedManager.advance_day()  # preview next day's challenge
 			get_tree().reload_current_scene()
 		elif event.keycode == KEY_C and not SeedManager.is_daily:
-			_apply_character(GameState.selected_character_index + 1)
+			# Cycle the persisted character selection, then rebuild.
+			var ci: int = (ContentCatalog.character_index(Economy.selected_character()) + 1) % ContentCatalog.CHARACTERS.size()
+			Economy.set_selected_character(ContentCatalog.CHARACTERS[ci].id)
+			get_tree().reload_current_scene()
 		elif event.keycode == KEY_V and not SeedManager.is_daily:
-			# Arena resize needs a full rebuild -> reload (index persists in GameState).
-			GameState.set_arena(GameState.selected_arena_index + 1)
+			var ai: int = (ContentCatalog.arena_index(Economy.selected_arena()) + 1) % ContentCatalog.ARENAS.size()
+			Economy.set_selected_arena(ContentCatalog.ARENAS[ai].id)
 			get_tree().reload_current_scene()
