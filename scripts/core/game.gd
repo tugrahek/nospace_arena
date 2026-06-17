@@ -16,6 +16,7 @@ const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; H
 const ARENA_SALT: int = 1   # daily seed salts (distinct draws)
 const CHAR_SALT: int = 2
 const LEADERBOARD_PATH: String = "user://leaderboard.json"
+const RUN_REWARD_DIVISOR: int = 100  # PLACEHOLDER: currency = score / this (Step 13 balances)
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -162,11 +163,17 @@ func _on_life_lost(_remaining: int) -> void:
 
 
 func _on_game_over(final_score: int) -> void:
-	_submit_run(final_score)  # HUD result panel handled via GameState signal
+	_on_run_ended(final_score)  # HUD result panel handled via GameState signal
 
 
 func _on_run_won(final_score: int) -> void:
-	_submit_run(final_score)  # HUD result panel handled via GameState signal
+	_on_run_ended(final_score)  # HUD result panel handled via GameState signal
+
+
+## Run reward (PLACEHOLDER — real economy is Step 13 missions) + daily leaderboard submit.
+func _on_run_ended(score: int) -> void:
+	Economy.earn(score / RUN_REWARD_DIVISOR)  # HUD currency updates via Economy.currency_changed
+	_submit_run(score)
 
 
 func _on_area_captured(percent: float, cells: Array) -> void:
