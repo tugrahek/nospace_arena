@@ -92,6 +92,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"Secondary"
 text = "Daily"
+script = ExtResource("3_juicy")
 
 [node name="StoreButton" type="Button" parent="Center/Buttons"]
 custom_minimum_size = Vector2(300, 58)
@@ -99,6 +100,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"Secondary"
 text = "Store"
+script = ExtResource("3_juicy")
 
 [node name="MissionsButton" type="Button" parent="Center/Buttons"]
 custom_minimum_size = Vector2(300, 58)
@@ -106,6 +108,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"Secondary"
 text = "Missions"
+script = ExtResource("3_juicy")
 
 [node name="CreditsButton" type="Button" parent="Center/Buttons"]
 custom_minimum_size = Vector2(300, 58)
@@ -113,6 +116,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"Secondary"
 text = "Credits"
+script = ExtResource("3_juicy")
 
 [node name="Version" type="Label" parent="."]
 theme_type_variation = &"Muted"

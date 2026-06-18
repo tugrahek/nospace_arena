@@ -54,13 +54,13 @@ func _add_item(kind: String, id: StringName, item_name: String, cost: int, is_se
 			s.add_theme_color_override("font_color", Color(0.4, 1, 0.55, 1))  # success/selected
 			row.add_child(s)
 		else:
-			var b := Button.new()
+			var b := JuicyButton.new()
 			b.text = tr("STORE_SELECT")
 			b.custom_minimum_size = Vector2(150, 44)
 			b.pressed.connect(_on_select.bind(kind, id))
 			row.add_child(b)
 	else:
-		var b := Button.new()
+		var b := JuicyButton.new()
 		b.text = "%s (%d)" % [tr("STORE_BUY"), cost]
 		b.custom_minimum_size = Vector2(150, 44)
 		b.disabled = not Storefront.can_purchase(false, Economy.balance(), cost)

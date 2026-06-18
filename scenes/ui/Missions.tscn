@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://d3md1ip2kbr2g"]
+[gd_scene load_steps=3 format=3 uid="uid://d3md1ip2kbr2g"]
 
 [ext_resource type="Script" path="res://scripts/ui/missions_panel.gd" id="1_missions"]
+[ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
 
 [node name="Missions" type="Control"]
 layout_mode = 3
@@ -43,4 +44,5 @@ offset_top = -84.0
 offset_right = 120.0
 offset_bottom = -28.0
 text = "Back"
+script = ExtResource("2_juicy")
 theme_override_font_sizes/font_size = 26

@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://w3dqlrk3g1ea"]
+[gd_scene load_steps=3 format=3 uid="uid://w3dqlrk3g1ea"]
 
 [ext_resource type="Script" path="res://scripts/ui/credits.gd" id="1_credits"]
+[ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
 
 [node name="Credits" type="Control"]
 layout_mode = 3
@@ -54,4 +55,5 @@ offset_top = -84.0
 offset_right = 120.0
 offset_bottom = -28.0
 text = "Back"
+script = ExtResource("2_juicy")
 theme_override_font_sizes/font_size = 26
