@@ -7,6 +7,11 @@ extends CanvasLayer
 signal retry_pressed()
 signal menu_pressed()
 
+## Scale the score label punches to on each capture, then settles back to 1.0 (@export feel).
+@export var score_punch: float = 1.3
+
+var _score_tween: Tween = null
+
 @onready var _lives_label: Label = $TopBar/LivesLabel
 @onready var _score_label: Label = $TopBar/ScoreLabel
 @onready var _percent_label: Label = $TopBar/PercentLabel
@@ -80,11 +85,24 @@ func _on_life_lost(remaining: int) -> void:
 
 func _on_score_changed(score: int, combo: int) -> void:
 	_score_label.text = tr("HUD_SCORE") + ": " + str(score)
+	_punch_score()
 	if combo > 0:
 		_combo_label.text = tr("HUD_COMBO") + " x" + str(combo + 1)
 		_combo_label.visible = true
 	else:
 		_combo_label.visible = false
+
+
+## A quick scale punch on the score label (settles back to 1.0). Pivot is re-centered each
+## time because the label resizes as the score grows.
+func _punch_score() -> void:
+	if _score_tween != null and _score_tween.is_running():
+		_score_tween.kill()
+	_score_label.pivot_offset = _score_label.size * 0.5
+	_score_label.scale = Vector2.ONE * score_punch
+	_score_tween = _score_label.create_tween()
+	_score_tween.tween_property(_score_label, "scale", Vector2.ONE, 0.18) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _on_game_over(final_score: int) -> void:

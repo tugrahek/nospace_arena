@@ -36,6 +36,17 @@ func is_exposed() -> bool:
 	return _is_drawing
 
 
+## Ordered world-space points of the active trail (dive cell -> head). Empty when not
+## drawing. Used by near-miss detection (enemy ↔ trail distance).
+func trail_world_points() -> PackedVector2Array:
+	var pts: PackedVector2Array = PackedVector2Array()
+	if _arena == null:
+		return pts
+	for cell in _trail_path:
+		pts.append(_arena.cell_to_world(cell))
+	return pts
+
+
 ## Wires the player to the arena, builds the control scheme, and rests it on the
 ## top-left frame corner. Always starts still regardless of auto_advance scheme.
 func setup(arena: ArenaController) -> void:

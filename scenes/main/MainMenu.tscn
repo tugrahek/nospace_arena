@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 [ext_resource type="Script" path="res://scripts/ui/logo.gd" id="2_logo"]
+[ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="3_juicy"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -78,6 +79,7 @@ custom_minimum_size = Vector2(370, 88)
 layout_mode = 2
 theme_type_variation = &"HeroButton"
 text = "Play"
+script = ExtResource("3_juicy")
 
 [node name="HeroSpacer" type="Control" parent="Center/Buttons"]
 custom_minimum_size = Vector2(0, 8)

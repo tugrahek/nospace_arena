@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fx/floating_score.gd" id="1_float"]
+
+[node name="FloatingScore" type="Label"]
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "+0"
+script = ExtResource("1_float")

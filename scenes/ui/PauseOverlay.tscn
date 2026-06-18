@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://bjfil3mkhtfs0"]
+[gd_scene load_steps=3 format=3 uid="uid://bjfil3mkhtfs0"]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_overlay.gd" id="1_pause"]
+[ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
 
 [node name="PauseOverlay" type="CanvasLayer"]
 layer = 3
@@ -56,15 +57,18 @@ layout_mode = 2
 custom_minimum_size = Vector2(280, 70)
 text = "Resume"
 theme_override_font_sizes/font_size = 28
+script = ExtResource("2_juicy")
 
 [node name="RestartButton" type="Button" parent="Overlay/Box"]
 layout_mode = 2
 custom_minimum_size = Vector2(280, 70)
 text = "Restart"
 theme_override_font_sizes/font_size = 28
+script = ExtResource("2_juicy")
 
 [node name="MenuButton" type="Button" parent="Overlay/Box"]
 layout_mode = 2
 custom_minimum_size = Vector2(280, 70)
 text = "Menu"
 theme_override_font_sizes/font_size = 28
+script = ExtResource("2_juicy")

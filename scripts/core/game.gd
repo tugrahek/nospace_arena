@@ -2,6 +2,8 @@ extends Node2D
 
 const BALANCE: BalanceConfig = preload("res://config/balance.tres")
 const ENEMY_SCENE: PackedScene = preload("res://scenes/gameplay/Enemy.tscn")
+const BURST_SCENE: PackedScene = preload("res://scenes/fx/CaptureBurst.tscn")
+const FLOATING_SCORE_SCENE: PackedScene = preload("res://scenes/fx/FloatingScore.tscn")
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; HUD reserved above
 const ARENA_SALT: int = 1   # daily seed salts (distinct draws)
@@ -17,6 +19,11 @@ const MISSION_COUNT: int = 3
 @onready var _dpad_view: Control = $UILayer/DpadView
 @onready var _hud: HUD = $HUD
 @onready var _pause_overlay: CanvasLayer = $PauseOverlay
+@onready var _camera: CameraShake = $Camera2D
+@onready var _hitstop: HitStop = $HitStop
+@onready var _time_control: TimeControl = $TimeControl
+@onready var _near_miss: NearMiss = $NearMiss
+@onready var _overlay: JuiceOverlay = $JuiceOverlay
 
 var _enemies: Array[Enemy] = []
 var _arena_data: ArenaData
@@ -33,6 +40,9 @@ var _won: bool = false
 
 
 func _ready() -> void:
+	# Safety: a hit-stop (or 16b slow-mo) may have reloaded the scene mid-freeze.
+	# Reset before anything else so a retry never starts time-scaled.
+	Engine.time_scale = 1.0
 	# Daily: arena + character + enemy dirs all come from the shared seed (same for
 	# everyone that day). Free-play: player's own indices (dev C/V cycle).
 	_daily = SeedManager.is_daily
@@ -55,6 +65,11 @@ func _ready() -> void:
 	_on_scheme_changed(int(_player.control_scheme))
 	_spawn_enemies()
 	_living_territory.setup(_arena, _enemies, _player)
+	# Juice wiring: hit-stop delegates to the time arbiter; near-miss watches enemy ↔ trail.
+	_hitstop.time_control = _time_control
+	_near_miss.setup(_player, _enemies)
+	_near_miss.near_miss.connect(_on_near_miss)
+	_near_miss.danger_changed.connect(_overlay.set_danger)  # continuous proximity vignette
 	_apply_character(char_idx)
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
@@ -111,7 +126,9 @@ func _update_missions(score: int) -> void:
 ## Records the player path at the physics rate (daily only) for the ghost.
 ## Pause freezes _physics_process -> no samples while paused -> ghost stays deterministic.
 func _physics_process(_delta: float) -> void:
-	if _daily and _recording != null and GameState.is_playing():
+	# Skip sampling while ANY time effect is active (hit-stop or near-miss slow-mo): time_scale
+	# is reduced there, so samples would cluster and bloat the ghost. Determinism unaffected.
+	if _daily and _recording != null and GameState.is_playing() and not _time_control.is_active():
 		_recording.add_sample(_player.position)
 
 
@@ -185,9 +202,18 @@ func _enemy_cells() -> Array:
 func _on_enemy_hit_trail() -> void:
 	if not GameState.is_playing():
 		return
+	# Life-loss impact: a single screen flash + heavy shake (no strobe).
+	_overlay.flash()
+	_camera.add_trauma(_camera.trauma_life_loss)
 	_arena.fail_trail()
 	_player.respawn()
 	GameState.lose_life()
+
+
+## Near-miss: a brief slow-mo (via the time arbiter). The red vignette is driven separately
+## and continuously by proximity (see _near_miss.danger_changed -> _overlay.set_danger).
+func _on_near_miss() -> void:
+	_time_control.request("nearmiss", _near_miss.slow_scale, _near_miss.slow_duration)
 
 
 func _on_life_lost(_remaining: int) -> void:
@@ -214,9 +240,46 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 	_areas_this_run += 1
 	_last_percent = percent
 	var now: float = Time.get_ticks_msec() / 1000.0
-	GameState.register_capture(cells.size(), now)
+	var earned: int = GameState.register_capture(cells.size(), now)
+	_play_capture_juice(cells, earned)
 	if percent >= _arena_data.target_percent and GameState.is_playing():
 		GameState.win_run()
+
+
+## Capture feedback (visual only — no effect on capture logic or determinism):
+## screen shake, a brief hit-stop, a particle burst and a "+N" popup at the closure point.
+func _play_capture_juice(cells: Array, earned: int) -> void:
+	_camera.add_trauma(_camera.trauma_capture)
+	_hitstop.stop()
+	var point: Vector2 = _capture_centroid(cells)
+	_spawn_burst(point)
+	if earned > 0:
+		_spawn_floating_score(point, earned)
+
+
+## World-space center of the newly captured cells (the closure point), or the player's
+## position when no cells are reported.
+func _capture_centroid(cells: Array) -> Vector2:
+	if cells.is_empty():
+		return _player.position
+	var sum: Vector2 = Vector2.ZERO
+	for c in cells:
+		sum += _arena.cell_to_world(c)
+	return sum / float(cells.size())
+
+
+func _spawn_burst(point: Vector2) -> void:
+	var burst: CPUParticles2D = BURST_SCENE.instantiate()
+	burst.position = point
+	burst.color = _arena.captured_color
+	add_child(burst)
+
+
+func _spawn_floating_score(point: Vector2, value: int) -> void:
+	var popup: Label = FLOATING_SCORE_SCENE.instantiate()
+	popup.position = point
+	add_child(popup)
+	popup.show_value(value, _arena.trail_color)
 
 
 func _on_scheme_changed(id: int) -> void:

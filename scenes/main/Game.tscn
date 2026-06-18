@@ -8,12 +8,29 @@
 [ext_resource type="Script" uid="uid://mwv1q046svec" path="res://scripts/gameplay/living_territory.gd" id="6_living"]
 [ext_resource type="Resource" uid="uid://cjeua2rblhmxr" path="res://config/default_territory.tres" id="7_effect"]
 [ext_resource type="PackedScene" path="res://scenes/ui/PauseOverlay.tscn" id="8_pause"]
+[ext_resource type="Script" path="res://scripts/fx/camera_shake.gd" id="9_shake"]
+[ext_resource type="Script" path="res://scripts/fx/hit_stop.gd" id="10_hitstop"]
+[ext_resource type="Script" path="res://scripts/fx/time_control.gd" id="11_time"]
+[ext_resource type="Script" path="res://scripts/fx/near_miss.gd" id="12_near"]
+[ext_resource type="PackedScene" path="res://scenes/fx/JuiceOverlay.tscn" id="13_overlay"]
 
 [node name="Game" type="Node2D" unique_id=779454124]
 script = ExtResource("1_game")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=446350047]
 position = Vector2(360, 640)
+script = ExtResource("9_shake")
+
+[node name="HitStop" type="Node" parent="."]
+script = ExtResource("10_hitstop")
+
+[node name="TimeControl" type="Node" parent="."]
+script = ExtResource("11_time")
+
+[node name="NearMiss" type="Node" parent="."]
+script = ExtResource("12_near")
+
+[node name="JuiceOverlay" parent="." instance=ExtResource("13_overlay")]
 
 [node name="Arena" parent="." unique_id=415805073 instance=ExtResource("2_arena")]
 
