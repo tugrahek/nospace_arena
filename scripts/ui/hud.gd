@@ -89,12 +89,14 @@ func _on_score_changed(score: int, combo: int) -> void:
 
 func _on_game_over(final_score: int) -> void:
 	_result_title.text = tr("RESULT_LOSE")
+	_result_title.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1.0))  # danger (soft)
 	_result_score.text = tr("HUD_SCORE") + ": " + str(final_score)
 	_result_panel.visible = true
 
 
 func _on_run_won(final_score: int) -> void:
 	_result_title.text = tr("RESULT_WIN")
+	_result_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.55, 1.0))  # success
 	_result_score.text = tr("HUD_SCORE") + ": " + str(final_score)
 	_result_panel.visible = true
 

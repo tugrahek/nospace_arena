@@ -35,8 +35,7 @@ func _refresh() -> void:
 func _add_header(text: String) -> void:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 24)
-	l.add_theme_color_override("font_color", Color(0.2, 0.95, 1, 1))
+	l.theme_type_variation = &"Heading"
 	_list.add_child(l)
 
 
@@ -52,8 +51,7 @@ func _add_item(kind: String, id: StringName, item_name: String, cost: int, is_se
 		if is_selected:
 			var s := Label.new()
 			s.text = tr("STORE_SELECTED")
-			s.add_theme_font_size_override("font_size", 18)
-			s.add_theme_color_override("font_color", Color(0.4, 1, 0.5, 1))
+			s.add_theme_color_override("font_color", Color(0.4, 1, 0.55, 1))  # success/selected
 			row.add_child(s)
 		else:
 			var b := Button.new()

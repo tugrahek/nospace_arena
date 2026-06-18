@@ -8,13 +8,12 @@ const STORE_SCENE: String = "res://scenes/ui/Store.tscn"
 const MISSIONS_SCENE: String = "res://scenes/ui/Missions.tscn"
 const CREDITS_SCENE: String = "res://scenes/ui/Credits.tscn"
 
-@onready var _title: Label = $Title
-@onready var _play_button: Button = $VBox/PlayButton
-@onready var _daily_button: Button = $VBox/DailyButton
-@onready var _store_button: Button = $VBox/StoreButton
-@onready var _missions_button: Button = $VBox/MissionsButton
-@onready var _credits_button: Button = $VBox/CreditsButton
-@onready var _coins: Label = $Coins
+@onready var _play_button: Button = $Center/Buttons/PlayButton
+@onready var _daily_button: Button = $Center/Buttons/DailyButton
+@onready var _store_button: Button = $Center/Buttons/StoreButton
+@onready var _missions_button: Button = $Center/Buttons/MissionsButton
+@onready var _credits_button: Button = $Center/Buttons/CreditsButton
+@onready var _coins: Label = $CoinsPanel/Coins
 @onready var _reward_popup: Control = $RewardPopup
 @onready var _reward_title: Label = $RewardPopup/Box/RewardTitle
 @onready var _reward_body: Label = $RewardPopup/Box/RewardBody
@@ -22,7 +21,7 @@ const CREDITS_SCENE: String = "res://scenes/ui/Credits.tscn"
 
 
 func _ready() -> void:
-	_title.text = tr("GAME_TITLE")
+	# Wordmark ("NoSpace" + "A R E N A") + emblem are set in the scene.
 	_play_button.text = tr("MENU_PLAY")
 	_daily_button.text = tr("MENU_DAILY")
 	_store_button.text = tr("MENU_STORE")
