@@ -10,6 +10,7 @@ const CREDITS_SCENE: String = "res://scenes/ui/Credits.tscn"
 const SETTINGS_SCENE: String = "res://scenes/ui/Settings.tscn"
 
 @onready var _play_button: Button = $Center/Buttons/PlayButton
+@onready var _level_button: Button = $Center/Buttons/LevelButton
 @onready var _daily_button: Button = $Center/Buttons/DailyButton
 @onready var _store_button: Button = $Center/Buttons/StoreButton
 @onready var _missions_button: Button = $Center/Buttons/MissionsButton
@@ -25,11 +26,13 @@ const SETTINGS_SCENE: String = "res://scenes/ui/Settings.tscn"
 func _ready() -> void:
 	# Wordmark ("NoSpace" + "A R E N A") + emblem are set in the scene.
 	_play_button.text = tr("MENU_PLAY")
+	_level_button.text = tr("MENU_LEVEL")
 	_daily_button.text = tr("MENU_DAILY")
 	_store_button.text = tr("MENU_STORE")
 	_missions_button.text = tr("MISSIONS_TITLE")
 	_credits_button.text = tr("MENU_CREDITS")
 	_play_button.pressed.connect(_on_play)
+	_level_button.pressed.connect(_on_level)
 	_daily_button.pressed.connect(_on_daily)
 	_store_button.pressed.connect(_on_store)
 	_missions_button.pressed.connect(_on_missions)
@@ -60,7 +63,13 @@ func _on_claim_reward() -> void:
 
 
 func _on_play() -> void:
-	SeedManager.exit_daily()
+	SeedManager.enter_free()  # single arena, casual
+	get_tree().change_scene_to_file(GAME_SCENE)
+
+
+## Level → Level-Endless for now (escalating stages); Campaign mode arrives in Step 18.1.
+func _on_level() -> void:
+	SeedManager.enter_level_endless()
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 

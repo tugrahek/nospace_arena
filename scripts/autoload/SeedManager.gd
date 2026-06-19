@@ -9,8 +9,13 @@ const EpochDay = preload("res://scripts/meta/epoch_day.gd")
 
 signal daily_seed_ready(seed_value: int)
 
+## Play modes. Stage progression (Step 18) belongs ONLY to LEVEL_ENDLESS; DAILY and FREE are
+## single-arena. `is_daily` stays as a convenience mirror of (mode == DAILY).
+enum Mode { DAILY, FREE, LEVEL_ENDLESS }
+
 var daily_seed: int = 0
 var is_daily: bool = false
+var mode: int = Mode.FREE
 var day_offset: int = 0  # DEV ONLY: preview other days' challenges (0 = real today)
 
 
@@ -41,16 +46,29 @@ func advance_day() -> void:
 
 func enter_daily() -> void:
 	is_daily = true
+	mode = Mode.DAILY
 	daily_seed = compute_today()
 	daily_seed_ready.emit(daily_seed)
 
 
 func exit_daily() -> void:
+	enter_free()
+
+
+## Free play: single arena, player loadout, casual. No ghost/leaderboard.
+func enter_free() -> void:
 	is_daily = false
+	mode = Mode.FREE
+
+
+## Level-Endless: arenas cycle and escalate until death (Step 18). Personal score, no ghost.
+func enter_level_endless() -> void:
+	is_daily = false
+	mode = Mode.LEVEL_ENDLESS
 
 
 func toggle_daily() -> void:
 	if is_daily:
-		exit_daily()
+		enter_free()
 	else:
 		enter_daily()

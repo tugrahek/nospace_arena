@@ -11,6 +11,7 @@ const CHAR_SALT: int = 2
 const LEADERBOARD_PATH: String = "user://leaderboard.json"
 const MISSIONS_PATH: String = "user://missions.json"
 const MISSION_COUNT: int = 3
+const PROGRESSION: ProgressionConfig = preload("res://config/progression.tres")
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -28,6 +29,7 @@ const MISSION_COUNT: int = 3
 var _enemies: Array[Enemy] = []
 var _arena_data: ArenaData
 var _daily: bool = false
+var _mode: int = SeedManager.Mode.FREE
 var _daily_seed: int = 0
 var _leaderboard: Leaderboard = null
 var _recording: GhostTrack = null
@@ -37,6 +39,9 @@ var _mission_date: int = 0
 var _areas_this_run: int = 0
 var _last_percent: float = 0.0
 var _won: bool = false
+var _current_stage: int = 0
+var _stage_target: float = 75.0
+var _advancing: bool = false
 
 
 func _ready() -> void:
@@ -46,12 +51,11 @@ func _ready() -> void:
 	# Daily: arena + character + enemy dirs all come from the shared seed (same for
 	# everyone that day). Free-play: player's own indices (dev C/V cycle).
 	_daily = SeedManager.is_daily
+	_mode = SeedManager.mode
 	_daily_seed = SeedManager.daily_seed
-	# Daily: seed-derived. Free-play: the player's saved loadout (Economy/SaveData).
-	var arena_idx: int = DailySeed.to_index(_daily_seed, ARENA_SALT, ContentCatalog.ARENAS.size()) if _daily else ContentCatalog.arena_index(Economy.selected_arena())
 	var char_idx: int = DailySeed.to_index(_daily_seed, CHAR_SALT, ContentCatalog.CHARACTERS.size()) if _daily else ContentCatalog.character_index(Economy.selected_character())
-	_apply_arena(arena_idx)
-	_player.setup(_arena)
+	# Connect signals ONCE — nodes (arena/player/enemies-root/HUD) persist across stages;
+	# only the arena config + enemy set change per stage.
 	_arena.area_captured.connect(_on_area_captured)
 	_player.control_scheme_changed.connect(_on_scheme_changed)
 	_player.loop_closed.connect(_on_loop_closed)
@@ -62,23 +66,20 @@ func _ready() -> void:
 	_hud.menu_pressed.connect(_on_menu)
 	_pause_overlay.restart_requested.connect(_on_retry)
 	_pause_overlay.menu_requested.connect(_on_menu)
-	_on_scheme_changed(int(_player.control_scheme))
-	_spawn_enemies()
-	_living_territory.setup(_arena, _enemies, _player)
-	# Juice wiring: hit-stop delegates to the time arbiter; near-miss watches enemy ↔ trail.
 	_hitstop.time_control = _time_control
-	_near_miss.setup(_player, _enemies)
 	_near_miss.near_miss.connect(_on_near_miss)
 	_near_miss.danger_changed.connect(_overlay.set_danger)  # continuous proximity vignette
-	_apply_character(char_idx)
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
 	_hud.set_daily(_daily, _daily_seed)
+	_start_stage(0)             # configures arena + player + enemies + living/near-miss refs
+	_apply_character(char_idx)  # character is constant across stages (set after arena exists)
+	_on_scheme_changed(int(_player.control_scheme))
 	_setup_leaderboard_and_ghost()
 	_setup_missions()
 	AudioManager.stop_music()  # in-run is silent (no game-music track); menu music resumes on return
 	if _daily:
-		print("Daily mode: seed=%d arena=%d char=%d" % [_daily_seed, arena_idx, char_idx])
+		print("Daily mode: seed=%d stages=%d" % [_daily_seed, PROGRESSION.daily_stage_count])
 
 
 ## Daily only: load the leaderboard, show today's best, and play its ghost (recorded
@@ -169,23 +170,70 @@ func _apply_character(index: int) -> void:
 	print("Karakter: %s" % tr(ch.display_name_key))
 
 
-func _spawn_enemies() -> void:
+## Builds (or rebuilds) a stage: arena (fresh grid) + player reset + scaled enemies, then
+## re-points the living-territory and near-miss refs. Lives + score (GameState) are untouched
+## — they carry across stages. Capture/seed/grid algorithms are not modified; this only
+## orchestrates which arena/enemies are active.
+func _start_stage(stage: int) -> void:
+	_advancing = false
+	_current_stage = stage
+	var base_arena: int = 0 if _daily else ContentCatalog.arena_index(Economy.selected_arena())
+	var spec: Dictionary = StagePlan.compute(
+		_daily, _daily_seed, base_arena, stage, ContentCatalog.ARENAS.size(),
+		PROGRESSION.speed_ramp_per_stage, PROGRESSION.speed_cap,
+		PROGRESSION.enemy_add_every, PROGRESSION.enemy_cap_bonus,
+		PROGRESSION.target_ramp_per_stage
+	)
+	_apply_arena(int(spec["arena_index"]))
+	_player.setup(_arena)
+	_spawn_stage_enemies(spec)
+	_living_territory.setup(_arena, _enemies, _player)
+	_near_miss.setup(_player, _enemies)
+	_stage_target = minf(_arena_data.target_percent + float(spec["target_bonus"]), PROGRESSION.target_cap)
+	_hud.update_percent(0.0)
+	print("Stage %d: arena=%d target=%.0f%% speed=x%.2f enemies=%d" % [
+		stage + 1, int(spec["arena_index"]), _stage_target, float(spec["speed_scale"]), _enemies.size()])
+
+
+## Spawns the stage's enemies: count = arena composition + seed/stage bonus (capped). Speed is
+## the grid-relative type base × arena modifier × stage speed scale × fitted cell_size. Daily
+## directions derive from the (deterministic) stage seed; free-play uses the index pattern.
+func _spawn_stage_enemies(spec: Dictionary) -> void:
+	for e in _enemies:
+		e.queue_free()
+	_enemies.clear()
+	var types: Array[EnemyType] = _arena_data.enemies
+	if types.is_empty():
+		return
+	var count: int = types.size() + int(spec["enemy_bonus"])
 	var center: Vector2 = _arena.get_rect().get_center()
-	var i: int = 0
-	for type in _arena_data.enemies:
-		# Grid-relative speed: type base (cells/s) × arena modifier × fitted cell_size.
-		var speed_px: float = type.base_speed_cells * _arena_data.speed_mult * _arena.cell_size
+	var stage_seed: int = int(spec["stage_seed"])
+	var speed_scale: float = float(spec["speed_scale"])
+	for i in count:
+		var type: EnemyType = types[i % types.size()]
+		var speed_px: float = type.base_speed_cells * _arena_data.speed_mult * speed_scale * _arena.cell_size
 		var enemy: Enemy = ENEMY_SCENE.instantiate()
 		_enemies_root.add_child(enemy)
 		if _arena_data.theme != null:
 			enemy.color = _arena_data.theme.enemy_color
 		enemy.shape = type.shape
-		var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(_daily_seed, i), speed_px) \
+		var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(stage_seed, i), speed_px) \
 			if _daily else EnemyMotion.start_velocity(i, speed_px)
 		enemy.setup(_arena, center, vel, type.behavior, speed_px)
 		enemy.hit_trail.connect(_on_enemy_hit_trail)
 		_enemies.append(enemy)
-		i += 1
+
+
+## Stage cleared (target reached): advance, or end the run. Daily completes after N stages
+## (win); free-play is endless. Deferred from _on_area_captured so the arena isn't rebuilt
+## inside the capture signal. Lives + score carry over.
+func _advance_stage() -> void:
+	if not GameState.is_playing():
+		return
+	if _daily and _current_stage + 1 >= PROGRESSION.daily_stage_count:
+		GameState.win_run()  # daily gauntlet complete
+		return
+	_start_stage(_current_stage + 1)
 
 
 ## Player closed a loop: capture using the live enemy cells as danger seeds.
@@ -246,8 +294,15 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 	var now: float = Time.get_ticks_msec() / 1000.0
 	var earned: int = GameState.register_capture(cells.size(), now)
 	_play_capture_juice(cells, earned)
-	if percent >= _arena_data.target_percent and GameState.is_playing():
-		GameState.win_run()
+	# Target reached. Level-Endless advances to a harder stage (deferred so the arena isn't
+	# rebuilt mid capture-signal); Daily/Free are single-arena and simply win.
+	if percent >= _stage_target and GameState.is_playing():
+		if _mode == SeedManager.Mode.LEVEL_ENDLESS:
+			if not _advancing:
+				_advancing = true
+				call_deferred("_advance_stage")
+		else:
+			GameState.win_run()
 
 
 ## Capture feedback (visual only — no effect on capture logic or determinism):
