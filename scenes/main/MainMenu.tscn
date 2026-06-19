@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 [ext_resource type="Script" path="res://scripts/ui/logo.gd" id="2_logo"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="3_juicy"]
+[ext_resource type="Script" path="res://scripts/ui/settings_icon.gd" id="4_seticon"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -32,6 +33,21 @@ theme_type_variation = &"Coins"
 horizontal_alignment = 2
 text = "Coins: 0"
 
+[node name="SettingsButton" type="Button" parent="."]
+custom_minimum_size = Vector2(64, 64)
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 84.0
+offset_bottom = 84.0
+flat = true
+script = ExtResource("3_juicy")
+
+[node name="Icon" type="Control" parent="SettingsButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("4_seticon")
+
 [node name="Center" type="VBoxContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,6 +55,7 @@ anchor_bottom = 1.0
 offset_left = 40.0
 offset_right = -40.0
 offset_bottom = -120.0
+mouse_filter = 2
 alignment = 1
 theme_override_constants/separation = 12
 

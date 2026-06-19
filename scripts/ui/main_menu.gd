@@ -7,12 +7,14 @@ const GAME_SCENE: String = "res://scenes/main/Game.tscn"
 const STORE_SCENE: String = "res://scenes/ui/Store.tscn"
 const MISSIONS_SCENE: String = "res://scenes/ui/Missions.tscn"
 const CREDITS_SCENE: String = "res://scenes/ui/Credits.tscn"
+const SETTINGS_SCENE: String = "res://scenes/ui/Settings.tscn"
 
 @onready var _play_button: Button = $Center/Buttons/PlayButton
 @onready var _daily_button: Button = $Center/Buttons/DailyButton
 @onready var _store_button: Button = $Center/Buttons/StoreButton
 @onready var _missions_button: Button = $Center/Buttons/MissionsButton
 @onready var _credits_button: Button = $Center/Buttons/CreditsButton
+@onready var _settings_button: Button = $SettingsButton
 @onready var _coins: Label = $CoinsPanel/Coins
 @onready var _reward_popup: Control = $RewardPopup
 @onready var _reward_title: Label = $RewardPopup/Box/RewardTitle
@@ -32,6 +34,7 @@ func _ready() -> void:
 	_store_button.pressed.connect(_on_store)
 	_missions_button.pressed.connect(_on_missions)
 	_credits_button.pressed.connect(_on_credits)
+	_settings_button.pressed.connect(func() -> void: get_tree().change_scene_to_file(SETTINGS_SCENE))
 	_reward_title.text = tr("DAILY_REWARD_TITLE")
 	_claim_button.text = tr("DAILY_REWARD_CLAIM")
 	_claim_button.pressed.connect(_on_claim_reward)

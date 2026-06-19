@@ -75,27 +75,32 @@ func settings() -> AudioSettings:
 	return _settings
 
 
-func set_master(v: float) -> void:
+# Live-apply setters (no save) — used while dragging a slider. Call commit_settings() once
+# on drag end to persist (debounced write).
+func apply_master(v: float) -> void:
 	_settings.set_master(v)
 	_apply_settings()
-	_save()
 
 
-func set_sfx(v: float) -> void:
+func apply_sfx(v: float) -> void:
 	_settings.set_sfx(v)
 	_apply_settings()
-	_save()
 
 
-func set_music(v: float) -> void:
+func apply_music(v: float) -> void:
 	_settings.set_music(v)
 	_apply_settings()
-	_save()
 
 
+## Mute is a single discrete event -> apply and persist immediately.
 func set_muted(v: bool) -> void:
 	_settings.set_muted(v)
 	_apply_settings()
+	_save()
+
+
+## Persists the current settings (call on slider drag end).
+func commit_settings() -> void:
 	_save()
 
 
