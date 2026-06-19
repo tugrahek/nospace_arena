@@ -26,8 +26,10 @@ func test_unknown_key_is_null() -> void:
 
 func test_menu_music_loops_after_play() -> void:
 	# AudioManager enforces looping when it starts the music (import flag isn't reliable
-	# headless/exported). After play_music, the (shared) menu stream loops forward.
+	# headless/exported). After play_music, the (shared) menu stream loops forward over a
+	# valid range (loop_end == 0 + FORWARD would play silence — the bug this guards).
 	AudioManager.play_music("menu")
 	var stream: AudioStream = load(BANK_PATH).music("menu")
 	assert_true(stream is AudioStreamWAV, "menu music is a WAV")
 	assert_eq(stream.loop_mode, AudioStreamWAV.LOOP_FORWARD, "menu music must loop forward")
+	assert_gt(stream.loop_end, stream.loop_begin, "loop range must be non-empty")

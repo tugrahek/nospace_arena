@@ -51,9 +51,15 @@ func play_music(key: String) -> void:
 	if stream == null:
 		return
 	# Guarantee music loops: the WAV import loop flag isn't reliably applied headless/exported,
-	# so enforce it here (SFX stay one-shot — only music is forced to loop).
-	if stream is AudioStreamWAV and (stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
-		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+	# so enforce it here (SFX stay one-shot — only music is forced to loop). A full-file forward
+	# loop needs a valid loop_end (frames); loop_end == 0 + FORWARD is a zero-length loop that
+	# plays silence, so set the range explicitly from the decoded length.
+	if stream is AudioStreamWAV:
+		var wav: AudioStreamWAV = stream
+		if wav.loop_mode == AudioStreamWAV.LOOP_DISABLED or wav.loop_end <= wav.loop_begin:
+			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+			wav.loop_begin = 0
+			wav.loop_end = int(wav.get_length() * float(wav.mix_rate))
 	if _music.stream == stream and _music.playing:
 		return
 	_music.stream = stream
