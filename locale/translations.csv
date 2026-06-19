@@ -22,6 +22,11 @@ GAME_TITLE,NoSpace: Arena
 MENU_PLAY,Play
 MENU_DAILY,Daily
 MENU_LEVEL,Level
+MENU_FREE,Free
+MODE_SELECT_TITLE,Select Mode
+MODE_DAILY_DESC,Today's challenge
+MODE_FREE_DESC,Casual play
+MODE_LEVEL_DESC,Escalating difficulty
 MENU_STORE,Store
 MENU_CREDITS,Credits
 MENU_LOADOUT,Loadout
