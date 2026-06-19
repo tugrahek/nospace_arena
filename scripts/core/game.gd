@@ -76,6 +76,7 @@ func _ready() -> void:
 	_hud.set_daily(_daily, _daily_seed)
 	_setup_leaderboard_and_ghost()
 	_setup_missions()
+	AudioManager.play_music("game")
 	if _daily:
 		print("Daily mode: seed=%d arena=%d char=%d" % [_daily_seed, arena_idx, char_idx])
 
@@ -205,6 +206,8 @@ func _on_enemy_hit_trail() -> void:
 	# Life-loss impact: a single screen flash + heavy shake (no strobe).
 	_overlay.flash()
 	_camera.add_trauma(_camera.trauma_life_loss)
+	AudioManager.play_sfx("life_loss")
+	AudioManager.haptic_life_loss()
 	_arena.fail_trail()
 	_player.respawn()
 	GameState.lose_life()
@@ -214,6 +217,7 @@ func _on_enemy_hit_trail() -> void:
 ## and continuously by proximity (see _near_miss.danger_changed -> _overlay.set_danger).
 func _on_near_miss() -> void:
 	_time_control.request("nearmiss", _near_miss.slow_scale, _near_miss.slow_duration)
+	AudioManager.play_sfx("near_miss")
 
 
 func _on_life_lost(_remaining: int) -> void:
@@ -251,6 +255,8 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 func _play_capture_juice(cells: Array, earned: int) -> void:
 	_camera.add_trauma(_camera.trauma_capture)
 	_hitstop.stop()
+	AudioManager.play_sfx("capture")
+	AudioManager.haptic_capture()
 	var point: Vector2 = _capture_centroid(cells)
 	_spawn_burst(point)
 	if earned > 0:

@@ -37,6 +37,7 @@ func _ready() -> void:
 	_claim_button.pressed.connect(_on_claim_reward)
 	_refresh()
 	_maybe_show_reward()
+	AudioManager.play_music("menu")  # menu track (silent until 17b assets)
 
 
 ## Shows the login-reward popup if a reward is claimable today (Step 15 polishes it).

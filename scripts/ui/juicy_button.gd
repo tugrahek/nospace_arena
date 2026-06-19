@@ -15,6 +15,7 @@ func _ready() -> void:
 
 
 func _on_down() -> void:
+	AudioManager.play_sfx("ui_tap")  # central UI tap sound (silent until 17b assets)
 	if haptic_ms > 0:
 		Input.vibrate_handheld(haptic_ms)
 	var t: Tween = create_tween()
