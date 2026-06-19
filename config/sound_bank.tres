@@ -1,6 +1,17 @@
-[gd_resource type="Resource" script_class="SoundBank" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="SoundBank" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/meta/sound_bank.gd" id="1_bank"]
+[ext_resource type="AudioStream" uid="uid://dscn8s4cdb436" path="res://assets/audio/sfx/capture.wav" id="2_capture"]
+[ext_resource type="AudioStream" uid="uid://dpl3pwqbo765b" path="res://assets/audio/sfx/life_loss.wav" id="3_life"]
+[ext_resource type="AudioStream" uid="uid://fofqch0djcg1" path="res://assets/audio/sfx/near_miss.wav" id="4_near"]
+[ext_resource type="AudioStream" uid="uid://c6ag3oxnb34vq" path="res://assets/audio/sfx/ui_tap.wav" id="5_tap"]
+[ext_resource type="AudioStream" uid="uid://b0tx4c0fv8v57" path="res://assets/audio/music/menu_music.wav" id="6_menu"]
 
 [resource]
 script = ExtResource("1_bank")
+capture = ExtResource("2_capture")
+life_loss = ExtResource("3_life")
+near_miss = ExtResource("4_near")
+ui_tap = ExtResource("5_tap")
+music_menu = ExtResource("6_menu")
+music_game = null

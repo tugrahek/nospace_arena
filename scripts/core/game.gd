@@ -76,7 +76,7 @@ func _ready() -> void:
 	_hud.set_daily(_daily, _daily_seed)
 	_setup_leaderboard_and_ghost()
 	_setup_missions()
-	AudioManager.play_music("game")
+	AudioManager.stop_music()  # in-run is silent (no game-music track); menu music resumes on return
 	if _daily:
 		print("Daily mode: seed=%d arena=%d char=%d" % [_daily_seed, arena_idx, char_idx])
 

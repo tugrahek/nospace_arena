@@ -14,6 +14,8 @@ attribution will be listed here (and surfaced in the in-game Credits screen):
 |-------|------|--------|---------|--------|
 | DynaPuff | Font (UI/başlık) | Cleo Krause | OFL 1.1 | Google Fonts |
 | Nunito | Font (gövde/sayı) | Vernon Adams et al. | OFL 1.1 | Google Fonts |
+| SFX (capture / ui_tap / life_loss / near_miss) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
+| Menu music (menu_music) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
 
 > NOT: Font .ttf dosyaları + OFL.txt'ler `assets/fonts/` altına eklenecek; sonra ui_theme.tres'e
 > bağlanacak (Title/Heading = DynaPuff, gövde/sayı = Nunito). Şu an varsayılan font etkin.

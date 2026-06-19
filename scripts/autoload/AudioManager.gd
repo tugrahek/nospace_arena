@@ -11,6 +11,7 @@ const SOUND_BANK: SoundBank = preload("res://config/sound_bank.tres")
 @export var sfx_pool_size: int = 3        # concurrent SFX voices (overlapping sounds)
 @export var capture_haptic_ms: int = 12   # light haptic on capture (mobile)
 @export var life_loss_haptic_ms: int = 30 # heavier haptic on life loss
+@export var music_volume_db: float = -6.0 # music sits below SFX (first-pass mix; tune in editor)
 
 var _settings: AudioSettings
 var _sfx_players: Array[AudioStreamPlayer] = []
@@ -27,6 +28,7 @@ func _ready() -> void:
 		_sfx_players.append(p)
 	_music = AudioStreamPlayer.new()
 	_music.bus = "Music"
+	_music.volume_db = music_volume_db  # background level vs SFX (first-pass mix)
 	add_child(_music)
 	_apply_settings()  # apply before anything plays
 
@@ -48,6 +50,10 @@ func play_music(key: String) -> void:
 	var stream: AudioStream = SOUND_BANK.music(key)
 	if stream == null:
 		return
+	# Guarantee music loops: the WAV import loop flag isn't reliably applied headless/exported,
+	# so enforce it here (SFX stay one-shot — only music is forced to loop).
+	if stream is AudioStreamWAV and (stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:
+		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
 	if _music.stream == stream and _music.playing:
 		return
 	_music.stream = stream
