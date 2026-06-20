@@ -29,6 +29,10 @@ MODE_FREE_DESC,Casual play
 MODE_LEVEL_DESC,Escalating difficulty
 MENU_STORE,Store
 MENU_CREDITS,Credits
+MENU_LEADERBOARD,Leaderboard
+LEADERBOARD_TITLE,Leaderboard
+LEADERBOARD_ALLBEST,All-time best: %d
+LEADERBOARD_EMPTY,Play Daily to set a record
 MENU_LOADOUT,Loadout
 MENU_MISSIONS,Today's Missions
 RESULT_MENU,Menu

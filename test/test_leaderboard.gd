@@ -71,6 +71,25 @@ func test_prune_keeps_recent_tracks_only() -> void:
 	assert_eq(lb.best_score(20260615), 10)
 
 
+func test_scores_returns_date_to_score() -> void:
+	var lb := Leaderboard.new()
+	lb.submit(20260616, 100, _track(1))
+	lb.submit(20260617, 50, _track(2))
+	var s := lb.scores()
+	assert_eq(s.size(), 2)
+	assert_eq(int(s[20260616]), 100)
+	assert_eq(int(s[20260617]), 50)
+
+
+func test_best_ever_is_max_or_minus_one() -> void:
+	var lb := Leaderboard.new()
+	assert_eq(lb.best_ever(), -1, "no entries -> -1")
+	lb.submit(20260616, 100, _track(1))
+	lb.submit(20260617, 175, _track(2))
+	lb.submit(20260618, 60, _track(3))
+	assert_eq(lb.best_ever(), 175)
+
+
 func test_dict_round_trip() -> void:
 	var lb := Leaderboard.new()
 	lb.submit(20260616, 120, _track(3))

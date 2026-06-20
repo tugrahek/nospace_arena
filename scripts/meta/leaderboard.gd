@@ -27,6 +27,22 @@ func best_track(date: int) -> GhostTrackScript:
 	return _entries[date]["track"] if _entries.has(date) else null
 
 
+## All recorded best scores as date(int) -> score(int) (no tracks). For the leaderboard view.
+func scores() -> Dictionary:
+	var out: Dictionary = {}
+	for date in _entries:
+		out[date] = int(_entries[date]["score"])
+	return out
+
+
+## Highest score across all days, or -1 if no entries. ("All-time best".)
+func best_ever() -> int:
+	var best: int = -1
+	for date in _entries:
+		best = maxi(best, int(_entries[date]["score"]))
+	return best
+
+
 ## Keeps full ghost tracks only for the `keep_recent` highest dates; older entries keep
 ## their score but drop the track (empty). Bounds storage growth.
 func prune_tracks(keep_recent: int) -> void:
