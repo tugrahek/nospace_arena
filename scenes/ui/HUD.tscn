@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
+[ext_resource type="Script" path="res://scripts/ui/hearts_hud.gd" id="3_hearts"]
 
 [node name="HUD" type="CanvasLayer"]
 layer = 2
@@ -15,9 +16,11 @@ offset_right = -16.0
 offset_bottom = 56.0
 theme_override_constants/separation = 16
 
-[node name="LivesLabel" type="Label" parent="TopBar"]
-text = "Can: 3"
-theme_override_font_sizes/font_size = 20
+[node name="Hearts" type="Control" parent="TopBar"]
+custom_minimum_size = Vector2(110, 32)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_hearts")
 
 [node name="LeftSpacer" type="Control" parent="TopBar"]
 layout_mode = 2
@@ -50,6 +53,21 @@ offset_bottom = 96.0
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.2, 0.95, 1.0, 1.0)
+
+[node name="StageBanner" type="Label" parent="."]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -70.0
+offset_right = 300.0
+offset_bottom = 70.0
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_type_variation = &"Title"
+text = "Stage 1"
 
 [node name="DailyLabel" type="Label" parent="."]
 visible = false

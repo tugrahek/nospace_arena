@@ -9,6 +9,7 @@ extends Resource
 @export var life_loss: AudioStream
 @export var near_miss: AudioStream
 @export var ui_tap: AudioStream
+@export var stage_clear: AudioStream
 @export var music_menu: AudioStream
 @export var music_game: AudioStream
 
@@ -24,6 +25,8 @@ func sfx(key: String) -> AudioStream:
 			return near_miss
 		"ui_tap":
 			return ui_tap
+		"stage_clear":
+			return stage_clear
 	return null
 
 

@@ -12,7 +12,8 @@ signal menu_pressed()
 
 var _score_tween: Tween = null
 
-@onready var _lives_label: Label = $TopBar/LivesLabel
+@onready var _hearts: HeartsHud = $TopBar/Hearts
+@onready var _stage_banner: Label = $StageBanner
 @onready var _score_label: Label = $TopBar/ScoreLabel
 @onready var _percent_label: Label = $TopBar/PercentLabel
 @onready var _combo_label: Label = $ComboLabel
@@ -63,15 +64,31 @@ func set_best(score: int) -> void:
 
 ## Called by game.gd after start_run to seed the initial display.
 func setup(lives: int) -> void:
-	_lives_label.text = tr("HUD_LIVES") + ": " + str(lives)
+	_hearts.set_max(lives)
 	_score_label.text = tr("HUD_SCORE") + ": 0"
 	_percent_label.text = "0%"
 	_combo_label.visible = false
 	_result_panel.visible = false
+	_stage_banner.visible = false
 
 
 func update_percent(percent: float) -> void:
 	_percent_label.text = "%.0f%%" % percent
+
+
+## Stage-clear flourish (Level-Endless): "Stage N" banner scales in, holds, then fades out.
+func show_stage_banner(stage_number: int) -> void:
+	_stage_banner.text = tr("HUD_STAGE") % stage_number
+	_stage_banner.visible = true
+	_stage_banner.pivot_offset = _stage_banner.size * 0.5
+	_stage_banner.scale = Vector2(0.6, 0.6)
+	_stage_banner.modulate.a = 0.0
+	var t: Tween = create_tween()
+	t.tween_property(_stage_banner, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.parallel().tween_property(_stage_banner, "modulate:a", 1.0, 0.18)
+	t.tween_interval(0.45)
+	t.tween_property(_stage_banner, "modulate:a", 0.0, 0.3)
+	t.tween_callback(func() -> void: _stage_banner.visible = false)
 
 
 func _on_game_started() -> void:
@@ -80,7 +97,7 @@ func _on_game_started() -> void:
 
 
 func _on_life_lost(remaining: int) -> void:
-	_lives_label.text = tr("HUD_LIVES") + ": " + str(remaining)
+	_hearts.set_current(remaining)  # lost heart fades to a dim slot (+ punch)
 
 
 func _on_score_changed(score: int, combo: int) -> void:

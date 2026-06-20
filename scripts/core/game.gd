@@ -233,7 +233,22 @@ func _advance_stage() -> void:
 	if _daily and _current_stage + 1 >= PROGRESSION.daily_stage_count:
 		GameState.win_run()  # daily gauntlet complete
 		return
-	_start_stage(_current_stage + 1)
+	var next: int = _current_stage + 1
+	_stage_flourish(next + 1)  # display is 1-based
+	_start_stage(next)
+
+
+## Stage-clear celebration (Level-Endless): "Stage N" banner + an extra particle burst, a
+## stronger camera punch, and the stage-clear SFX. Purely visual (no seed/capture effect).
+func _stage_flourish(display_number: int) -> void:
+	_hud.show_stage_banner(display_number)
+	AudioManager.play_sfx("stage_clear")
+	_camera.add_trauma(_camera.trauma_capture * 1.4)
+	var burst: CPUParticles2D = BURST_SCENE.instantiate()
+	burst.position = _arena.get_rect().get_center()
+	burst.color = _arena.trail_color
+	burst.amount = burst.amount * 2
+	add_child(burst)
 
 
 ## Player closed a loop: capture using the live enemy cells as danger seeds.
