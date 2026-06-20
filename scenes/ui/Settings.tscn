@@ -1,7 +1,9 @@
-[gd_scene format=3 uid="uid://b7st1n0gsetg0"]
+[gd_scene load_steps=4 format=3 uid="uid://b7st1n0gsetg0"]
 
 [ext_resource type="Script" path="res://scripts/ui/settings_panel.gd" id="1_settings"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
+
+[sub_resource type="ButtonGroup" id="ctrl_group"]
 
 [node name="Settings" type="Control"]
 layout_mode = 3
@@ -88,6 +90,46 @@ value = 1.0
 custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "Mute"
+
+[node name="ControlsRow" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="Center/ControlsRow"]
+layout_mode = 2
+theme_type_variation = &"Heading"
+text = "Controls"
+
+[node name="Segment" type="HBoxContainer" parent="Center/ControlsRow"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SwipeButton" type="Button" parent="Center/ControlsRow/Segment"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("ctrl_group")
+theme_type_variation = &"Secondary"
+text = "Swipe"
+
+[node name="TapButton" type="Button" parent="Center/ControlsRow/Segment"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("ctrl_group")
+theme_type_variation = &"Secondary"
+text = "Tap"
+
+[node name="DpadButton" type="Button" parent="Center/ControlsRow/Segment"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("ctrl_group")
+theme_type_variation = &"Secondary"
+text = "D-Pad"
 
 [node name="BackButton" type="Button" parent="Center"]
 custom_minimum_size = Vector2(300, 64)

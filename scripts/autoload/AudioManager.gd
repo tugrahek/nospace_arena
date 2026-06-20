@@ -116,6 +116,18 @@ func commit_settings() -> void:
 	_save()
 
 
+## Emitted when the control scheme changes — the game listens to apply it live (mid-run too).
+signal control_scheme_changed(id: int)
+
+
+## Sets + persists the input control scheme (Settings UI). Applied at game start and, via the
+## signal, live while a run is active (Pause → Settings).
+func set_control_scheme(id: int) -> void:
+	_settings.set_control_scheme(id)
+	_save()
+	control_scheme_changed.emit(_settings.control_scheme)
+
+
 func _apply_settings() -> void:
 	_set_bus_volume("Master", _settings.master)
 	_set_bus_volume("SFX", _settings.sfx)

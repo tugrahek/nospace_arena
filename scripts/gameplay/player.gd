@@ -80,6 +80,11 @@ func respawn() -> void:
 	position = _start_world
 
 
+## Public live scheme switch (Settings / Pause→Settings). Re-applies the active scheme.
+func set_scheme(id: int) -> void:
+	_apply_scheme(id)
+
+
 func _apply_scheme(id: SchemeId) -> void:
 	control_scheme = id
 	_scheme = _make_scheme(id)

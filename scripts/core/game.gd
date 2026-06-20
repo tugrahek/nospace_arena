@@ -72,6 +72,9 @@ func _ready() -> void:
 	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
 	_hud.setup(BALANCE.start_lives)
 	_hud.set_daily(_daily, _daily_seed)
+	_player.control_scheme = AudioManager.settings().control_scheme  # persisted choice (Settings)
+	# Live-apply scheme changes from Pause → Settings (mid-run); _on_scheme_changed updates d-pad.
+	AudioManager.control_scheme_changed.connect(func(id: int) -> void: _player.set_scheme(id))
 	_start_stage(0)             # configures arena + player + enemies + living/near-miss refs
 	_apply_character(char_idx)  # character is constant across stages (set after arena exists)
 	_on_scheme_changed(int(_player.control_scheme))

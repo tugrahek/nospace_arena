@@ -53,3 +53,16 @@ func test_from_dict_defaults_on_missing_keys() -> void:
 	assert_eq(s.sfx, 1.0)
 	assert_eq(s.music, 1.0)
 	assert_false(s.muted)
+	assert_eq(s.control_scheme, 1)  # default swipe
+
+
+func test_control_scheme_clamp_and_round_trip() -> void:
+	var s := AudioSettings.new()
+	s.set_control_scheme(2)
+	assert_eq(s.control_scheme, 2)
+	s.set_control_scheme(99)
+	assert_eq(s.control_scheme, AudioSettings.SCHEME_MAX)
+	s.set_control_scheme(-5)
+	assert_eq(s.control_scheme, AudioSettings.SCHEME_MIN)
+	s.set_control_scheme(0)
+	assert_eq(AudioSettings.from_dict(s.to_dict()).control_scheme, 0)
