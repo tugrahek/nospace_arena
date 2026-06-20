@@ -7,6 +7,7 @@
 script = ExtResource("1_char")
 id = &"halt"
 display_name_key = "CHAR_HALT"
+description_key = "CHAR_HALT_DESC"
 accent_color = Color(0.15, 0.9, 0.8, 0.55)
 effect = ExtResource("2_effect")
 unlock_cost = 400

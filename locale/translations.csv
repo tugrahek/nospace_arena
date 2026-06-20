@@ -62,3 +62,24 @@ SETTINGS_CONTROLS,Controls
 CONTROL_SWIPE,Swipe
 CONTROL_TAP,Tap
 CONTROL_DPAD,D-Pad
+HOWTO_TITLE,How to Play
+HOWTO_NEXT,Next
+HOWTO_PREV,Back
+HOWTO_DONE,Got it
+HOWTO_GOAL_TITLE,Capture the arena
+HOWTO_GOAL_BODY,Leave the safe border, draw into the void, and close a loop to claim that region. Reach the target % to win.
+HOWTO_CONTROLS_TITLE,Move
+HOWTO_CONTROLS_SWIPE,Swipe a direction to steer.
+HOWTO_CONTROLS_TAP,Tap left or right to turn.
+HOWTO_CONTROLS_DPAD,Use the on-screen d-pad to steer.
+HOWTO_CONTROLS_HINT,Change controls in Settings
+HOWTO_ENEMIES_TITLE,Watch the enemies
+HOWTO_ENEMIES_BODY,Bouncer drifts and ricochets off walls. Stalker hunts you while you're drawing in the open.
+HOWTO_LIVES_TITLE,Stay alive
+HOWTO_LIVES_BODY,You have 3 lives. Lose one if an enemy touches your active trail. Captured ground is safe.
+CHAR_PULSE_DESC,Pushes enemies away from your territory
+CHAR_DRAG_DESC,Slows enemies near your territory
+CHAR_HALT_DESC,Freezes enemies that get too close
+ARENA_VOID_DESC,Balanced starter — one drifting bouncer.
+ARENA_EMBER_DESC,Tall and tight — two bouncers, kinder target.
+ARENA_FROST_DESC,Wide and open — one relentless stalker.

@@ -86,6 +86,18 @@ func set_selected_arena(id: StringName) -> void:
 	_flush()
 
 
+## Whether the how-to-play has been shown once (first launch).
+func tutorial_seen() -> bool:
+	return _data.tutorial_seen
+
+
+func mark_tutorial_seen() -> void:
+	if _data.tutorial_seen:
+		return
+	_data.tutorial_seen = true
+	_flush()
+
+
 ## { claimable, reward, new_streak } for today's login reward (for the menu popup).
 func login_reward_status() -> Dictionary:
 	return LoginStreak.evaluate(SeedManager.today_epoch(), _data.last_claim_epoch_day, _data.streak_day, LOGIN_REWARDS)

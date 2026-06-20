@@ -7,4 +7,5 @@
 script = ExtResource("1_char")
 id = &"pulse"
 display_name_key = "CHAR_PULSE"
+description_key = "CHAR_PULSE_DESC"
 effect = ExtResource("2_effect")

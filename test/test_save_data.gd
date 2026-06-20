@@ -100,3 +100,11 @@ func test_round_trip_preserves_streak() -> void:
 	var restored := SaveData.from_dict(d.to_dict())
 	assert_eq(restored.last_claim_epoch_day, 20567)
 	assert_eq(restored.streak_day, 4)
+
+
+func test_tutorial_seen_round_trip() -> void:
+	var d := SaveData.new()
+	assert_false(d.tutorial_seen, "default unseen")
+	d.tutorial_seen = true
+	assert_true(SaveData.from_dict(d.to_dict()).tutorial_seen)
+	assert_false(SaveData.from_dict({}).tutorial_seen, "missing key -> false")

@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/ui/logo.gd" id="2_logo"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="3_juicy"]
 [ext_resource type="Script" path="res://scripts/ui/settings_icon.gd" id="4_seticon"]
+[ext_resource type="Script" path="res://scripts/ui/how_to_icon.gd" id="5_helpicon"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -47,6 +48,21 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("4_seticon")
+
+[node name="HelpButton" type="Button" parent="."]
+custom_minimum_size = Vector2(64, 64)
+offset_left = 94.0
+offset_top = 20.0
+offset_right = 158.0
+offset_bottom = 84.0
+flat = true
+script = ExtResource("3_juicy")
+
+[node name="Icon" type="Control" parent="HelpButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("5_helpicon")
 
 [node name="Center" type="VBoxContainer" parent="."]
 anchors_preset = 15

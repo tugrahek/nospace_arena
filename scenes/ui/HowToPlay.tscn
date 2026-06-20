@@ -1,0 +1,225 @@
+[gd_scene load_steps=8 format=3 uid="uid://c0howto0play0a"]
+
+[ext_resource type="Script" path="res://scripts/ui/how_to_play.gd" id="1_howto"]
+[ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
+[ext_resource type="Script" path="res://scripts/ui/logo.gd" id="3_logo"]
+[ext_resource type="Script" path="res://scripts/ui/hearts_hud.gd" id="4_hearts"]
+[ext_resource type="Script" path="res://scripts/ui/control_glyph.gd" id="5_glyph"]
+[ext_resource type="Script" path="res://scripts/ui/enemy_glyphs.gd" id="6_enemy"]
+[ext_resource type="Script" path="res://scripts/ui/close_icon.gd" id="7_close"]
+
+[node name="HowToPlay" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_howto")
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.12, 0.1, 0.22, 1)
+mouse_filter = 2
+
+[node name="CloseButton" type="Button" parent="."]
+custom_minimum_size = Vector2(64, 64)
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -84.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 84.0
+flat = true
+script = ExtResource("2_juicy")
+
+[node name="Icon" type="Control" parent="CloseButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("7_close")
+
+[node name="Center" type="VBoxContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 50.0
+offset_top = 70.0
+offset_right = -50.0
+offset_bottom = -50.0
+alignment = 1
+theme_override_constants/separation = 22
+
+[node name="ScreenTitle" type="Label" parent="Center"]
+layout_mode = 2
+theme_type_variation = &"Title"
+horizontal_alignment = 1
+text = "How to Play"
+
+[node name="GoalPage" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Center/GoalPage"]
+layout_mode = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+text = "Capture the arena"
+
+[node name="Diagram" type="Control" parent="Center/GoalPage"]
+custom_minimum_size = Vector2(160, 160)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+script = ExtResource("3_logo")
+
+[node name="Body" type="Label" parent="Center/GoalPage"]
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+text = "Goal"
+
+[node name="ControlsPage" type="VBoxContainer" parent="Center"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Center/ControlsPage"]
+layout_mode = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+text = "Move"
+
+[node name="SwipeRow" type="HBoxContainer" parent="Center/ControlsPage"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Glyph" type="Control" parent="Center/ControlsPage/SwipeRow"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("5_glyph")
+kind = 0
+
+[node name="Label" type="Label" parent="Center/ControlsPage/SwipeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+autowrap_mode = 3
+text = "Swipe"
+
+[node name="TapRow" type="HBoxContainer" parent="Center/ControlsPage"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Glyph" type="Control" parent="Center/ControlsPage/TapRow"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("5_glyph")
+kind = 1
+
+[node name="Label" type="Label" parent="Center/ControlsPage/TapRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+autowrap_mode = 3
+text = "Tap"
+
+[node name="DpadRow" type="HBoxContainer" parent="Center/ControlsPage"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Glyph" type="Control" parent="Center/ControlsPage/DpadRow"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("5_glyph")
+kind = 2
+
+[node name="Label" type="Label" parent="Center/ControlsPage/DpadRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+autowrap_mode = 3
+text = "D-Pad"
+
+[node name="Hint" type="Label" parent="Center/ControlsPage"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+horizontal_alignment = 1
+text = "Change controls in Settings"
+
+[node name="EnemiesPage" type="VBoxContainer" parent="Center"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Center/EnemiesPage"]
+layout_mode = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+text = "Watch the enemies"
+
+[node name="Glyphs" type="Control" parent="Center/EnemiesPage"]
+custom_minimum_size = Vector2(220, 90)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+script = ExtResource("6_enemy")
+
+[node name="Body" type="Label" parent="Center/EnemiesPage"]
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+text = "Enemies"
+
+[node name="LivesPage" type="VBoxContainer" parent="Center"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Center/LivesPage"]
+layout_mode = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+text = "Stay alive"
+
+[node name="Hearts" type="Control" parent="Center/LivesPage"]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+script = ExtResource("4_hearts")
+
+[node name="Body" type="Label" parent="Center/LivesPage"]
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+text = "Lives"
+
+[node name="Dots" type="HBoxContainer" parent="Center"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 14
+
+[node name="Nav" type="HBoxContainer" parent="Center"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 24
+
+[node name="PrevButton" type="Button" parent="Center/Nav"]
+custom_minimum_size = Vector2(170, 64)
+layout_mode = 2
+theme_type_variation = &"Secondary"
+text = "Back"
+script = ExtResource("2_juicy")
+
+[node name="NextButton" type="Button" parent="Center/Nav"]
+custom_minimum_size = Vector2(170, 64)
+layout_mode = 2
+theme_type_variation = &"HeroButton"
+text = "Next"
+script = ExtResource("2_juicy")

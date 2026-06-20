@@ -10,6 +10,7 @@ extends Resource
 
 @export var id: StringName
 @export var display_name_key: String
+@export var description_key: String  # locale key (one-line arena description)
 @export var cols: int = 64  # logical grid incl. the 1-cell frame ring
 @export var rows: int = 110
 @export var theme: ThemeData

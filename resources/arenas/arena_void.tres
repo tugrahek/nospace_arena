@@ -8,6 +8,7 @@
 script = ExtResource("1_arena")
 id = &"void"
 display_name_key = "ARENA_VOID"
+description_key = "ARENA_VOID_DESC"
 cols = 64
 rows = 110
 theme = ExtResource("2_theme")
