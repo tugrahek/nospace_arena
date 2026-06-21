@@ -4,3 +4,6 @@
 
 [resource]
 script = ExtResource("1_bal")
+exposed_points_per_sec = 10.0
+exposed_cap_sec = 10.0
+life_loss_penalty = 400

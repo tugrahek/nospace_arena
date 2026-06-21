@@ -83,3 +83,19 @@ func test_register_capture_noop_when_not_playing() -> void:
 	var earned: int = _gs.register_capture(10, 0.0)
 	assert_eq(earned, 0)
 	assert_eq(_gs.get_score(), 0)
+
+
+func test_capture_includes_exposed_bonus() -> void:
+	_gs.start_run(3, 10, 2.0, 10.0, 10.0, 400)
+	# 1 cell * 10 * x1 = 10 + floor(3 * 10) = 30 -> 40
+	assert_eq(_gs.register_capture(1, 0.0, 3.0), 40)
+	assert_eq(_gs.get_score(), 40)
+
+
+func test_lose_life_applies_penalty() -> void:
+	_gs.start_run(3, 10, 2.0, 0.0, 0.0, 400)
+	_gs.register_capture(100, 0.0)  # 1000
+	watch_signals(_gs)
+	_gs.lose_life()
+	assert_eq(_gs.get_score(), 600, "penalty 400 applied")
+	assert_signal_emitted(_gs, "score_changed")

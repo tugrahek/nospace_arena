@@ -20,20 +20,24 @@ var _scorer: ScoreKeeperScript = null
 
 
 ## Starts a new run. Resets lives, score, and combo. Passes balance knobs to scorer.
-func start_run(start_lives: int, base_points: int = 10, combo_window: float = 2.0) -> void:
+func start_run(start_lives: int, base_points: int = 10, combo_window: float = 2.0,
+		exposed_points_per_sec: float = 0.0, exposed_cap_sec: float = 0.0, life_loss_penalty: int = 0) -> void:
 	lives = maxi(start_lives, 0)
 	status = Status.PLAYING
 	_scorer = ScoreKeeperScript.new()
 	_scorer.base_points = base_points
 	_scorer.combo_window = combo_window
+	_scorer.exposed_points_per_sec = exposed_points_per_sec
+	_scorer.exposed_cap_sec = exposed_cap_sec
+	_scorer.life_loss_penalty = life_loss_penalty
 	game_started.emit()
 
 
-## Records a capture. No-op unless PLAYING. Emits score_changed. Returns earned points.
-func register_capture(cell_count: int, now: float) -> int:
+## Records a capture (+ exposed-time risk bonus). No-op unless PLAYING. Emits score_changed.
+func register_capture(cell_count: int, now: float, exposed_seconds: float = 0.0) -> int:
 	if status != Status.PLAYING:
 		return 0
-	var earned: int = _scorer.register_capture(cell_count, now)
+	var earned: int = _scorer.register_capture(cell_count, now, exposed_seconds)
 	score_changed.emit(_scorer.score, _scorer.combo)
 	return earned
 
@@ -52,6 +56,9 @@ func lose_life() -> int:
 	if status != Status.PLAYING:
 		return lives
 	lives = maxi(lives - 1, 0)
+	if _scorer != null:
+		_scorer.apply_life_penalty()
+		score_changed.emit(_scorer.score, _scorer.combo)
 	life_lost.emit(lives)
 	if lives == 0:
 		status = Status.GAME_OVER

@@ -8,3 +8,6 @@ extends Resource
 @export var start_lives: int = 3
 @export var base_points: int = 10
 @export var combo_window: float = 2.0
+@export var exposed_points_per_sec: float = 10.0  # score/sec while drawing in the open (risk)
+@export var exposed_cap_sec: float = 10.0          # max exposed seconds counted per capture
+@export var life_loss_penalty: int = 400           # score lost per life (floored at 0)

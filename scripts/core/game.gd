@@ -42,6 +42,7 @@ var _won: bool = false
 var _current_stage: int = 0
 var _stage_target: float = 75.0
 var _advancing: bool = false
+var _exposed_time: float = 0.0  # seconds spent drawing in the open since last capture/fail
 
 
 func _ready() -> void:
@@ -69,7 +70,8 @@ func _ready() -> void:
 	_hitstop.time_control = _time_control
 	_near_miss.near_miss.connect(_on_near_miss)
 	_near_miss.danger_changed.connect(_overlay.set_danger)  # continuous proximity vignette
-	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window)
+	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window,
+		BALANCE.exposed_points_per_sec, BALANCE.exposed_cap_sec, BALANCE.life_loss_penalty)
 	_hud.setup(BALANCE.start_lives)
 	_hud.set_daily(_daily, _daily_seed)
 	_player.control_scheme = AudioManager.settings().control_scheme  # persisted choice (Settings)
@@ -130,7 +132,10 @@ func _update_missions(score: int) -> void:
 
 ## Records the player path at the physics rate (daily only) for the ghost.
 ## Pause freezes _physics_process -> no samples while paused -> ghost stays deterministic.
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	# Risk reward: accrue exposed time only while drawing in the open (safe/wall == not exposed -> 0).
+	if GameState.is_playing() and _player.is_exposed():
+		_exposed_time += delta
 	# Skip sampling while ANY time effect is active (hit-stop or near-miss slow-mo): time_scale
 	# is reduced there, so samples would cluster and bloat the ghost. Determinism unaffected.
 	if _daily and _recording != null and GameState.is_playing() and not _time_control.is_active():
@@ -274,6 +279,7 @@ func _on_enemy_hit_trail() -> void:
 	_camera.add_trauma(_camera.trauma_life_loss)
 	AudioManager.play_sfx("life_loss")
 	AudioManager.haptic_life_loss()
+	_exposed_time = 0.0  # risky time is forfeit on a failed trail
 	_arena.fail_trail()
 	_player.respawn()
 	GameState.lose_life()
@@ -310,7 +316,8 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 	_areas_this_run += 1
 	_last_percent = percent
 	var now: float = Time.get_ticks_msec() / 1000.0
-	var earned: int = GameState.register_capture(cells.size(), now)
+	var earned: int = GameState.register_capture(cells.size(), now, _exposed_time)
+	_exposed_time = 0.0  # consumed by this capture
 	_play_capture_juice(cells, earned)
 	# Target reached. Level-Endless advances to a harder stage (deferred so the arena isn't
 	# rebuilt mid capture-signal); Daily/Free are single-arena and simply win.
