@@ -162,7 +162,7 @@ theme_override_font_sizes/font_size = 32
 layout_mode = 2
 custom_minimum_size = Vector2(200, 60)
 size_flags_horizontal = 4
-text = "RETRY"
+text = "Retry"
 theme_override_font_sizes/font_size = 28
 script = ExtResource("2_juicy")
 
@@ -170,6 +170,6 @@ script = ExtResource("2_juicy")
 layout_mode = 2
 custom_minimum_size = Vector2(200, 56)
 size_flags_horizontal = 4
-text = "MENU"
+text = "Menu"
 theme_override_font_sizes/font_size = 24
 script = ExtResource("2_juicy")
