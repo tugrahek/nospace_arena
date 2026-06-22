@@ -53,3 +53,25 @@ static func even_spread(index: int, total: int) -> float:
 	if total <= 1:
 		return 0.0
 	return float(index) / float(total - 1) * 2.0 - 1.0
+
+
+## 90° rotations of a cardinal grid direction (screen space, y-down).
+static func turn_right(dir: Vector2i) -> Vector2i:
+	return Vector2i(-dir.y, dir.x)
+
+
+static func turn_left(dir: Vector2i) -> Vector2i:
+	return Vector2i(dir.y, -dir.x)
+
+
+## Right-hand wall-follow next heading (Sparx): keep the wall (CAPTURED) on the right by
+## preferring right -> forward -> left -> back, taking the first OPEN direction. `free_*` is
+## true when the cell that way is walkable (not a wall). Pure / deterministic -> ghost-safe.
+static func wall_follow_turn(heading: Vector2i, free_right: bool, free_front: bool, free_left: bool) -> Vector2i:
+	if free_right:
+		return turn_right(heading)
+	if free_front:
+		return heading
+	if free_left:
+		return turn_left(heading)
+	return -heading

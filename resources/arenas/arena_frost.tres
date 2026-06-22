@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="ArenaData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="ArenaData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/meta/arena_data.gd" id="1_arena"]
 [ext_resource type="Resource" path="res://resources/themes/theme_frost.tres" id="2_theme"]
 [ext_resource type="Resource" path="res://resources/enemies/type_chaser.tres" id="3_chaser"]
+[ext_resource type="Resource" path="res://resources/enemies/type_sparx.tres" id="4_sparx"]
 
 [resource]
 script = ExtResource("1_arena")
@@ -12,7 +13,7 @@ description_key = "ARENA_FROST_DESC"
 cols = 80
 rows = 96
 theme = ExtResource("2_theme")
-enemies = Array[Resource]([ExtResource("3_chaser")])
+enemies = Array[Resource]([ExtResource("3_chaser"), ExtResource("4_sparx")])
 speed_mult = 1.0
 target_percent = 80.0
 unlock_cost = 700

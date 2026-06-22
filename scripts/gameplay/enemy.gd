@@ -8,7 +8,7 @@ extends Node2D
 
 signal hit_trail()
 
-enum Shape { CIRCLE, TRIANGLE }
+enum Shape { CIRCLE, TRIANGLE, SQUARE }
 
 @export var radius: float = 9.0
 @export var color: Color = Color(1.0, 0.25, 0.2, 1.0)
@@ -22,6 +22,14 @@ var _arena: ArenaController
 var _behavior: EnemyBehavior = null
 var _base_speed_px: float = 0.0
 var _variation: float = 0.0  # per-enemy [-1,1] offset so same-type enemies don't overlap
+
+# Edge-follow (Sparx) movement state — grid wall-follower along the captured perimeter.
+var _edge_follow: bool = false
+var _grid_cell: Vector2i = Vector2i.ZERO
+var _heading: Vector2i = Vector2i.DOWN
+var _step_from: Vector2 = Vector2.ZERO
+var _step_to: Vector2 = Vector2.ZERO
+var _step_timer: float = 0.0
 var _velocity: Vector2 = Vector2.ZERO
 var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
 var _active_effect: TerritoryEffect = null  # set each frame by LivingTerritory
@@ -33,13 +41,19 @@ var _steered: bool = false  # TEMP: debug tint while steered/slowed (Step 15 jui
 var _frozen: bool = false  # TEMP: distinct tint while contact-frozen
 
 
-func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavior: EnemyBehavior, base_speed_px: float, variation: float = 0.0) -> void:
+func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavior: EnemyBehavior, base_speed_px: float, variation: float = 0.0, edge_follow: bool = false, start_cell: Vector2i = Vector2i.ZERO, heading: Vector2i = Vector2i.DOWN) -> void:
 	_arena = arena
 	position = start_pos
 	_velocity = velocity
 	_behavior = behavior
 	_base_speed_px = base_speed_px
 	_variation = variation
+	_edge_follow = edge_follow
+	_grid_cell = start_cell
+	_heading = heading
+	_step_from = start_pos
+	_step_to = start_pos
+	_step_timer = 0.0
 	_speed_scale = 1.0
 	_active_effect = null
 	_freeze_timer = 0.0
@@ -78,6 +92,9 @@ func apply_territory(effect: TerritoryEffect, arena: ArenaController, base_veloc
 func _physics_process(delta: float) -> void:
 	if _arena == null or not GameState.is_playing():
 		return
+	if _edge_follow:
+		_edge_process(delta)
+		return
 	# Contact freeze (Stasis): hold still while the timer runs, then start cooldown.
 	if _freeze_timer > 0.0:
 		_freeze_timer -= delta
@@ -92,6 +109,73 @@ func _physics_process(delta: float) -> void:
 	if _recovery_timer > 0.0:
 		_recovery_timer -= delta
 	_move(delta)
+
+
+## Sparx movement: steps cell-to-cell along the captured perimeter (right-hand wall-follow),
+## interpolating position between cell centers. Lethal on stepping into a TRAIL cell. Never
+## stalls (wall-follow always picks an open cell, reversing if boxed). Effects don't steer it.
+func _edge_process(delta: float) -> void:
+	if _arena.cell_state(_grid_cell) == CaptureGrid.Cell.CAPTURED:
+		_reproject()  # engulfed by a fresh capture -> re-seek the nearest perimeter cell
+	var interval: float = maxf(_arena.cell_size / maxf(_base_speed_px, 0.001), 0.001)
+	_step_timer += delta
+	while _step_timer >= interval:
+		_step_timer -= interval
+		_grid_cell = _arena.world_to_cell(_step_to)  # arrived at the previous target
+		_heading = _next_edge_heading()
+		var next_cell: Vector2i = _grid_cell + _heading
+		if _arena.cell_state(next_cell) == CaptureGrid.Cell.TRAIL:
+			hit_trail.emit()
+			return
+		_step_from = _arena.cell_to_world(_grid_cell)
+		_step_to = _arena.cell_to_world(next_cell)
+	position = _step_from.lerp(_step_to, clampf(_step_timer / interval, 0.0, 1.0))
+	queue_redraw()
+
+
+## Right-hand wall-follow heading from the cells around the current one (CAPTURED = wall).
+func _next_edge_heading() -> Vector2i:
+	var fr: bool = _edge_open(_grid_cell + EnemyMotion.turn_right(_heading))
+	var ff: bool = _edge_open(_grid_cell + _heading)
+	var fl: bool = _edge_open(_grid_cell + EnemyMotion.turn_left(_heading))
+	return EnemyMotion.wall_follow_turn(_heading, fr, ff, fl)
+
+
+## Walkable for edge-follow: anything that isn't a CAPTURED wall (FREE or the player's TRAIL).
+func _edge_open(cell: Vector2i) -> bool:
+	return _arena.cell_state(cell) != CaptureGrid.Cell.CAPTURED
+
+
+## Snaps Sparx to the nearest FREE perimeter cell (FREE + a CAPTURED neighbor) when its cell
+## gets captured. Manhattan-nearest, row-major tie-break -> deterministic.
+func _reproject() -> void:
+	var grid: CaptureGrid = _arena.grid
+	var best := Vector2i(-1, -1)
+	var best_d: int = 1 << 30
+	for y in grid.rows:
+		for x in grid.cols:
+			if grid.cell_at(x, y) != CaptureGrid.Cell.FREE:
+				continue
+			if not _has_captured_neighbor(x, y):
+				continue
+			var d: int = absi(x - _grid_cell.x) + absi(y - _grid_cell.y)
+			if d < best_d:
+				best_d = d
+				best = Vector2i(x, y)
+	if best.x >= 0:
+		_grid_cell = best
+		_step_from = _arena.cell_to_world(best)
+		_step_to = _step_from
+		position = _step_from
+		_step_timer = 0.0
+
+
+func _has_captured_neighbor(x: int, y: int) -> bool:
+	var g: CaptureGrid = _arena.grid
+	return g.cell_at(x + 1, y) == CaptureGrid.Cell.CAPTURED \
+		or g.cell_at(x - 1, y) == CaptureGrid.Cell.CAPTURED \
+		or g.cell_at(x, y + 1) == CaptureGrid.Cell.CAPTURED \
+		or g.cell_at(x, y - 1) == CaptureGrid.Cell.CAPTURED
 
 
 ## Sub-stepped movement so a fast enemy cannot tunnel through a 1-cell trail/wall.
@@ -190,5 +274,7 @@ func _draw() -> void:
 			Vector2(radius * 0.866, radius * 0.5),
 		])
 		draw_colored_polygon(pts, draw_color)
+	elif shape == Shape.SQUARE:
+		draw_rect(Rect2(-radius, -radius, radius * 2.0, radius * 2.0), draw_color)
 	else:
 		draw_circle(Vector2.ZERO, radius, draw_color)

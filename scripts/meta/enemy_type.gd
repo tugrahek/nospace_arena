@@ -8,4 +8,5 @@ extends Resource
 @export var id: StringName
 @export var behavior: EnemyBehavior
 @export var base_speed_cells: float = 18.0
-@export_enum("Circle", "Triangle") var shape: int = 0
+@export_enum("Circle", "Triangle", "Square") var shape: int = 0
+@export var edge_follow: bool = false  # Sparx: ride the captured-region perimeter (wall-follow)

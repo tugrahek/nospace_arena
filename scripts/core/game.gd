@@ -235,9 +235,16 @@ func _spawn_stage_enemies(spec: Dictionary) -> void:
 		if _arena_data.theme != null:
 			enemy.color = _arena_data.theme.enemy_color
 		enemy.shape = type.shape
-		var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(stage_seed, i), speed_px) \
-			if _daily else EnemyMotion.start_velocity(i, speed_px)
-		enemy.setup(_arena, center, vel, type.behavior, speed_px, variation)
+		if type.edge_follow:
+			# Sparx: deterministic perimeter spawn at column 1 (left border = wall on the right
+			# of a DOWN heading), each one a row lower so multiple sparx don't stack.
+			var start_cell := Vector2i(1, clampi(1 + k, 1, maxi(_arena.grid.rows - 2, 1)))
+			enemy.setup(_arena, _arena.cell_to_world(start_cell), Vector2.ZERO, type.behavior,
+				speed_px, variation, true, start_cell, Vector2i.DOWN)
+		else:
+			var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(stage_seed, i), speed_px) \
+				if _daily else EnemyMotion.start_velocity(i, speed_px)
+			enemy.setup(_arena, center, vel, type.behavior, speed_px, variation)
 		enemy.hit_trail.connect(_on_enemy_hit_trail)
 		_enemies.append(enemy)
 

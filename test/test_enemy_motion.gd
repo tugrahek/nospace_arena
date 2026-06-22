@@ -21,3 +21,29 @@ func test_even_spread_values_are_distinct() -> void:
 		var v: float = EnemyMotion.even_spread(i, 5)
 		assert_false(seen.has(v), "each index -> distinct variation")
 		seen[v] = true
+
+
+func test_turn_helpers_are_cardinal_rotations() -> void:
+	assert_eq(EnemyMotion.turn_right(Vector2i.RIGHT), Vector2i.DOWN)
+	assert_eq(EnemyMotion.turn_right(Vector2i.DOWN), Vector2i.LEFT)
+	assert_eq(EnemyMotion.turn_left(Vector2i.DOWN), Vector2i.RIGHT)
+	assert_eq(EnemyMotion.turn_left(Vector2i.RIGHT), Vector2i.UP)
+
+
+func test_wall_follow_straight_along_wall() -> void:
+	# Heading DOWN, wall on the right (right blocked), front open -> keep going DOWN.
+	assert_eq(EnemyMotion.wall_follow_turn(Vector2i.DOWN, false, true, false), Vector2i.DOWN)
+
+
+func test_wall_follow_convex_corner_turns_right() -> void:
+	# Wall ends -> right opens -> turn right (hug the wall around the corner).
+	assert_eq(EnemyMotion.wall_follow_turn(Vector2i.DOWN, true, true, true), Vector2i.LEFT)
+
+
+func test_wall_follow_concave_corner_turns_left() -> void:
+	# Right + front blocked, left open -> turn left.
+	assert_eq(EnemyMotion.wall_follow_turn(Vector2i.DOWN, false, false, true), Vector2i.RIGHT)
+
+
+func test_wall_follow_dead_end_reverses() -> void:
+	assert_eq(EnemyMotion.wall_follow_turn(Vector2i.DOWN, false, false, false), Vector2i.UP)
