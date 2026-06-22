@@ -8,6 +8,7 @@ extends Resource
 
 ## Returns the desired velocity this frame. `player_exposed` is true while the player is
 ## drawing a trail in the open (vulnerable); false while safe on captured territory.
-## Base = identity (keep current heading).
-func decide(velocity: Vector2, _enemy_pos: Vector2, _player_pos: Vector2, _player_exposed: bool, _base_speed_px: float) -> Vector2:
+## `variation` ([-1,1], per-enemy) lets a behavior offset itself so identical enemies don't
+## overlap (e.g. chaser homing angle). Base = identity (keep current heading).
+func decide(velocity: Vector2, _enemy_pos: Vector2, _player_pos: Vector2, _player_exposed: bool, _base_speed_px: float, _variation: float = 0.0) -> Vector2:
 	return velocity

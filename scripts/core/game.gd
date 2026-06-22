@@ -217,8 +217,18 @@ func _spawn_stage_enemies(spec: Dictionary) -> void:
 	var center: Vector2 = _arena.get_rect().get_center()
 	var stage_seed: int = int(spec["stage_seed"])
 	var speed_scale: float = float(spec["speed_scale"])
+	# Per-type totals so each enemy of a type gets an even-spread variation ([-1,1]) -> same-type
+	# enemies (e.g. chasers) approach from distinct angles instead of stacking (overlap fix).
+	var per_type_total: Dictionary = {}
 	for i in count:
-		var type: EnemyType = types[i % types.size()]
+		per_type_total[i % types.size()] = int(per_type_total.get(i % types.size(), 0)) + 1
+	var per_type_seen: Dictionary = {}
+	for i in count:
+		var ti: int = i % types.size()
+		var k: int = int(per_type_seen.get(ti, 0))
+		per_type_seen[ti] = k + 1
+		var variation: float = EnemyMotion.even_spread(k, int(per_type_total[ti]))
+		var type: EnemyType = types[ti]
 		var speed_px: float = type.base_speed_cells * _arena_data.speed_mult * speed_scale * _arena.cell_size
 		var enemy: Enemy = ENEMY_SCENE.instantiate()
 		_enemies_root.add_child(enemy)
@@ -227,7 +237,7 @@ func _spawn_stage_enemies(spec: Dictionary) -> void:
 		enemy.shape = type.shape
 		var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(stage_seed, i), speed_px) \
 			if _daily else EnemyMotion.start_velocity(i, speed_px)
-		enemy.setup(_arena, center, vel, type.behavior, speed_px)
+		enemy.setup(_arena, center, vel, type.behavior, speed_px, variation)
 		enemy.hit_trail.connect(_on_enemy_hit_trail)
 		_enemies.append(enemy)
 

@@ -12,13 +12,16 @@ enum Shape { CIRCLE, TRIANGLE }
 
 @export var radius: float = 9.0
 @export var color: Color = Color(1.0, 0.25, 0.2, 1.0)
-@export var recovery_time: float = 0.18  # after a freeze, suppress homing so it peels off the wall
+@export var recovery_time: float = 0.18  # after a bounce/freeze, briefly suppress homing so the
+                                          # enemy peels off the wall on its reflected heading
+                                          # instead of re-homing into it (no boundary pin/stall)
 
 var shape: int = Shape.CIRCLE  # placeholder type tell (Step 14 sprites)
 
 var _arena: ArenaController
 var _behavior: EnemyBehavior = null
 var _base_speed_px: float = 0.0
+var _variation: float = 0.0  # per-enemy [-1,1] offset so same-type enemies don't overlap
 var _velocity: Vector2 = Vector2.ZERO
 var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
 var _active_effect: TerritoryEffect = null  # set each frame by LivingTerritory
@@ -30,12 +33,13 @@ var _steered: bool = false  # TEMP: debug tint while steered/slowed (Step 15 jui
 var _frozen: bool = false  # TEMP: distinct tint while contact-frozen
 
 
-func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavior: EnemyBehavior, base_speed_px: float) -> void:
+func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavior: EnemyBehavior, base_speed_px: float, variation: float = 0.0) -> void:
 	_arena = arena
 	position = start_pos
 	_velocity = velocity
 	_behavior = behavior
 	_base_speed_px = base_speed_px
+	_variation = variation
 	_speed_scale = 1.0
 	_active_effect = null
 	_freeze_timer = 0.0
@@ -54,7 +58,7 @@ func decide_velocity(player_pos: Vector2, player_exposed: bool) -> Vector2:
 	# of re-deciding — avoids a re-freeze loop right after a Halt freeze.
 	if _behavior == null or EnemyMotion.is_behavior_suppressed(_freeze_timer, _recovery_timer):
 		return _velocity
-	return _behavior.decide(_velocity, position, player_pos, player_exposed, _base_speed_px)
+	return _behavior.decide(_velocity, position, player_pos, player_exposed, _base_speed_px, _variation)
 
 
 ## Applies the living-territory effect on top of the behavior's base velocity. steer
@@ -131,6 +135,7 @@ func _advance(step: float) -> bool:
 		position.y = EnemyMotion.clamp_to_wall(position.y, face_y, radius, sgy)
 	if block_x or block_y:
 		_velocity = EnemyMotion.reflect(_velocity, block_x, block_y)
+		_recovery_timer = recovery_time  # peel off on the reflected heading (no homing pin)
 		queue_redraw()
 		var on_player: bool = (block_x and _arena.is_player_captured(cx)) \
 			or (block_y and _arena.is_player_captured(cy))
@@ -141,6 +146,7 @@ func _advance(step: float) -> bool:
 	var cd: Vector2i = _arena.world_to_cell(Vector2(next_pos.x + sgx * radius, next_pos.y + sgy * radius))
 	if _arena.cell_state(cd) == CaptureGrid.Cell.CAPTURED:
 		_velocity = EnemyMotion.reflect(_velocity, true, true)
+		_recovery_timer = recovery_time  # peel off on the reflected heading (no homing pin)
 		queue_redraw()
 		if _arena.is_player_captured(cd) and _try_contact_freeze():
 			return false

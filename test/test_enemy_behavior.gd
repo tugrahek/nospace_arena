@@ -41,3 +41,27 @@ func test_chaser_is_deterministic() -> void:
 	var a: Vector2 = ChaserBehavior.new().decide(Vector2(1, 0), Vector2(2, 3), Vector2(8, 9), true, 60.0)
 	var b: Vector2 = ChaserBehavior.new().decide(Vector2(1, 0), Vector2(2, 3), Vector2(8, 9), true, 60.0)
 	assert_eq(a, b)
+
+
+func test_chaser_variation_zero_is_straight() -> void:
+	# variation 0 (default) must match the legacy straight-homing behavior.
+	var ch := ChaserBehavior.new()
+	var out: Vector2 = ch.decide(Vector2(0, 1), Vector2(0, 0), Vector2(10, 0), true, 100.0, 0.0)
+	assert_almost_eq(out.y, 0.0, 0.001, "no offset at variation 0")
+	assert_gt(out.x, 0.0)
+
+
+func test_chaser_variation_offsets_angle() -> void:
+	var ch := ChaserBehavior.new()
+	ch.spread_rad = 0.5
+	# Player straight to the right; +variation and -variation tilt the approach opposite ways.
+	var pos: Vector2 = ChaserBehavior.new().decide(Vector2(0, 1), Vector2(0, 0), Vector2(10, 0), true, 100.0, 1.0)
+	var neg: Vector2 = ChaserBehavior.new().decide(Vector2(0, 1), Vector2(0, 0), Vector2(10, 0), true, 100.0, -1.0)
+	assert_almost_eq(pos.length(), 100.0, 0.001, "speed preserved")
+	assert_ne(pos.y, 0.0, "offset tilts the heading")
+	assert_true((pos.y > 0.0) != (neg.y > 0.0), "opposite variations tilt opposite ways")
+
+
+func test_chaser_variation_ignored_when_safe() -> void:
+	var v := Vector2(7, -3)
+	assert_eq(ChaserBehavior.new().decide(v, Vector2(0, 0), Vector2(200, 0), false, 100.0, 1.0), v)

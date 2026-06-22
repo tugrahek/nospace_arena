@@ -44,3 +44,12 @@ static func start_velocity(index: int, speed: float) -> Vector2:
 ## direction from the daily seed so the layout is the same for everyone that day.
 static func start_velocity_seeded(dir_index: int, speed: float) -> Vector2:
 	return start_velocity(dir_index, speed)
+
+
+## Evenly spreads `index` of `total` across [-1, 1] (single item -> 0). Used to give each
+## enemy of a type a distinct variation so multiple chasers don't home onto the exact same
+## point. Deterministic (no RNG) -> daily/ghost reproduce intact.
+static func even_spread(index: int, total: int) -> float:
+	if total <= 1:
+		return 0.0
+	return float(index) / float(total - 1) * 2.0 - 1.0
