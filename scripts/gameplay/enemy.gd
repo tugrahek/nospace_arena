@@ -15,6 +15,7 @@ enum Shape { CIRCLE, TRIANGLE, SQUARE }
 @export var recovery_time: float = 0.18  # after a bounce/freeze, briefly suppress homing so the
                                           # enemy peels off the wall on its reflected heading
                                           # instead of re-homing into it (no boundary pin/stall)
+@export var edge_catch_cooldown: float = 1.0  # Sparx: grace after catching the player (no chain-kill)
 
 var shape: int = Shape.CIRCLE  # placeholder type tell (Step 14 sprites)
 
@@ -30,6 +31,9 @@ var _heading: Vector2i = Vector2i.DOWN
 var _step_from: Vector2 = Vector2.ZERO
 var _step_to: Vector2 = Vector2.ZERO
 var _step_timer: float = 0.0
+var _last_player_pos: Vector2 = Vector2.ZERO
+var _has_player: bool = false  # set once LivingTerritory reports the player (gates edge catch)
+var _catch_cd: float = 0.0     # Sparx catch cooldown
 var _velocity: Vector2 = Vector2.ZERO
 var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
 var _active_effect: TerritoryEffect = null  # set each frame by LivingTerritory
@@ -54,6 +58,8 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 	_step_from = start_pos
 	_step_to = start_pos
 	_step_timer = 0.0
+	_has_player = false
+	_catch_cd = 0.0
 	_speed_scale = 1.0
 	_active_effect = null
 	_freeze_timer = 0.0
@@ -68,6 +74,8 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 ## This frame's behavior decision (homing/heading), before any effect or collision.
 ## Pure per type; the effect + collision layer is applied on top by apply_territory/_move.
 func decide_velocity(player_pos: Vector2, player_exposed: bool) -> Vector2:
+	_last_player_pos = player_pos  # cached for Sparx edge-catch (LivingTerritory runs first)
+	_has_player = true
 	# While frozen or recovering, keep the reflected heading (peel off the wall) instead
 	# of re-deciding — avoids a re-freeze loop right after a Halt freeze.
 	if _behavior == null or EnemyMotion.is_behavior_suppressed(_freeze_timer, _recovery_timer):
@@ -115,6 +123,8 @@ func _physics_process(delta: float) -> void:
 ## interpolating position between cell centers. Lethal on stepping into a TRAIL cell. Never
 ## stalls (wall-follow always picks an open cell, reversing if boxed). Effects don't steer it.
 func _edge_process(delta: float) -> void:
+	if _catch_cd > 0.0:
+		_catch_cd -= delta
 	if _arena.cell_state(_grid_cell) == CaptureGrid.Cell.CAPTURED:
 		_reproject()  # engulfed by a fresh capture -> re-seek the nearest perimeter cell
 	var interval: float = maxf(_arena.cell_size / maxf(_base_speed_px, 0.001), 0.001)
@@ -130,6 +140,14 @@ func _edge_process(delta: float) -> void:
 		_step_from = _arena.cell_to_world(_grid_cell)
 		_step_to = _arena.cell_to_world(next_cell)
 	position = _step_from.lerp(_step_to, clampf(_step_timer / interval, 0.0, 1.0))
+	# Threat (b): Sparx catches the player at the edge even when safe -> can't linger on the
+	# border. Cell-adjacent; a cooldown after a catch prevents chain-kills on respawn.
+	if _has_player and _catch_cd <= 0.0:
+		var pc: Vector2i = _arena.world_to_cell(_last_player_pos)
+		if absi(pc.x - _grid_cell.x) + absi(pc.y - _grid_cell.y) <= 1:
+			_catch_cd = edge_catch_cooldown
+			hit_trail.emit()
+			return
 	queue_redraw()
 
 

@@ -74,7 +74,10 @@ HOWTO_CONTROLS_TAP,Tap left or right to turn.
 HOWTO_CONTROLS_DPAD,Use the on-screen d-pad to steer.
 HOWTO_CONTROLS_HINT,Change controls in Settings
 HOWTO_ENEMIES_TITLE,Watch the enemies
-HOWTO_ENEMIES_BODY,Bouncer drifts and ricochets off walls. Stalker hunts you while you're drawing in the open.
+ENEMY_BOUNCER_NAME,Bouncer
+ENEMY_STALKER_NAME,Stalker
+ENEMY_SPARX_NAME,Sparx
+HOWTO_ENEMIES_BODY,Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge — don't linger on the border.
 HOWTO_LIVES_TITLE,Stay alive
 HOWTO_LIVES_BODY,You have 3 lives. Lose one if an enemy touches your active trail. Captured ground is safe.
 CHAR_PULSE_DESC,Pushes enemies away from your territory
@@ -82,4 +85,4 @@ CHAR_DRAG_DESC,Slows enemies near your territory
 CHAR_HALT_DESC,Freezes enemies that get too close
 ARENA_VOID_DESC,Balanced starter — one drifting bouncer.
 ARENA_EMBER_DESC,Tall and tight — two bouncers, kinder target.
-ARENA_FROST_DESC,Wide and open — one relentless stalker.
+ARENA_FROST_DESC,Wide and open — a stalker plus an edge-patrolling sparx.
