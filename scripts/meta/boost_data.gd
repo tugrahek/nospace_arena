@@ -9,6 +9,7 @@ extends Resource
 enum Effect {
 	EXTRA_LIFE,   # magnitude = extra starting lives
 	SLOW_START,   # magnitude = enemy speed scale (0..1) for `duration` seconds at run start
+	COIN_BONUS,   # magnitude = extra fraction of run-end coins (0.5 -> +50%, i.e. x1.5)
 }
 
 @export var id: StringName

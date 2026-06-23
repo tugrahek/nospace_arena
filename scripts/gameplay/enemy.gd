@@ -47,6 +47,7 @@ var _contain_timer: float = 0.0    # CONTAINED countdown (fixed physics-step, gr
 var _telegraph_timer: float = 0.0  # TELEGRAPH countdown (non-lethal warning blink)
 var _velocity: Vector2 = Vector2.ZERO
 var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
+var run_speed_scale: float = 1.0  # run-start boost (Slow Start): < 1 slows; game resets to 1 on expiry
 var _active_effect: TerritoryEffect = null  # set each frame by LivingTerritory
 var _freeze_timer: float = 0.0  # > 0 while contact-frozen (Stasis); no movement
 var _freeze_cooldown_timer: float = 0.0  # blocks re-freeze (prevents boundary jitter re-lock)
@@ -163,7 +164,7 @@ func _patrol(delta: float) -> void:
 	if _arena.cell_state(_grid_cell) == CaptureGrid.Cell.CAPTURED:
 		_enter_contain()
 		return
-	var interval: float = maxf(_arena.cell_size / maxf(_base_speed_px, 0.001), 0.001)
+	var interval: float = maxf(_arena.cell_size / maxf(_base_speed_px * run_speed_scale, 0.001), 0.001)
 	_step_timer += delta
 	while _step_timer >= interval:
 		_step_timer -= interval
@@ -397,7 +398,7 @@ func _has_captured_neighbor(x: int, y: int) -> bool:
 func _move(delta: float) -> void:
 	if _velocity == Vector2.ZERO:
 		return
-	var remaining: float = _velocity.length() * _speed_scale * delta
+	var remaining: float = _velocity.length() * _speed_scale * run_speed_scale * delta
 	var step_len: float = _arena.cell_size * 0.5
 	while remaining > 0.0:
 		var step: float = minf(step_len, remaining)

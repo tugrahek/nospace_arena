@@ -43,6 +43,9 @@ var _current_stage: int = 0
 var _stage_target: float = 75.0
 var _advancing: bool = false
 var _exposed_time: float = 0.0  # seconds spent drawing in the open since last capture/fail
+var _slow_start_timer: float = 0.0  # Slow Start boost: enemies slowed while > 0 (fixed-step)
+var _slow_start_scale: float = 1.0
+var _coin_multiplier: float = 1.0  # Coin Bonus boost: run-end coin reward x this (1.0 = none)
 
 
 func _ready() -> void:
@@ -70,9 +73,15 @@ func _ready() -> void:
 	_hitstop.time_control = _time_control
 	_near_miss.near_miss.connect(_on_near_miss)
 	_near_miss.danger_changed.connect(_overlay.set_danger)  # continuous proximity vignette
-	GameState.start_run(BALANCE.start_lives, BALANCE.base_points, BALANCE.combo_window,
+	# Pre-run boosts (consumables): policy-gated (off in Daily), applied + consumed once at run start.
+	var boost_fx: Dictionary = _resolve_boosts()
+	var start_lives: int = BALANCE.start_lives + int(boost_fx["extra_lives"])
+	_slow_start_scale = float(boost_fx["slow_scale"])
+	_slow_start_timer = float(boost_fx["slow_duration"])
+	_coin_multiplier = float(boost_fx["coin_multiplier"])
+	GameState.start_run(start_lives, BALANCE.base_points, BALANCE.combo_window,
 		BALANCE.exposed_points_per_sec, BALANCE.exposed_cap_sec, BALANCE.life_loss_penalty)
-	_hud.setup(BALANCE.start_lives)
+	_hud.setup(start_lives)
 	_hud.set_daily(_daily, _daily_seed)
 	_player.control_scheme = AudioManager.settings().control_scheme  # persisted choice (Settings)
 	# Live-apply scheme changes from Pause → Settings (mid-run); _on_scheme_changed updates d-pad.
@@ -122,7 +131,7 @@ func _update_missions(score: int) -> void:
 		m.advance(stats)
 		reward += m.claim()  # 0 unless newly complete; idempotent (no double reward)
 	if reward > 0:
-		Economy.earn(reward)
+		Economy.earn(int(round(reward * _coin_multiplier)))  # Coin Bonus boost (1.0 = no change)
 	var progress: Dictionary = {}
 	for m in _missions:
 		progress[String(m.def.id)] = m.to_dict()
@@ -130,9 +139,29 @@ func _update_missions(score: int) -> void:
 	_hud.show_missions(_missions)
 
 
+## Resolves this run's boosts from Economy via the pure resolver, consuming the armed charges that
+## actually apply (policy-gated: Daily applies/consumes nothing). Returns the effect dictionary.
+func _resolve_boosts() -> Dictionary:
+	var armed: Dictionary = {}
+	var counts: Dictionary = {}
+	for b in ContentCatalog.BOOSTS:
+		armed[String(b.id)] = Economy.is_boost_armed(b.id)
+		counts[String(b.id)] = Economy.boost_count(b.id)
+	var fx: Dictionary = BoostEffects.resolve(_mode, ContentCatalog.BOOSTS, armed, counts)
+	for id in fx["consume"]:
+		Economy.consume_boost(id)
+	return fx
+
+
 ## Records the player path at the physics rate (daily only) for the ghost.
 ## Pause freezes _physics_process -> no samples while paused -> ghost stays deterministic.
 func _physics_process(delta: float) -> void:
+	# Slow Start boost: enemies run at run_speed_scale until the timer expires, then back to normal.
+	if _slow_start_timer > 0.0:
+		_slow_start_timer -= delta
+		if _slow_start_timer <= 0.0:
+			for e in _enemies:
+				e.run_speed_scale = 1.0
 	# Risk reward: accrue exposed time only while drawing in the open (safe/wall == not exposed -> 0).
 	if GameState.is_playing() and _player.is_exposed():
 		_exposed_time += delta
@@ -245,6 +274,7 @@ func _spawn_stage_enemies(spec: Dictionary) -> void:
 			var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(stage_seed, i), speed_px) \
 				if _daily else EnemyMotion.start_velocity(i, speed_px)
 			enemy.setup(_arena, center, vel, type.behavior, speed_px, variation)
+		enemy.run_speed_scale = _slow_start_scale if _slow_start_timer > 0.0 else 1.0  # Slow Start boost
 		enemy.hit_trail.connect(_on_enemy_hit_trail)
 		_enemies.append(enemy)
 

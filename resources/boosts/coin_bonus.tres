@@ -4,10 +4,10 @@
 
 [resource]
 script = ExtResource("1_boost")
-id = &"extra_life"
-display_name_key = "BOOST_EXTRA_LIFE_NAME"
-description_key = "BOOST_EXTRA_LIFE_DESC"
-cost = 250
-effect = 0
-magnitude = 1.0
+id = &"coin_bonus"
+display_name_key = "BOOST_COIN_BONUS_NAME"
+description_key = "BOOST_COIN_BONUS_DESC"
+cost = 200
+effect = 2
+magnitude = 0.5
 duration = 0.0

@@ -8,12 +8,14 @@ extends RefCounted
 
 ## `armed`  : { id_string -> bool }  (is this boost armed for the next run)
 ## `counts` : { id_string -> int }   (owned charges)
-## Returns  : { extra_lives:int, slow_scale:float, slow_duration:float, consume:Array[StringName] }
+## Returns: { extra_lives:int, slow_scale:float, slow_duration:float, coin_multiplier:float,
+##            consume:Array[StringName] }
 static func resolve(mode: int, boosts: Array, armed: Dictionary, counts: Dictionary) -> Dictionary:
 	var out: Dictionary = {
 		"extra_lives": 0,
 		"slow_scale": 1.0,
 		"slow_duration": 0.0,
+		"coin_multiplier": 1.0,
 		"consume": [],
 	}
 	if not BoostPolicy.boosts_allowed(mode):
@@ -29,4 +31,6 @@ static func resolve(mode: int, boosts: Array, armed: Dictionary, counts: Diction
 			BoostData.Effect.SLOW_START:
 				out["slow_scale"] = b.magnitude
 				out["slow_duration"] = b.duration
+			BoostData.Effect.COIN_BONUS:
+				out["coin_multiplier"] = 1.0 + b.magnitude
 	return out

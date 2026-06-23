@@ -16,6 +16,7 @@ const ARENAS: Array[ArenaData] = [
 ]
 const BOOSTS: Array[BoostData] = [
 	preload("res://resources/boosts/extra_life.tres"),
+	preload("res://resources/boosts/coin_bonus.tres"),
 	preload("res://resources/boosts/slow_start.tres"),
 ]
 const MISSIONS: Array[MissionDef] = [
