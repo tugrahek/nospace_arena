@@ -12,6 +12,7 @@ const LOGIN_REWARDS: Array[int] = [50, 75, 100, 125, 150, 200, 300]  # day 1..7 
 signal currency_changed(new_balance: int)
 signal unlocks_changed()
 signal login_reward_claimed(day: int, amount: int)
+signal boosts_changed()
 
 var _data  # SaveData
 
@@ -66,6 +67,46 @@ func purchase(kind: String, id: StringName, cost: int) -> bool:
 	currency_changed.emit(_data.currency)
 	unlocks_changed.emit()
 	return true
+
+
+# --- Boosts (consumables) ---
+
+func boost_count(id: StringName) -> int:
+	return _data.boost_count(id)
+
+
+## Buys one charge of a boost if affordable: spends then adds the charge. Returns success.
+func buy_boost(id: StringName, cost: int) -> bool:
+	if not _data.spend(cost):
+		return false
+	_data.add_boost(id, 1)
+	_flush()
+	currency_changed.emit(_data.currency)
+	boosts_changed.emit()
+	return true
+
+
+## Spends one charge (e.g. consumed at run start). Returns success.
+func consume_boost(id: StringName) -> bool:
+	if not _data.consume_boost(id):
+		return false
+	_flush()
+	boosts_changed.emit()
+	return true
+
+
+func is_boost_armed(id: StringName) -> bool:
+	return _data.is_boost_armed(id)
+
+
+func set_boost_armed(id: StringName, armed: bool) -> void:
+	_data.set_boost_armed(id, armed)
+	_flush()
+	boosts_changed.emit()
+
+
+func armed_boosts() -> Array:
+	return _data.armed_boosts.duplicate()
 
 
 func selected_character() -> StringName:

@@ -86,3 +86,11 @@ CHAR_HALT_DESC,Freezes enemies that get too close
 ARENA_VOID_DESC,Balanced starter — one drifting bouncer.
 ARENA_EMBER_DESC,Tall and tight — two bouncers, kinder target.
 ARENA_FROST_DESC,Wide and open — a stalker plus an edge-patrolling sparx.
+BOOST_EXTRA_LIFE_NAME,Extra Life
+BOOST_EXTRA_LIFE_DESC,Start the run with one more heart.
+BOOST_SLOW_START_NAME,Slow Start
+BOOST_SLOW_START_DESC,Enemies move at half speed for the first few seconds.
+STORE_BOOSTS,Boosts
+STORE_OWNED,Owned: %d
+BOOST_ARM,Arm
+BOOST_ARMED,Armed

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BoostData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/boost_data.gd" id="1_boost"]
+
+[resource]
+script = ExtResource("1_boost")
+id = &"extra_life"
+display_name_key = "BOOST_EXTRA_LIFE_NAME"
+description_key = "BOOST_EXTRA_LIFE_DESC"
+cost = 150
+effect = 0
+magnitude = 1.0
+duration = 0.0

@@ -14,6 +14,10 @@ const ARENAS: Array[ArenaData] = [
 	preload("res://resources/arenas/arena_ember.tres"),
 	preload("res://resources/arenas/arena_frost.tres"),
 ]
+const BOOSTS: Array[BoostData] = [
+	preload("res://resources/boosts/extra_life.tres"),
+	preload("res://resources/boosts/slow_start.tres"),
+]
 const MISSIONS: Array[MissionDef] = [
 	preload("res://resources/missions/m_score_800.tres"),
 	preload("res://resources/missions/m_score_1000.tres"),
@@ -45,3 +49,11 @@ static func arena_index(id: StringName) -> int:
 		if ARENAS[i].id == id:
 			return i
 	return 0
+
+
+## The BoostData with `id`, or null if not found.
+static func boost_by_id(id: StringName) -> BoostData:
+	for b in BOOSTS:
+		if b.id == id:
+			return b
+	return null
