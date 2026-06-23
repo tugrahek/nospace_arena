@@ -335,6 +335,8 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 	var now: float = Time.get_ticks_msec() / 1000.0
 	var earned: int = GameState.register_capture(cells.size(), now, _exposed_time)
 	_exposed_time = 0.0  # consumed by this capture
+	for e in _enemies:  # edge-walkers (Sparx) self-contain when boxed into a small pocket
+		e.on_capture_event()
 	_play_capture_juice(cells, earned)
 	# Target reached. Level-Endless advances to a harder stage (deferred so the arena isn't
 	# rebuilt mid capture-signal); Daily/Free are single-arena and simply win.

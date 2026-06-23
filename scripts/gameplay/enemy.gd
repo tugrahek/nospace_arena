@@ -10,12 +10,20 @@ signal hit_trail()
 
 enum Shape { CIRCLE, TRIANGLE, SQUARE }
 
+# Sparx lifecycle: patrols the edge; when the player seals it off from the main region it is
+# CONTAINED (invisible breather), then re-emerges via a non-lethal TELEGRAPH blink back to PATROL.
+enum SparxState { PATROL, CONTAINED, TELEGRAPH }
+
 @export var radius: float = 9.0
 @export var color: Color = Color(1.0, 0.25, 0.2, 1.0)
 @export var recovery_time: float = 0.18  # after a bounce/freeze, briefly suppress homing so the
                                           # enemy peels off the wall on its reflected heading
                                           # instead of re-homing into it (no boundary pin/stall)
 @export var edge_catch_cooldown: float = 1.0  # Sparx: grace after catching the player (no chain-kill)
+@export var contain_duration: float = 5.0     # Sparx: invisible breather while CONTAINED
+@export var emerge_telegraph: float = 0.4     # Sparx: warning blink on re-emerge before lethal again
+@export var trap_pocket_max_cells: int = 400  # Sparx: secondary safety -> also trapped if region <= this
+@export var safe_emerge_distance: int = 7      # Sparx: re-emerge >= this many cells from the player
 
 var shape: int = Shape.CIRCLE  # placeholder type tell (Step 14 sprites)
 
@@ -34,6 +42,9 @@ var _step_timer: float = 0.0
 var _last_player_pos: Vector2 = Vector2.ZERO
 var _has_player: bool = false  # set once LivingTerritory reports the player (gates edge catch)
 var _catch_cd: float = 0.0     # Sparx catch cooldown
+var _sparx_state: int = SparxState.PATROL
+var _contain_timer: float = 0.0    # CONTAINED countdown (fixed physics-step, grid-independent)
+var _telegraph_timer: float = 0.0  # TELEGRAPH countdown (non-lethal warning blink)
 var _velocity: Vector2 = Vector2.ZERO
 var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
 var _active_effect: TerritoryEffect = null  # set each frame by LivingTerritory
@@ -60,6 +71,10 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 	_step_timer = 0.0
 	_has_player = false
 	_catch_cd = 0.0
+	_sparx_state = SparxState.PATROL
+	_contain_timer = 0.0
+	_telegraph_timer = 0.0
+	visible = true
 	_speed_scale = 1.0
 	_active_effect = null
 	_freeze_timer = 0.0
@@ -119,25 +134,50 @@ func _physics_process(delta: float) -> void:
 	_move(delta)
 
 
-## Sparx movement: steps cell-to-cell along the captured perimeter (right-hand wall-follow),
-## interpolating position between cell centers. Lethal on stepping into a TRAIL cell. Never
-## stalls (wall-follow always picks an open cell, reversing if boxed). Effects don't steer it.
+## Sparx lifecycle dispatch (PATROL -> CONTAINED -> TELEGRAPH -> PATROL). Timers run on the fixed
+## physics step so they are grid-independent and frame-deterministic (daily/ghost reproduce).
 func _edge_process(delta: float) -> void:
 	if _catch_cd > 0.0:
 		_catch_cd -= delta
+	match _sparx_state:
+		SparxState.CONTAINED:
+			# Invisible breather. ALWAYS expires on its own timer -> re-emerge (no capture needed).
+			_contain_timer -= delta
+			if _contain_timer <= 0.0:
+				_begin_telegraph()
+		SparxState.TELEGRAPH:
+			# Visible non-lethal warning blink at the re-emerge cell, then back to patrol.
+			_telegraph_timer -= delta
+			queue_redraw()
+			if _telegraph_timer <= 0.0:
+				_sparx_state = SparxState.PATROL
+		_:
+			_patrol(delta)
+
+
+## PATROL: edge-locked wall-follow. Every step lands on a FREE cell adjacent to a wall; never the
+## open interior. Lethal via the trail and the player-cell catch (19b-2). Engulf or a degenerate
+## (no walkable neighbour) cell triggers re-projection instead of spinning.
+func _patrol(delta: float) -> void:
+	# Engulf safety: the cell got captured under it -> contain (connectivity trigger also covers this).
 	if _arena.cell_state(_grid_cell) == CaptureGrid.Cell.CAPTURED:
-		_reproject()  # engulfed by a fresh capture -> re-seek the nearest perimeter cell
+		_enter_contain()
+		return
 	var interval: float = maxf(_arena.cell_size / maxf(_base_speed_px, 0.001), 0.001)
 	_step_timer += delta
 	while _step_timer >= interval:
 		_step_timer -= interval
 		_grid_cell = _arena.world_to_cell(_step_to)  # arrived at the previous target
 		_heading = _next_edge_heading()
+		_step_from = _arena.cell_to_world(_grid_cell)
 		var next_cell: Vector2i = _grid_cell + _heading
+		if not _edge_open(next_cell):
+			# Boxed on all four sides (isolated cell) -> relocate, never step into a wall or spin.
+			_begin_telegraph()
+			return
 		if _arena.cell_state(next_cell) == CaptureGrid.Cell.TRAIL:
 			hit_trail.emit()
 			return
-		_step_from = _arena.cell_to_world(_grid_cell)
 		_step_to = _arena.cell_to_world(next_cell)
 	position = _step_from.lerp(_step_to, clampf(_step_timer / interval, 0.0, 1.0))
 	# Threat (b): Sparx catches the player at the edge even when safe -> can't linger on the
@@ -151,7 +191,80 @@ func _edge_process(delta: float) -> void:
 	queue_redraw()
 
 
-## Right-hand wall-follow heading from the cells around the current one (CAPTURED = wall).
+## PATROL -> CONTAINED: invisible + inert breather on its own timer.
+func _enter_contain() -> void:
+	_sparx_state = SparxState.CONTAINED
+	_contain_timer = contain_duration
+	visible = false
+	queue_redraw()
+	if OS.is_debug_build():
+		print("[Sparx] CONTAINED @ ", _grid_cell)
+
+
+## CONTAINED -> TELEGRAPH: snap onto a walkable perimeter of the MAIN region nearest the player
+## (never the pocket), with a valid heading, then a non-lethal warning blink. Grid is read-only.
+func _begin_telegraph() -> void:
+	var ref: Vector2i = _arena.world_to_cell(_last_player_pos) if _has_player else _grid_cell
+	_reproject_to_main(ref)
+	_sparx_state = SparxState.TELEGRAPH
+	_telegraph_timer = emerge_telegraph
+	visible = true
+	queue_redraw()
+	if OS.is_debug_build():
+		print("[Sparx] RE-EMERGE @ ", _grid_cell, " heading ", _heading)
+
+
+## Called after every capture (grid changed). Connectivity trigger: Sparx is trapped when its FREE
+## region is NOT the main (largest) FREE region -- i.e. the player sealed it off from the play area
+## -- or when its cell was engulfed (captured). Optional size safety: also trap a tiny pocket even
+## inside the main region. Read-only flood-fill, deterministic; runs only on capture events.
+func on_capture_event() -> void:
+	if not _edge_follow or _sparx_state != SparxState.PATROL:
+		return
+	if _is_trapped():
+		_enter_contain()
+
+
+## True when the player has cut Sparx off from the main play area (or engulfed its cell).
+func _is_trapped() -> bool:
+	var g: CaptureGrid = _arena.grid
+	if g.cell_at(_grid_cell.x, _grid_cell.y) != CaptureGrid.Cell.FREE:
+		return true  # engulfed (pocket size 0)
+	var main_seed: Vector2i = g._largest_free_component_seed()
+	if main_seed.x < 0:
+		return false  # no FREE region at all (board full) -> nothing to contain into
+	var region: Dictionary = _flood_free_set(_grid_cell, g.cols * g.rows)  # Sparx's component
+	if not region.has(main_seed):
+		return true  # Sparx is in a smaller component than the main region -> sealed off
+	return trap_pocket_max_cells > 0 and region.size() <= trap_pocket_max_cells  # tiny-pocket safety
+
+
+## The set of FREE cells 4-connected to `start`, stopping once it exceeds `cap` (so a huge main
+## region stays cheap). Empty if `start` isn't FREE. Used both to detect a small pocket and to
+## exclude that pocket on re-emerge. Deterministic (fixed neighbour order, no RNG).
+func _flood_free_set(start: Vector2i, cap: int) -> Dictionary:
+	var g: CaptureGrid = _arena.grid
+	var seen: Dictionary = {}
+	if g.cell_at(start.x, start.y) != CaptureGrid.Cell.FREE:
+		return seen
+	seen[start] = true
+	var stack: Array[Vector2i] = [start]
+	while not stack.is_empty():
+		if seen.size() > cap:  # region is bigger than a pocket -> stop expanding
+			break
+		var c: Vector2i = stack.pop_back()
+		for d in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]:
+			var n: Vector2i = c + d
+			if not seen.has(n) and g.cell_at(n.x, n.y) == CaptureGrid.Cell.FREE:
+				seen[n] = true
+				stack.append(n)
+	return seen
+
+
+## Classic right-hand wall-follow: keep the wall on the right (right -> front -> left), reversing
+## ONLY at a true dead-end (right, front and left all walls). This traces a full loop around a
+## free region and rounds convex corners (where the next cell is only diagonally wall-adjacent)
+## instead of U-turning early. Starting on a wall keeps it edge-locked; it never free-floats.
 func _next_edge_heading() -> Vector2i:
 	var fr: bool = _edge_open(_grid_cell + EnemyMotion.turn_right(_heading))
 	var ff: bool = _edge_open(_grid_cell + _heading)
@@ -164,28 +277,112 @@ func _edge_open(cell: Vector2i) -> bool:
 	return _arena.cell_state(cell) != CaptureGrid.Cell.CAPTURED
 
 
-## Snaps Sparx to the nearest FREE perimeter cell (FREE + a CAPTURED neighbor) when its cell
-## gets captured. Manhattan-nearest, row-major tie-break -> deterministic.
-func _reproject() -> void:
+## Re-emerge target: a WALKABLE perimeter cell of the MAIN (largest) FREE region that is at least
+## safe_emerge_distance (Manhattan) from the player AND not next to the active trail -> anti-insta-
+## kill. Among safe cells, the one nearest the contained position (`_grid_cell`) wins (deterministic
+## Manhattan + row-major tie-break). If none is safe (tiny board), the FARTHEST-from-player cell is
+## chosen instead. The pocket is a different component, so never selected. No-op only if no walkable
+## border exists anywhere (board ~fully captured).
+func _reproject_to_main(player_cell: Vector2i) -> void:
+	var grid: CaptureGrid = _arena.grid
+	var main_seed: Vector2i = grid._largest_free_component_seed()
+	var region: Dictionary = {}
+	if main_seed.x >= 0:
+		region = _flood_free_set(main_seed, grid.cols * grid.rows)  # the main region
+	var prox: Vector2i = _grid_cell  # contained position -> proximity tie-break
+	var best := Vector2i(-1, -1)
+	var best_d: int = 1 << 30
+	var far_best := Vector2i(-1, -1)  # fallback: farthest from the player
+	var far_d: int = -1
+	for y in grid.rows:
+		for x in grid.cols:
+			if not region.is_empty() and not region.has(Vector2i(x, y)):
+				continue
+			if not _is_walkable_border(x, y) or _has_trail_neighbor(x, y):
+				continue
+			var dp: int = absi(x - player_cell.x) + absi(y - player_cell.y)
+			if dp > far_d:  # track the safest available fallback (row-major first on ties)
+				far_d = dp
+				far_best = Vector2i(x, y)
+			if dp < safe_emerge_distance:
+				continue  # too close to the player for the primary pick
+			var dprox: int = absi(x - prox.x) + absi(y - prox.y)
+			if dprox < best_d:
+				best_d = dprox
+				best = Vector2i(x, y)
+	var target: Vector2i = best if best.x >= 0 else far_best
+	if target.x < 0:
+		target = _nearest_walkable_border(player_cell, {})  # last resort (any walkable border)
+	if target.x < 0:
+		return  # no walkable border anywhere -> no-op (run ending)
+	_grid_cell = target
+	_step_from = _arena.cell_to_world(target)
+	_step_to = _step_from
+	position = _step_from
+	_step_timer = 0.0
+	_heading = _wall_follow_start_heading(target)
+
+
+## True if any 4-neighbour of (x,y) is part of the player's active trail (avoid re-emerging on it).
+func _has_trail_neighbor(x: int, y: int) -> bool:
+	var g: CaptureGrid = _arena.grid
+	for d in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]:
+		if g.cell_at(x + d.x, y + d.y) == CaptureGrid.Cell.TRAIL:
+			return true
+	return false
+
+
+## Nearest walkable border cell to `ref` (deterministic, row-major tie-break). When `only` is
+## non-empty the search is restricted to that set (the player's region). Returns (-1,-1) if none.
+func _nearest_walkable_border(ref: Vector2i, only: Dictionary) -> Vector2i:
 	var grid: CaptureGrid = _arena.grid
 	var best := Vector2i(-1, -1)
 	var best_d: int = 1 << 30
 	for y in grid.rows:
 		for x in grid.cols:
-			if grid.cell_at(x, y) != CaptureGrid.Cell.FREE:
+			if not only.is_empty() and not only.has(Vector2i(x, y)):
 				continue
-			if not _has_captured_neighbor(x, y):
+			if not _is_walkable_border(x, y):
 				continue
-			var d: int = absi(x - _grid_cell.x) + absi(y - _grid_cell.y)
+			var d: int = absi(x - ref.x) + absi(y - ref.y)
 			if d < best_d:
 				best_d = d
 				best = Vector2i(x, y)
-	if best.x >= 0:
-		_grid_cell = best
-		_step_from = _arena.cell_to_world(best)
-		_step_to = _step_from
-		position = _step_from
-		_step_timer = 0.0
+	return best
+
+
+## A cell Sparx can actually patrol: FREE, touching at least one CAPTURED wall (something to hug)
+## and with >= 2 open neighbours (a real edge, not an isolated cell or a dead-end spur that would
+## make wall-follow ping-pong). cell_at treats out-of-bounds as CAPTURED (the arena frame).
+func _is_walkable_border(x: int, y: int) -> bool:
+	var g: CaptureGrid = _arena.grid
+	if g.cell_at(x, y) != CaptureGrid.Cell.FREE:
+		return false
+	var walls: int = 0
+	var open: int = 0
+	for d in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]:
+		if g.cell_at(x + d.x, y + d.y) == CaptureGrid.Cell.CAPTURED:
+			walls += 1
+		else:
+			open += 1
+	return walls >= 1 and open >= 2
+
+
+## A start heading from `cell` that steps ALONG the edge: front open, border-adjacent, and a wall
+## on the right (canonical right-hand follow). Falls back to any open border-adjacent front, then
+## any open front. Deterministic direction order -> daily/ghost reproduce.
+func _wall_follow_start_heading(cell: Vector2i) -> Vector2i:
+	var dirs: Array[Vector2i] = [Vector2i.DOWN, Vector2i.RIGHT, Vector2i.UP, Vector2i.LEFT]
+	for h in dirs:
+		var n: Vector2i = cell + h
+		if _edge_open(n) and _has_captured_neighbor(n.x, n.y) \
+				and _arena.cell_state(cell + EnemyMotion.turn_right(h)) == CaptureGrid.Cell.CAPTURED:
+			return h
+	for h in dirs:
+		var n: Vector2i = cell + h
+		if _edge_open(n) and _has_captured_neighbor(n.x, n.y):
+			return h
+	return Vector2i.DOWN
 
 
 func _has_captured_neighbor(x: int, y: int) -> bool:
@@ -285,6 +482,8 @@ func _draw() -> void:
 		draw_color = color.lerp(Color.WHITE, 0.8)
 	elif _steered:
 		draw_color = color.lightened(0.5)
+	if _telegraph_timer > 0.0:  # re-emerge warning: blink (non-lethal window)
+		draw_color.a *= 0.3 + 0.7 * absf(sin(_telegraph_timer * 26.0))
 	if shape == Shape.TRIANGLE:
 		var pts := PackedVector2Array([
 			Vector2(0, -radius),
