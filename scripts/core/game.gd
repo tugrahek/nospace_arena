@@ -63,6 +63,7 @@ func _ready() -> void:
 	_arena.area_captured.connect(_on_area_captured)
 	_player.control_scheme_changed.connect(_on_scheme_changed)
 	_player.loop_closed.connect(_on_loop_closed)
+	_player.self_hit.connect(_on_trail_failed)  # crossing own trail = life loss (same pipeline)
 	GameState.life_lost.connect(_on_life_lost)
 	GameState.game_over.connect(_on_game_over)
 	GameState.run_won.connect(_on_run_won)
@@ -275,7 +276,7 @@ func _spawn_stage_enemies(spec: Dictionary) -> void:
 				if _daily else EnemyMotion.start_velocity(i, speed_px)
 			enemy.setup(_arena, center, vel, type.behavior, speed_px, variation)
 		enemy.run_speed_scale = _slow_start_scale if _slow_start_timer > 0.0 else 1.0  # Slow Start boost
-		enemy.hit_trail.connect(_on_enemy_hit_trail)
+		enemy.hit_trail.connect(_on_trail_failed)
 		_enemies.append(enemy)
 
 
@@ -318,7 +319,9 @@ func _enemy_cells() -> Array:
 	return cells
 
 
-func _on_enemy_hit_trail() -> void:
+## Shared life-loss pipeline: an enemy touched the active trail, OR the player crossed its own
+## trail (self_hit). Same feedback + fail_trail + respawn + lose_life for both.
+func _on_trail_failed() -> void:
 	if not GameState.is_playing():
 		return
 	# Life-loss impact: a single screen flash + heavy shake (no strobe).

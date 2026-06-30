@@ -8,6 +8,7 @@ extends Node2D
 signal trail_started()
 signal returned_to_safe()
 signal loop_closed()
+signal self_hit()  # crossed own active trail (non-adjacent) -> life loss (Qix/Volfied rule)
 signal control_scheme_changed(id: int)
 
 enum SchemeId { TAP_TURN, SWIPE, DPAD }
@@ -181,7 +182,10 @@ func _try_step() -> void:
 			_arena.remove_trail(_grid_pos)
 			_trail_path.pop_back()
 			_grid_pos = target
-		# else: non-adjacent trail (loop) — blocked, keep heading
+		else:
+			# Crossing own active trail (non-adjacent) -> life loss. Don't enter the cell; Game
+			# runs the shared life-loss pipeline (fail_trail + respawn + lose_life) on self_hit.
+			self_hit.emit()
 
 
 func _keyboard_dir() -> Vector2i:
