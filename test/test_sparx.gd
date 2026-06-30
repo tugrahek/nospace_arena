@@ -211,6 +211,56 @@ func test_sparx_full_lap_no_premature_reverse() -> void:
 	GameState.reset()
 
 
+func test_stuck_loop_detected_on_big_region() -> void:
+	# Circling a tiny set of cells while a large FREE region exists -> degenerate loop detected.
+	var arena := _frost_arena()
+	GameState.start_run(3)
+	var e := _sparx_on(arena, Vector2i(1, 1))
+	e.loop_check_steps = 12
+	e.loop_min_cells = 4
+	var cyc: Array = [Vector2i(20, 20), Vector2i(20, 21), Vector2i(21, 21), Vector2i(21, 20)]
+	var flagged := false
+	for i in 40:
+		e.set("_grid_cell", cyc[i % cyc.size()])
+		if e.call("_is_stuck_in_loop"):
+			flagged = true
+			break
+	assert_true(flagged, "tiny cycle amid a large FREE region -> stuck")
+	GameState.reset()
+
+
+func test_tiny_region_not_flagged_no_thrash() -> void:
+	# When the whole reachable area IS that small (near-win), do NOT relocate -> no thrash.
+	var arena := _frost_arena()
+	GameState.start_run(3)
+	_carve_corner_pocket(arena)  # ~28-cell isolated FREE pocket
+	var e := _sparx_on(arena, Vector2i(1, 1))
+	e.loop_check_steps = 12
+	e.loop_min_cells = 40  # pocket counts as "tiny", but it is the whole region
+	var flagged := false
+	for i in 40:
+		e.set("_grid_cell", Vector2i(1 + (i % 4), 1))  # cycle inside the pocket
+		if e.call("_is_stuck_in_loop"):
+			flagged = true
+			break
+	assert_false(flagged, "whole region IS this small -> no relocate")
+	GameState.reset()
+
+
+func test_real_lap_not_flagged_as_stuck() -> void:
+	# A genuine border lap covers many distinct cells -> never mistaken for a stuck loop.
+	var arena := _frost_arena()
+	GameState.start_run(3)
+	var e := _sparx_on(arena, Vector2i(1, 1))
+	var seen: Dictionary = {}
+	for i in 200:
+		e._physics_process(0.05)
+		seen[e.get("_grid_cell")] = true
+	assert_eq(e.get("_sparx_state"), Enemy.SparxState.PATROL, "real lap stays patrolling (no relocate)")
+	assert_gt(seen.size(), e.loop_min_cells, "real lap covers many distinct cells")
+	GameState.reset()
+
+
 func test_sparx_stays_on_border_never_interior() -> void:
 	# Edge-lock invariant: every cell Sparx occupies is border-adjacent (touches a wall). It must
 	# NEVER step into the open interior, even over a long patrol.

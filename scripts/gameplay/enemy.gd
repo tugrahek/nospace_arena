@@ -24,6 +24,8 @@ enum SparxState { PATROL, CONTAINED, TELEGRAPH }
 @export var emerge_telegraph: float = 0.4     # Sparx: warning blink on re-emerge before lethal again
 @export var trap_pocket_max_cells: int = 400  # Sparx: secondary safety -> also trapped if region <= this
 @export var safe_emerge_distance: int = 7      # Sparx: re-emerge >= this many cells from the player
+@export var loop_check_steps: int = 64         # Sparx: window of steps to detect a degenerate loop
+@export var loop_min_cells: int = 24           # Sparx: <= this many distinct cells in the window = stuck loop
 
 var shape: int = Shape.CIRCLE  # placeholder type tell (Step 14 sprites)
 
@@ -45,6 +47,8 @@ var _catch_cd: float = 0.0     # Sparx catch cooldown
 var _sparx_state: int = SparxState.PATROL
 var _contain_timer: float = 0.0    # CONTAINED countdown (fixed physics-step, grid-independent)
 var _telegraph_timer: float = 0.0  # TELEGRAPH countdown (non-lethal warning blink)
+var _loop_seen: Dictionary = {}    # distinct cells visited in the current loop-detection window
+var _loop_steps: int = 0           # steps taken in the current window
 var _velocity: Vector2 = Vector2.ZERO
 var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
 var run_speed_scale: float = 1.0  # run-start boost (Slow Start): < 1 slows; game resets to 1 on expiry
@@ -75,6 +79,8 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 	_sparx_state = SparxState.PATROL
 	_contain_timer = 0.0
 	_telegraph_timer = 0.0
+	_loop_seen = {}
+	_loop_steps = 0
 	visible = true
 	_speed_scale = 1.0
 	_active_effect = null
@@ -169,6 +175,9 @@ func _patrol(delta: float) -> void:
 	while _step_timer >= interval:
 		_step_timer -= interval
 		_grid_cell = _arena.world_to_cell(_step_to)  # arrived at the previous target
+		if _is_stuck_in_loop():  # circling a tiny sub-loop (e.g. a captured island) -> relocate
+			_begin_telegraph()
+			return
 		_heading = _next_edge_heading()
 		_step_from = _arena.cell_to_world(_grid_cell)
 		var next_cell: Vector2i = _grid_cell + _heading
@@ -192,8 +201,30 @@ func _patrol(delta: float) -> void:
 	queue_redraw()
 
 
+## Degenerate-loop detector: records each arrival cell; once a window of loop_check_steps passes, if
+## only a tiny distinct set was visited (<= loop_min_cells) AND the reachable FREE area is far larger
+## than that loop, Sparx is circling a sub-loop (e.g. a captured island) and can't reach the main
+## edge -> signal a relocate. Otherwise resets the window. The FREE-area gate avoids thrash when the
+## whole remaining arena IS that small (near-win, nowhere better). Deterministic (no RNG).
+func _is_stuck_in_loop() -> bool:
+	_loop_seen[_grid_cell] = true
+	_loop_steps += 1
+	if _loop_steps < loop_check_steps:
+		return false
+	var tiny: bool = _loop_seen.size() <= loop_min_cells
+	var has_more: bool = _flood_free_set(_grid_cell, loop_min_cells * 4).size() > loop_min_cells
+	_reset_loop_tracker()
+	return tiny and has_more
+
+
+func _reset_loop_tracker() -> void:
+	_loop_seen.clear()
+	_loop_steps = 0
+
+
 ## PATROL -> CONTAINED: invisible + inert breather on its own timer.
 func _enter_contain() -> void:
+	_reset_loop_tracker()
 	_sparx_state = SparxState.CONTAINED
 	_contain_timer = contain_duration
 	visible = false
@@ -205,6 +236,7 @@ func _enter_contain() -> void:
 ## CONTAINED -> TELEGRAPH: snap onto a walkable perimeter of the MAIN region nearest the player
 ## (never the pocket), with a valid heading, then a non-lethal warning blink. Grid is read-only.
 func _begin_telegraph() -> void:
+	_reset_loop_tracker()
 	var ref: Vector2i = _arena.world_to_cell(_last_player_pos) if _has_player else _grid_cell
 	_reproject_to_main(ref)
 	_sparx_state = SparxState.TELEGRAPH
