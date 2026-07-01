@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/level_data.gd" id="1_lvl"]
+[ext_resource type="Resource" path="res://resources/arenas/arena_frost.tres" id="2_arena"]
+[ext_resource type="Resource" path="res://resources/enemies/type_sparx.tres" id="5_s"]
+
+[resource]
+script = ExtResource("1_lvl")
+id = &"c06"
+arena = ExtResource("2_arena")
+enemies = Array[Resource]([ExtResource("5_s"), ExtResource("5_s")])
+target_percent = 60.0
+lives = 3
+boosts_allowed = true
+speed_mult = 1.0
+star2_score = 1000
+star3_percent = 75.0

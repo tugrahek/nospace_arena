@@ -19,6 +19,22 @@ const BOOSTS: Array[BoostData] = [
 	preload("res://resources/boosts/coin_bonus.tres"),
 	preload("res://resources/boosts/slow_start.tres"),
 ]
+## Campaign levels, in play order. The difficulty curve is hand-authored (intro one enemy type at a
+## time -> combine -> boost-locked / low-life spikes with "breather" levels between).
+const LEVELS: Array[LevelData] = [
+	preload("res://resources/levels/c01.tres"),
+	preload("res://resources/levels/c02.tres"),
+	preload("res://resources/levels/c03.tres"),
+	preload("res://resources/levels/c04.tres"),
+	preload("res://resources/levels/c05.tres"),
+	preload("res://resources/levels/c06.tres"),
+	preload("res://resources/levels/c07.tres"),
+	preload("res://resources/levels/c08.tres"),
+	preload("res://resources/levels/c09.tres"),
+	preload("res://resources/levels/c10.tres"),
+	preload("res://resources/levels/c11.tres"),
+	preload("res://resources/levels/c12.tres"),
+]
 const MISSIONS: Array[MissionDef] = [
 	preload("res://resources/missions/m_score_800.tres"),
 	preload("res://resources/missions/m_score_1000.tres"),
@@ -50,6 +66,13 @@ static func arena_index(id: StringName) -> int:
 		if ARENAS[i].id == id:
 			return i
 	return 0
+
+
+## The Campaign level at `index`, or null if out of range.
+static func level_at(index: int) -> LevelData:
+	if index < 0 or index >= LEVELS.size():
+		return null
+	return LEVELS[index]
 
 
 ## The BoostData with `id`, or null if not found.

@@ -14,6 +14,7 @@ var streak_day: int = 0  # 1..7 login streak
 var tutorial_seen: bool = false  # how-to-play shown once (first launch)
 var boost_charges: Dictionary = {}  # boost id:String -> owned count:int (consumables)
 var armed_boosts: Array = []  # boost ids:String armed for the next run
+var campaign_stars: Dictionary = {}  # campaign level id:String -> best stars:int (0-3)
 
 
 ## Fresh profile: no currency, default content unlocked + selected (free baseline).
@@ -73,6 +74,20 @@ func consume_boost(id: StringName) -> bool:
 	return true
 
 
+## Best stars earned on a campaign level (0 if never cleared).
+func campaign_star(id: StringName) -> int:
+	return int(campaign_stars.get(String(id), 0))
+
+
+## Records a level result, keeping the best (highest) star count. Returns true if it improved.
+func set_campaign_star(id: StringName, stars: int) -> bool:
+	var s: int = clampi(stars, 0, 3)
+	if s <= campaign_star(id):
+		return false
+	campaign_stars[String(id)] = s
+	return true
+
+
 func is_boost_armed(id: StringName) -> bool:
 	return armed_boosts.has(String(id))
 
@@ -97,6 +112,7 @@ func to_dict() -> Dictionary:
 		"tutorial_seen": tutorial_seen,
 		"boost_charges": boost_charges.duplicate(true),
 		"armed_boosts": armed_boosts.duplicate(),
+		"campaign_stars": campaign_stars.duplicate(true),
 	}
 
 
@@ -122,4 +138,8 @@ static func from_dict(d: Dictionary) -> SaveData:
 	if typeof(ab) == TYPE_ARRAY:
 		for id in ab:
 			data.armed_boosts.append(String(id))
+	var cs: Variant = d.get("campaign_stars", {})
+	if typeof(cs) == TYPE_DICTIONARY:
+		for id in cs:
+			data.campaign_stars[String(id)] = int(cs[id])
 	return data

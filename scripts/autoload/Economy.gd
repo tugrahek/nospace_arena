@@ -13,6 +13,7 @@ signal currency_changed(new_balance: int)
 signal unlocks_changed()
 signal login_reward_claimed(day: int, amount: int)
 signal boosts_changed()
+signal campaign_changed()
 
 var _data  # SaveData
 
@@ -107,6 +108,24 @@ func set_boost_armed(id: StringName, armed: bool) -> void:
 
 func armed_boosts() -> Array:
 	return _data.armed_boosts.duplicate()
+
+
+# --- Campaign progress ---
+
+func campaign_star(id: StringName) -> int:
+	return _data.campaign_star(id)
+
+
+## Records a level result (keeps the best stars). Persists + signals only if it improved.
+func record_campaign_result(id: StringName, stars: int) -> void:
+	if _data.set_campaign_star(id, stars):
+		_flush()
+		campaign_changed.emit()
+
+
+## Whether the level at `index` is unlocked (previous level has >= 1 star; first is always open).
+func is_level_unlocked(index: int) -> bool:
+	return CampaignStars.is_unlocked(index, ContentCatalog.LEVELS, _data.campaign_stars)
 
 
 func selected_character() -> StringName:

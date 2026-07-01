@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/level_data.gd" id="1_lvl"]
+[ext_resource type="Resource" path="res://resources/arenas/arena_void.tres" id="2_arena"]
+[ext_resource type="Resource" path="res://resources/enemies/type_bouncer.tres" id="3_b"]
+[ext_resource type="Resource" path="res://resources/enemies/type_chaser.tres" id="4_c"]
+
+[resource]
+script = ExtResource("1_lvl")
+id = &"c03"
+arena = ExtResource("2_arena")
+enemies = Array[Resource]([ExtResource("3_b"), ExtResource("4_c")])
+target_percent = 55.0
+lives = 3
+boosts_allowed = true
+speed_mult = 1.0
+star2_score = 640
+star3_percent = 70.0

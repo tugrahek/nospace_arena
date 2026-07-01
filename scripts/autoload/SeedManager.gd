@@ -11,11 +11,12 @@ signal daily_seed_ready(seed_value: int)
 
 ## Play modes. Stage progression (Step 18) belongs ONLY to LEVEL_ENDLESS; DAILY and FREE are
 ## single-arena. `is_daily` stays as a convenience mirror of (mode == DAILY).
-enum Mode { DAILY, FREE, LEVEL_ENDLESS }
+enum Mode { DAILY, FREE, LEVEL_ENDLESS, CAMPAIGN }
 
 var daily_seed: int = 0
 var is_daily: bool = false
 var mode: int = Mode.FREE
+var campaign_level: int = 0  # selected Campaign level index (CAMPAIGN mode)
 var day_offset: int = 0  # DEV ONLY: preview other days' challenges (0 = real today)
 
 
@@ -65,6 +66,13 @@ func enter_free() -> void:
 func enter_level_endless() -> void:
 	is_daily = false
 	mode = Mode.LEVEL_ENDLESS
+
+
+## Campaign: play one authored level (single arena challenge). Personal stars/progress, no ghost.
+func enter_campaign(level_index: int) -> void:
+	is_daily = false
+	mode = Mode.CAMPAIGN
+	campaign_level = level_index
 
 
 func toggle_daily() -> void:
