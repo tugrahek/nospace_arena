@@ -129,21 +129,21 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -240.0
-offset_top = -180.0
+offset_top = -235.0
 offset_right = 240.0
-offset_bottom = 180.0
+offset_bottom = 235.0
 
 [node name="VBox" type="VBoxContainer" parent="ResultPanel"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -160.0
-offset_right = 220.0
-offset_bottom = 160.0
+offset_left = -215.0
+offset_top = -215.0
+offset_right = 215.0
+offset_bottom = 215.0
 alignment = 1
-theme_override_constants/separation = 24
+theme_override_constants/separation = 18
 
 [node name="TitleLabel" type="Label" parent="ResultPanel/VBox"]
 layout_mode = 2
@@ -158,18 +158,48 @@ horizontal_alignment = 1
 text = "Skor: 0"
 theme_override_font_sizes/font_size = 32
 
-[node name="RetryButton" type="Button" parent="ResultPanel/VBox"]
+[node name="StarsLabel" type="Label" parent="ResultPanel/VBox"]
+visible = false
 layout_mode = 2
-custom_minimum_size = Vector2(200, 60)
-size_flags_horizontal = 4
-text = "Retry"
+horizontal_alignment = 1
+text = "★★★"
+theme_override_font_sizes/font_size = 40
+theme_override_colors/font_color = Color(1, 0.82, 0.28, 1)
+
+[node name="NewBestLabel" type="Label" parent="ResultPanel/VBox"]
+visible = false
+layout_mode = 2
+horizontal_alignment = 1
+text = "New best!"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 0.82, 0.28, 1)
+
+[node name="NextButton" type="Button" parent="ResultPanel/VBox"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(0, 58)
+size_flags_horizontal = 3
+theme_type_variation = &"HeroButton"
+text = "Next"
 theme_override_font_sizes/font_size = 28
 script = ExtResource("2_juicy")
 
-[node name="MenuButton" type="Button" parent="ResultPanel/VBox"]
+[node name="ButtonRow" type="HBoxContainer" parent="ResultPanel/VBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(200, 56)
-size_flags_horizontal = 4
+theme_override_constants/separation = 16
+
+[node name="RetryButton" type="Button" parent="ResultPanel/VBox/ButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+size_flags_horizontal = 3
+text = "Retry"
+theme_override_font_sizes/font_size = 26
+script = ExtResource("2_juicy")
+
+[node name="MenuButton" type="Button" parent="ResultPanel/VBox/ButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+size_flags_horizontal = 3
 text = "Menu"
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 26
 script = ExtResource("2_juicy")

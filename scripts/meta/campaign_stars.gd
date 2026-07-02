@@ -6,14 +6,17 @@ extends RefCounted
 ## (score, capture %). Unlock is derived from progress: a level opens once the previous one has
 ## at least one star (the first level is always open).
 
-## Stars (0..3) for a level attempt. 0 if the target wasn't reached (level failed).
-static func star_for(reached_target: bool, score: int, percent: float, level: LevelData) -> int:
+## Stars (0..3) for a level attempt. 0 if the target wasn't reached (level failed). Otherwise:
+## 1 = cleared; +1 if the score threshold is met; +1 if flawless (no life lost). So 2 stars = one
+## of {score, flawless}, 3 stars = BOTH. (Percent isn't used: the run ends at the target %, so a
+## higher-percent star would be unreachable -- score + no-death are the reachable skill metrics.)
+static func star_for(reached_target: bool, score: int, lives_lost: int, level: LevelData) -> int:
 	if not reached_target:
 		return 0
 	var stars: int = 1
 	if level.star2_score > 0 and score >= level.star2_score:
 		stars += 1
-	if level.star3_percent > 0.0 and percent >= level.star3_percent:
+	if lives_lost <= 0:
 		stars += 1
 	return mini(stars, 3)
 

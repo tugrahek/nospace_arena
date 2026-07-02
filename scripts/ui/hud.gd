@@ -6,6 +6,7 @@ extends CanvasLayer
 
 signal retry_pressed()
 signal menu_pressed()
+signal next_pressed()  # Campaign: advance to the next level from the win screen
 
 ## Scale the score label punches to on each capture, then settles back to 1.0 (@export feel).
 @export var score_punch: float = 1.3
@@ -24,8 +25,11 @@ var _score_tween: Tween = null
 @onready var _result_panel: Control = $ResultPanel
 @onready var _result_title: Label = $ResultPanel/VBox/TitleLabel
 @onready var _result_score: Label = $ResultPanel/VBox/ResultScore
-@onready var _retry_button: Button = $ResultPanel/VBox/RetryButton
-@onready var _menu_button: Button = $ResultPanel/VBox/MenuButton
+@onready var _stars_label: Label = $ResultPanel/VBox/StarsLabel
+@onready var _new_best_label: Label = $ResultPanel/VBox/NewBestLabel
+@onready var _next_button: Button = $ResultPanel/VBox/NextButton
+@onready var _retry_button: Button = $ResultPanel/VBox/ButtonRow/RetryButton
+@onready var _menu_button: Button = $ResultPanel/VBox/ButtonRow/MenuButton
 
 
 func _ready() -> void:
@@ -42,8 +46,11 @@ func _ready() -> void:
 	_best_label.visible = false
 	_retry_button.text = tr("RESULT_RETRY")
 	_menu_button.text = tr("RESULT_MENU")
+	_next_button.text = tr("RESULT_NEXT")
+	_new_best_label.text = tr("RESULT_NEW_BEST")
 	_retry_button.pressed.connect(func() -> void: retry_pressed.emit())
 	_menu_button.pressed.connect(func() -> void: menu_pressed.emit())
+	_next_button.pressed.connect(func() -> void: next_pressed.emit())
 
 
 ## Shows/hides the daily-mode badge. Full daily UI (countdown etc.) is Step 14.
@@ -69,6 +76,9 @@ func setup(lives: int) -> void:
 	_percent_label.text = "0%"
 	_combo_label.visible = false
 	_result_panel.visible = false
+	_stars_label.visible = false
+	_new_best_label.visible = false
+	_next_button.visible = false
 	_stage_banner.visible = false
 
 
@@ -134,6 +144,16 @@ func _on_run_won(final_score: int) -> void:
 	_result_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.55, 1.0))  # success
 	_result_score.text = tr("HUD_SCORE") + ": " + str(final_score)
 	_result_panel.visible = true
+
+
+## Campaign win: show earned stars (filled/empty) on the result panel, with a "new best" tag if
+## this run improved the level's record. Called by game.gd after recording the result.
+func show_campaign_stars(stars: int, improved: bool, has_next: bool) -> void:
+	var s: int = clampi(stars, 0, 3)
+	_stars_label.text = "★".repeat(s) + "☆".repeat(3 - s)  # own line -> no overflow
+	_stars_label.visible = true
+	_new_best_label.visible = improved  # separate small line
+	_next_button.visible = has_next
 
 
 ## DEV currency indicator (Step 13/14 replace with real currency UI).

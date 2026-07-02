@@ -18,28 +18,34 @@ func _level(target: float, s2: int, s3: float) -> LevelData:
 # --- Star computation ---
 
 func test_star_zero_when_failed() -> void:
-	var l := _level(60.0, 500, 75.0)
-	assert_eq(CampaignStars.star_for(false, 9999, 99.0, l), 0, "not reached -> 0 stars")
+	var l := _level(60.0, 500, 0.0)
+	assert_eq(CampaignStars.star_for(false, 9999, 0, l), 0, "not reached -> 0 stars")
 
 
-func test_star_one_on_clear() -> void:
-	var l := _level(60.0, 500, 75.0)
-	assert_eq(CampaignStars.star_for(true, 100, 60.0, l), 1, "cleared, thresholds unmet -> 1")
+func test_star_one_cleared_only() -> void:
+	var l := _level(60.0, 500, 0.0)
+	assert_eq(CampaignStars.star_for(true, 100, 1, l), 1, "cleared, low score, died -> 1")
 
 
 func test_star_two_on_score() -> void:
-	var l := _level(60.0, 500, 75.0)
-	assert_eq(CampaignStars.star_for(true, 500, 60.0, l), 2, "score threshold -> 2")
+	var l := _level(60.0, 500, 0.0)
+	assert_eq(CampaignStars.star_for(true, 500, 1, l), 2, "score met but died -> 2")
 
 
-func test_star_three_on_score_and_percent() -> void:
-	var l := _level(60.0, 500, 75.0)
-	assert_eq(CampaignStars.star_for(true, 500, 75.0, l), 3, "score + percent -> 3")
+func test_star_two_on_flawless() -> void:
+	var l := _level(60.0, 500, 0.0)
+	assert_eq(CampaignStars.star_for(true, 100, 0, l), 2, "flawless but low score -> 2")
 
 
-func test_star_capped_and_disabled_thresholds() -> void:
-	var l := _level(60.0, 0, 0.0)  # thresholds disabled
-	assert_eq(CampaignStars.star_for(true, 99999, 99.0, l), 1, "disabled thresholds -> only 1")
+func test_star_three_score_and_flawless() -> void:
+	var l := _level(60.0, 500, 0.0)
+	assert_eq(CampaignStars.star_for(true, 500, 0, l), 3, "score met AND flawless -> 3")
+
+
+func test_star_disabled_score_threshold() -> void:
+	var l := _level(60.0, 0, 0.0)  # score star disabled (star2_score = 0)
+	assert_eq(CampaignStars.star_for(true, 99999, 1, l), 1, "no score star + died -> 1")
+	assert_eq(CampaignStars.star_for(true, 99999, 0, l), 2, "flawless still counts -> 2")
 
 
 # --- Unlock derivation ---
@@ -83,11 +89,41 @@ func test_savedata_star_keeps_best_and_round_trip() -> void:
 
 # --- Catalog integrity ---
 
+func test_boost_resolve_respects_level_flag() -> void:
+	# Campaign with boosts_allowed=false -> nothing applied, even if armed + owned.
+	var armed := {"extra_life": true}
+	var counts := {"extra_life": 3}
+	var off := BoostEffects.resolve(SeedManager.Mode.CAMPAIGN, ContentCatalog.BOOSTS, armed, counts, false)
+	assert_eq(off["extra_lives"], 0, "boost-locked level -> no boost")
+	assert_eq(off["consume"].size(), 0, "no charge consumed")
+	var on := BoostEffects.resolve(SeedManager.Mode.CAMPAIGN, ContentCatalog.BOOSTS, armed, counts, true)
+	assert_eq(on["extra_lives"], 1, "boost-allowed level -> applied")
+
+
+func test_level_select_scene_instantiates() -> void:
+	var s: Control = load("res://scenes/ui/LevelSelect.tscn").instantiate()
+	add_child_autofree(s)
+	assert_not_null(s, "LevelSelect builds its level grid")
+
+
+func test_campaign_configures_selected_level() -> void:
+	# Game in CAMPAIGN mode configures arena/composition/target/lives from the LevelData.
+	SeedManager.enter_campaign(0)  # c01: void, 1 bouncer, target 50, lives 3
+	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
+	add_child_autofree(game)
+	assert_almost_eq(float(game.get("_stage_target")), 50.0, 0.01, "target from level")
+	assert_eq((game.get("_enemies") as Array).size(), 1, "composition from level (1 enemy)")
+	assert_eq(GameState.lives, 3, "lives from level")
+	SeedManager.enter_free()
+	GameState.reset()
+
+
 func test_levels_catalog_valid() -> void:
 	assert_eq(ContentCatalog.LEVELS.size(), 12, "12 authored levels")
 	for lvl in ContentCatalog.LEVELS:
 		assert_not_null(lvl.arena, "%s has an arena" % lvl.id)
 		assert_gt(lvl.enemies.size(), 0, "%s has enemies" % lvl.id)
 		assert_gt(lvl.target_percent, 0.0, "%s has a target" % lvl.id)
+		assert_ne(lvl.description_key, "", "%s has a description key" % lvl.id)
 	assert_eq(ContentCatalog.level_at(0).id, &"c01")
 	assert_null(ContentCatalog.level_at(99), "out of range -> null")

@@ -5,6 +5,7 @@ const ENEMY_SCENE: PackedScene = preload("res://scenes/gameplay/Enemy.tscn")
 const BURST_SCENE: PackedScene = preload("res://scenes/fx/CaptureBurst.tscn")
 const FLOATING_SCORE_SCENE: PackedScene = preload("res://scenes/fx/FloatingScore.tscn")
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
+const LEVEL_SELECT_SCENE: String = "res://scenes/ui/LevelSelect.tscn"
 const PLAY_RECT: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)  # fixed play area; HUD reserved above
 const ARENA_SALT: int = 1   # daily seed salts (distinct draws)
 const CHAR_SALT: int = 2
@@ -30,6 +31,7 @@ var _enemies: Array[Enemy] = []
 var _arena_data: ArenaData
 var _daily: bool = false
 var _mode: int = SeedManager.Mode.FREE
+var _level: LevelData = null  # active Campaign level (CAMPAIGN mode only)
 var _daily_seed: int = 0
 var _leaderboard: Leaderboard = null
 var _recording: GhostTrack = null
@@ -46,6 +48,7 @@ var _exposed_time: float = 0.0  # seconds spent drawing in the open since last c
 var _slow_start_timer: float = 0.0  # Slow Start boost: enemies slowed while > 0 (fixed-step)
 var _slow_start_scale: float = 1.0
 var _coin_multiplier: float = 1.0  # Coin Bonus boost: run-end coin reward x this (1.0 = none)
+var _lives_lost: int = 0  # deaths this run (Campaign: 0 -> flawless star)
 
 
 func _ready() -> void:
@@ -56,6 +59,7 @@ func _ready() -> void:
 	# everyone that day). Free-play: player's own indices (dev C/V cycle).
 	_daily = SeedManager.is_daily
 	_mode = SeedManager.mode
+	_level = ContentCatalog.level_at(SeedManager.campaign_level) if _mode == SeedManager.Mode.CAMPAIGN else null
 	_daily_seed = SeedManager.daily_seed
 	var char_idx: int = DailySeed.to_index(_daily_seed, CHAR_SALT, ContentCatalog.CHARACTERS.size()) if _daily else ContentCatalog.character_index(Economy.selected_character())
 	# Connect signals ONCE — nodes (arena/player/enemies-root/HUD) persist across stages;
@@ -69,14 +73,16 @@ func _ready() -> void:
 	GameState.run_won.connect(_on_run_won)
 	_hud.retry_pressed.connect(_on_retry)
 	_hud.menu_pressed.connect(_on_menu)
+	_hud.next_pressed.connect(_on_next)
 	_pause_overlay.restart_requested.connect(_on_retry)
 	_pause_overlay.menu_requested.connect(_on_menu)
 	_hitstop.time_control = _time_control
 	_near_miss.near_miss.connect(_on_near_miss)
 	_near_miss.danger_changed.connect(_overlay.set_danger)  # continuous proximity vignette
-	# Pre-run boosts (consumables): policy-gated (off in Daily), applied + consumed once at run start.
+	# Pre-run boosts (consumables): policy-gated (off in Daily / boost-locked levels), consumed once.
 	var boost_fx: Dictionary = _resolve_boosts()
-	var start_lives: int = BALANCE.start_lives + int(boost_fx["extra_lives"])
+	var base_lives: int = _level.lives if _level != null else BALANCE.start_lives
+	var start_lives: int = base_lives + int(boost_fx["extra_lives"])
 	_slow_start_scale = float(boost_fx["slow_scale"])
 	_slow_start_timer = float(boost_fx["slow_duration"])
 	_coin_multiplier = float(boost_fx["coin_multiplier"])
@@ -148,7 +154,8 @@ func _resolve_boosts() -> Dictionary:
 	for b in ContentCatalog.BOOSTS:
 		armed[String(b.id)] = Economy.is_boost_armed(b.id)
 		counts[String(b.id)] = Economy.boost_count(b.id)
-	var fx: Dictionary = BoostEffects.resolve(_mode, ContentCatalog.BOOSTS, armed, counts)
+	var campaign_allows: bool = _level.boosts_allowed if _level != null else true
+	var fx: Dictionary = BoostEffects.resolve(_mode, ContentCatalog.BOOSTS, armed, counts, campaign_allows)
 	for id in fx["consume"]:
 		Economy.consume_boost(id)
 	return fx
@@ -215,6 +222,9 @@ func _apply_character(index: int) -> void:
 func _start_stage(stage: int) -> void:
 	_advancing = false
 	_current_stage = stage
+	if _mode == SeedManager.Mode.CAMPAIGN and _level != null:
+		_apply_campaign_level()
+		return
 	var base_arena: int = 0 if _daily else ContentCatalog.arena_index(Economy.selected_arena())
 	var spec: Dictionary = StagePlan.compute(
 		_daily, _daily_seed, base_arena, stage, ContentCatalog.ARENAS.size(),
@@ -233,32 +243,53 @@ func _start_stage(stage: int) -> void:
 		stage + 1, int(spec["arena_index"]), _stage_target, float(spec["speed_scale"]), _enemies.size()])
 
 
+## Campaign: a single authored level -- arena/theme + explicit enemy composition + target/pace from
+## LevelData (no ramp, no auto-advance). Reuses the same spawn + capture machinery as stages.
+func _apply_campaign_level() -> void:
+	_arena_data = _level.arena
+	_arena.configure(_arena_data, PLAY_RECT)
+	_player.setup(_arena)
+	_spawn_stage_enemies({"speed_scale": _level.speed_mult, "enemy_bonus": 0, "stage_seed": 0}, _level.enemies)
+	_living_territory.setup(_arena, _enemies, _player)
+	_near_miss.setup(_player, _enemies)
+	_stage_target = _level.target_percent
+	_hud.update_percent(0.0)
+	print("Campaign level %s: arena=%s target=%.0f%% enemies=%d boosts=%s" % [
+		_level.id, _arena_data.id, _stage_target, _level.enemies.size(), str(_level.boosts_allowed)])
+
+
 ## Spawns the stage's enemies: count = arena composition + seed/stage bonus (capped). Speed is
 ## the grid-relative type base × arena modifier × stage speed scale × fitted cell_size. Daily
 ## directions derive from the (deterministic) stage seed; free-play uses the index pattern.
-func _spawn_stage_enemies(spec: Dictionary) -> void:
+func _spawn_stage_enemies(spec: Dictionary, override_types: Array = []) -> void:
 	for e in _enemies:
 		e.queue_free()
 	_enemies.clear()
+	# Campaign passes an explicit composition; stages use the arena's default roster.
 	var types: Array[EnemyType] = _arena_data.enemies
+	if not override_types.is_empty():
+		types = []
+		for t in override_types:
+			types.append(t)
 	if types.is_empty():
 		return
 	var count: int = types.size() + int(spec["enemy_bonus"])
 	var center: Vector2 = _arena.get_rect().get_center()
 	var stage_seed: int = int(spec["stage_seed"])
 	var speed_scale: float = float(spec["speed_scale"])
-	# Per-type totals so each enemy of a type gets an even-spread variation ([-1,1]) -> same-type
-	# enemies (e.g. chasers) approach from distinct angles instead of stacking (overlap fix).
-	var per_type_total: Dictionary = {}
+	# Per-type totals keyed by the ACTUAL type (not position) so same-type enemies get distinct
+	# even-spread variations ([-1,1]) -> approach from different angles, never stack. Keying by type
+	# also fixes Campaign, whose explicit composition lists duplicates ([chaser, chaser]).
+	var type_total: Dictionary = {}
 	for i in count:
-		per_type_total[i % types.size()] = int(per_type_total.get(i % types.size(), 0)) + 1
-	var per_type_seen: Dictionary = {}
+		var tt: EnemyType = types[i % types.size()]
+		type_total[tt] = int(type_total.get(tt, 0)) + 1
+	var type_seen: Dictionary = {}
 	for i in count:
-		var ti: int = i % types.size()
-		var k: int = int(per_type_seen.get(ti, 0))
-		per_type_seen[ti] = k + 1
-		var variation: float = EnemyMotion.even_spread(k, int(per_type_total[ti]))
-		var type: EnemyType = types[ti]
+		var type: EnemyType = types[i % types.size()]
+		var k: int = int(type_seen.get(type, 0))
+		type_seen[type] = k + 1
+		var variation: float = EnemyMotion.even_spread(k, int(type_total[type]))
 		var speed_px: float = type.base_speed_cells * _arena_data.speed_mult * speed_scale * _arena.cell_size
 		var enemy: Enemy = ENEMY_SCENE.instantiate()
 		_enemies_root.add_child(enemy)
@@ -324,6 +355,7 @@ func _enemy_cells() -> Array:
 func _on_trail_failed() -> void:
 	if not GameState.is_playing():
 		return
+	_lives_lost += 1  # tracked for the Campaign flawless star
 	# Life-loss impact: a single screen flash + heavy shake (no strobe).
 	_overlay.flash()
 	_camera.add_trauma(_camera.trauma_life_loss)
@@ -356,9 +388,17 @@ func _on_run_won(final_score: int) -> void:
 
 
 ## Run end: daily leaderboard submit + mission evaluation (missions are the currency source).
+## Campaign win also records stars (best kept -> unlocks the next level) + shows them on the result.
 func _on_run_ended(score: int) -> void:
 	_submit_run(score)
 	_update_missions(score)
+	if _mode == SeedManager.Mode.CAMPAIGN and _level != null and _won:
+		var stars: int = CampaignStars.star_for(true, score, _lives_lost, _level)
+		var improved: bool = stars > Economy.campaign_star(_level.id)
+		Economy.record_campaign_result(_level.id, stars)  # records max -> may unlock the next level
+		var next_i: int = SeedManager.campaign_level + 1
+		var has_next: bool = next_i < ContentCatalog.LEVELS.size() and Economy.is_level_unlocked(next_i)
+		_hud.show_campaign_stars(stars, improved, has_next)
 
 
 func _on_area_captured(percent: float, cells: Array) -> void:
@@ -429,7 +469,15 @@ func _on_retry() -> void:
 
 
 func _on_menu() -> void:
-	get_tree().change_scene_to_file(MENU_SCENE)
+	# Campaign returns to the level map (tight pick-next loop); other modes go home.
+	var dest: String = LEVEL_SELECT_SCENE if _mode == SeedManager.Mode.CAMPAIGN else MENU_SCENE
+	get_tree().change_scene_to_file(dest)
+
+
+## Campaign win -> advance to the next level (already validated unlocked before the button showed).
+func _on_next() -> void:
+	SeedManager.enter_campaign(SeedManager.campaign_level + 1)
+	get_tree().reload_current_scene()  # re-runs _ready with the new campaign_level
 
 
 ## DEV shortcuts — debug/editor only; auto-disabled in release export (no cheats shipped).

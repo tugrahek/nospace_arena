@@ -7,6 +7,7 @@
 [resource]
 script = ExtResource("1_lvl")
 id = &"c04"
+description_key = "LEVEL_C04_DESC"
 arena = ExtResource("2_arena")
 enemies = Array[Resource]([ExtResource("4_c"), ExtResource("4_c")])
 target_percent = 60.0

@@ -10,7 +10,7 @@ extends RefCounted
 ## `counts` : { id_string -> int }   (owned charges)
 ## Returns: { extra_lives:int, slow_scale:float, slow_duration:float, coin_multiplier:float,
 ##            consume:Array[StringName] }
-static func resolve(mode: int, boosts: Array, armed: Dictionary, counts: Dictionary) -> Dictionary:
+static func resolve(mode: int, boosts: Array, armed: Dictionary, counts: Dictionary, campaign_allows: bool = true) -> Dictionary:
 	var out: Dictionary = {
 		"extra_lives": 0,
 		"slow_scale": 1.0,
@@ -18,8 +18,8 @@ static func resolve(mode: int, boosts: Array, armed: Dictionary, counts: Diction
 		"coin_multiplier": 1.0,
 		"consume": [],
 	}
-	if not BoostPolicy.boosts_allowed(mode):
-		return out  # Daily / disallowed -> no effect, no charge spent
+	if not BoostPolicy.boosts_allowed(mode, campaign_allows):
+		return out  # Daily / boost-locked Campaign level -> no effect, no charge spent
 	for b in boosts:
 		var key: String = String(b.id)
 		if not armed.get(key, false) or int(counts.get(key, 0)) <= 0:

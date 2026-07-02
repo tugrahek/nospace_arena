@@ -27,6 +27,25 @@ MODE_SELECT_TITLE,Select Mode
 MODE_DAILY_DESC,Today's challenge
 MODE_FREE_DESC,Casual play
 MODE_LEVEL_DESC,Escalating difficulty
+MENU_CAMPAIGN,Campaign
+MODE_CAMPAIGN_DESC,Level challenges
+LEVELSELECT_TITLE,Select Level
+LEVEL_LABEL,Level
+LEVEL_LOCKED,Locked
+RESULT_NEW_BEST,New best!
+RESULT_NEXT,Next
+LEVEL_C01_DESC,1 Bouncer • reach 50%
+LEVEL_C02_DESC,2 Bouncers • reach 55%
+LEVEL_C03_DESC,Stalker joins • reach 55%
+LEVEL_C04_DESC,2 Stalkers • reach 60%
+LEVEL_C05_DESC,Sparx joins • reach 55%
+LEVEL_C06_DESC,2 Sparx • reach 60%
+LEVEL_C07_DESC,Full combo • reach 60%
+LEVEL_C08_DESC,Combo • no boosts
+LEVEL_C09_DESC,Breather • reach 50%
+LEVEL_C10_DESC,Heavy swarm • reach 65%
+LEVEL_C11_DESC,Low lives (2) • reach 65%
+LEVEL_C12_DESC,Finale • all types, no boosts
 MENU_STORE,Store
 MENU_CREDITS,Credits
 MENU_LEADERBOARD,Leaderboard
