@@ -14,6 +14,8 @@ const MISSIONS_PATH: String = "user://missions.json"
 const MISSION_COUNT: int = 3
 const PROGRESSION: ProgressionConfig = preload("res://config/progression.tres")
 
+@export var death_grace: float = 1.0  # invulnerability window after a life loss (no chain-kills)
+
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
 @onready var _enemies_root: Node2D = $Enemies
@@ -49,6 +51,7 @@ var _slow_start_timer: float = 0.0  # Slow Start boost: enemies slowed while > 0
 var _slow_start_scale: float = 1.0
 var _coin_multiplier: float = 1.0  # Coin Bonus boost: run-end coin reward x this (1.0 = none)
 var _lives_lost: int = 0  # deaths this run (Campaign: 0 -> flawless star)
+var _death_grace_timer: float = 0.0  # > 0 = invulnerable (ignore hits) right after a life loss
 
 
 func _ready() -> void:
@@ -164,6 +167,13 @@ func _resolve_boosts() -> Dictionary:
 ## Records the player path at the physics rate (daily only) for the ghost.
 ## Pause freezes _physics_process -> no samples while paused -> ghost stays deterministic.
 func _physics_process(delta: float) -> void:
+	# Post-death invulnerability: count down + blink the player so the grace reads clearly.
+	if _death_grace_timer > 0.0:
+		_death_grace_timer -= delta
+		if _death_grace_timer <= 0.0:
+			_player.modulate.a = 1.0
+		else:
+			_player.modulate.a = 0.35 + 0.65 * absf(sin(_death_grace_timer * 20.0))
 	# Slow Start boost: enemies run at run_speed_scale until the timer expires, then back to normal.
 	if _slow_start_timer > 0.0:
 		_slow_start_timer -= delta
@@ -297,15 +307,21 @@ func _spawn_stage_enemies(spec: Dictionary, override_types: Array = []) -> void:
 			enemy.color = _arena_data.theme.enemy_color
 		enemy.shape = type.shape
 		if type.edge_follow:
-			# Sparx: deterministic perimeter spawn at column 1 (left border = wall on the right
-			# of a DOWN heading), each one a row lower so multiple sparx don't stack.
-			var start_cell := Vector2i(1, clampi(1 + k, 1, maxi(_arena.grid.rows - 2, 1)))
+			# Sparx: deterministic perimeter spawn on the left border (col 1, wall on the right of a
+			# DOWN heading). Spread the start rows ACROSS the arena height by per-type index so
+			# multiple sparx patrol far apart on the loop instead of trailing 1 cell apart (stacked).
+			var max_row: int = maxi(_arena.grid.rows - 2, 1)
+			var start_row: int = EnemyMotion.edge_start_row(k, int(type_total[type]), max_row)
+			var start_cell := Vector2i(1, start_row)
 			enemy.setup(_arena, _arena.cell_to_world(start_cell), Vector2.ZERO, type.behavior,
 				speed_px, variation, true, start_cell, Vector2i.DOWN)
 		else:
 			var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(stage_seed, i), speed_px) \
 				if _daily else EnemyMotion.start_velocity(i, speed_px)
-			enemy.setup(_arena, center, vel, type.behavior, speed_px, variation)
+			# Spread spawn positions off-center by index so multiple enemies don't stack (2 -> opposite
+			# sides). Deterministic (index/count only) -> daily/ghost reproduce.
+			var spawn_pos: Vector2 = center + EnemyMotion.spawn_offset(i, count, _arena.cell_size * 3.0)
+			enemy.setup(_arena, spawn_pos, vel, type.behavior, speed_px, variation)
 		enemy.run_speed_scale = _slow_start_scale if _slow_start_timer > 0.0 else 1.0  # Slow Start boost
 		enemy.hit_trail.connect(_on_trail_failed)
 		_enemies.append(enemy)
@@ -355,6 +371,9 @@ func _enemy_cells() -> Array:
 func _on_trail_failed() -> void:
 	if not GameState.is_playing():
 		return
+	if _death_grace_timer > 0.0:
+		return  # invulnerable right after a death -> a single event costs exactly one life
+	_death_grace_timer = death_grace  # start i-frames (blocks simultaneous/chain hits + respawn re-catch)
 	_lives_lost += 1  # tracked for the Campaign flawless star
 	# Life-loss impact: a single screen flash + heavy shake (no strobe).
 	_overlay.flash()

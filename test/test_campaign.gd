@@ -106,6 +106,19 @@ func test_level_select_scene_instantiates() -> void:
 	assert_not_null(s, "LevelSelect builds its level grid")
 
 
+func test_death_grace_blocks_double_hit() -> void:
+	# Two hits in the same death moment (e.g. two adjacent Sparx) cost only ONE life -- the
+	# post-death invulnerability window ignores the second.
+	SeedManager.enter_free()
+	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
+	add_child_autofree(game)
+	var lives0: int = GameState.lives
+	game.call("_on_trail_failed")  # first hit -> 1 life + starts grace
+	game.call("_on_trail_failed")  # same frame -> ignored (invulnerable)
+	assert_eq(GameState.lives, lives0 - 1, "one death event costs exactly one life")
+	GameState.reset()
+
+
 func test_campaign_configures_selected_level() -> void:
 	# Game in CAMPAIGN mode configures arena/composition/target/lives from the LevelData.
 	SeedManager.enter_campaign(0)  # c01: void, 1 bouncer, target 50, lives 3

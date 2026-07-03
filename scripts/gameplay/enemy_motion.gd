@@ -55,6 +55,23 @@ static func even_spread(index: int, total: int) -> float:
 	return float(index) / float(total - 1) * 2.0 - 1.0
 
 
+## Deterministic spawn offset so `total` enemies don't stack on the arena center: evenly spaced on
+## a ring by index (2 -> opposite sides, 3 -> triangle, ...). Single enemy -> no offset. No RNG.
+static func spawn_offset(index: int, total: int, radius: float) -> Vector2:
+	if total <= 1:
+		return Vector2.ZERO
+	var ang: float = TAU * float(index) / float(total)
+	return Vector2(cos(ang), sin(ang)) * radius
+
+
+## Edge-walker (Sparx) start row on the left border, spread across [1, max_row] by index so multiple
+## patrol far apart on the loop instead of trailing 1 cell apart. Single -> row 1. Deterministic.
+static func edge_start_row(index: int, total: int, max_row: int) -> int:
+	if total <= 1:
+		return 1
+	return clampi(1 + index * int(max_row / total), 1, max_row)
+
+
 ## 90° rotations of a cardinal grid direction (screen space, y-down).
 static func turn_right(dir: Vector2i) -> Vector2i:
 	return Vector2i(-dir.y, dir.x)

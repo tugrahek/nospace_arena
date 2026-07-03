@@ -56,7 +56,8 @@ var _active_effect: TerritoryEffect = null  # set each frame by LivingTerritory
 var _freeze_timer: float = 0.0  # > 0 while contact-frozen (Stasis); no movement
 var _freeze_cooldown_timer: float = 0.0  # blocks re-freeze (prevents boundary jitter re-lock)
 var _pending_cooldown: float = 0.0
-var _recovery_timer: float = 0.0  # post-freeze: behavior suppressed, moves on reflected heading
+var _recovery_timer: float = 0.0  # post-bounce peel window (directional; see decide_velocity)
+var _recovery_normal: Vector2 = Vector2.ZERO  # outward normal of the wall last bounced off
 var _steered: bool = false  # TEMP: debug tint while steered/slowed (Step 15 juice replaces)
 var _frozen: bool = false  # TEMP: distinct tint while contact-frozen
 
@@ -88,6 +89,7 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 	_freeze_cooldown_timer = 0.0
 	_pending_cooldown = 0.0
 	_recovery_timer = 0.0
+	_recovery_normal = Vector2.ZERO
 	_steered = false
 	_frozen = false
 	queue_redraw()
@@ -98,11 +100,31 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 func decide_velocity(player_pos: Vector2, player_exposed: bool) -> Vector2:
 	_last_player_pos = player_pos  # cached for Sparx edge-catch (LivingTerritory runs first)
 	_has_player = true
-	# While frozen or recovering, keep the reflected heading (peel off the wall) instead
-	# of re-deciding — avoids a re-freeze loop right after a Halt freeze.
-	if _behavior == null or EnemyMotion.is_behavior_suppressed(_freeze_timer, _recovery_timer):
+	# Frozen (Halt) or no behavior: hold the current/reflected heading (no re-freeze loop).
+	if _behavior == null or _freeze_timer > 0.0:
 		return _velocity
-	return _behavior.decide(_velocity, position, player_pos, player_exposed, _base_speed_px, _variation)
+	var desired: Vector2 = _behavior.decide(_velocity, position, player_pos, player_exposed, _base_speed_px, _variation)
+	# Post-bounce recovery is now DIRECTIONAL: keep homing in every direction EXCEPT straight back
+	# into the wall just hit. Fixes chasers circling a captured edge (blanket suppression) while
+	# still preventing wall-pin (never home directly into the surface). Freeze path is unchanged.
+	if _recovery_timer > 0.0:
+		return _peel_adjust(desired)
+	return desired
+
+
+## During the post-bounce window, strip the component of `v` pointing INTO the wall last hit
+## (keep the tangential + outward part) so the enemy peels ALONG the wall toward its target rather
+## than homing straight back into it. Purely-inward -> keep the reflected heading. Pure/deterministic.
+func _peel_adjust(v: Vector2) -> Vector2:
+	if _recovery_normal == Vector2.ZERO or v == Vector2.ZERO:
+		return v
+	var into: float = v.dot(_recovery_normal)
+	if into >= 0.0:
+		return v  # heading away from / along the wall -> home freely
+	var tangential: Vector2 = v - _recovery_normal * into  # remove the inward component
+	if tangential.length() < 0.001:
+		return _velocity  # purely into the wall -> keep the reflected (peel) heading
+	return tangential.normalized() * v.length()
 
 
 ## Applies the living-territory effect on top of the behavior's base velocity. steer
@@ -467,7 +489,8 @@ func _advance(step: float) -> bool:
 		position.y = EnemyMotion.clamp_to_wall(position.y, face_y, radius, sgy)
 	if block_x or block_y:
 		_velocity = EnemyMotion.reflect(_velocity, block_x, block_y)
-		_recovery_timer = recovery_time  # peel off on the reflected heading (no homing pin)
+		_recovery_timer = recovery_time  # peel window; decide_velocity uses it directionally
+		_recovery_normal = Vector2(-sgx if block_x else 0.0, -sgy if block_y else 0.0).normalized()
 		queue_redraw()
 		var on_player: bool = (block_x and _arena.is_player_captured(cx)) \
 			or (block_y and _arena.is_player_captured(cy))
@@ -478,7 +501,8 @@ func _advance(step: float) -> bool:
 	var cd: Vector2i = _arena.world_to_cell(Vector2(next_pos.x + sgx * radius, next_pos.y + sgy * radius))
 	if _arena.cell_state(cd) == CaptureGrid.Cell.CAPTURED:
 		_velocity = EnemyMotion.reflect(_velocity, true, true)
-		_recovery_timer = recovery_time  # peel off on the reflected heading (no homing pin)
+		_recovery_timer = recovery_time  # peel window; decide_velocity uses it directionally
+		_recovery_normal = Vector2(-sgx, -sgy).normalized()
 		queue_redraw()
 		if _arena.is_player_captured(cd) and _try_contact_freeze():
 			return false
