@@ -39,7 +39,7 @@ LEVEL_C02_DESC,2 Bouncers • reach 55%
 LEVEL_C03_DESC,Stalker joins • reach 55%
 LEVEL_C04_DESC,2 Stalkers • reach 60%
 LEVEL_C05_DESC,Sparx joins • reach 55%
-LEVEL_C06_DESC,2 Sparx • reach 60%
+LEVEL_C06_DESC,2 Sparx guard the edges + Bouncer • reach 65%
 LEVEL_C07_DESC,Full combo • reach 60%
 LEVEL_C08_DESC,Combo • no boosts
 LEVEL_C09_DESC,Breather • reach 50%

@@ -5,3 +5,5 @@
 [resource]
 script = ExtResource("1_slow")
 slow_radius = 55.0
+slow_factor = 0.4
+min_scale = 0.6

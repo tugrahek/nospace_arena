@@ -1,16 +1,17 @@
-[gd_resource type="Resource" script_class="LevelData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="LevelData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/meta/level_data.gd" id="1_lvl"]
 [ext_resource type="Resource" path="res://resources/arenas/arena_frost.tres" id="2_arena"]
 [ext_resource type="Resource" path="res://resources/enemies/type_sparx.tres" id="5_s"]
+[ext_resource type="Resource" path="res://resources/enemies/type_bouncer.tres" id="3_b"]
 
 [resource]
 script = ExtResource("1_lvl")
 id = &"c06"
 description_key = "LEVEL_C06_DESC"
 arena = ExtResource("2_arena")
-enemies = Array[Resource]([ExtResource("5_s"), ExtResource("5_s")])
-target_percent = 60.0
+enemies = Array[Resource]([ExtResource("5_s"), ExtResource("5_s"), ExtResource("3_b")])
+target_percent = 65.0
 lives = 3
 boosts_allowed = true
 speed_mult = 1.0
