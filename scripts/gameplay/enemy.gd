@@ -280,11 +280,15 @@ func is_contained() -> bool:
 ## region is NOT the main (largest) FREE region -- i.e. the player sealed it off from the play area
 ## -- or when its cell was engulfed (captured). Optional size safety: also trap a tiny pocket even
 ## inside the main region. Read-only flood-fill, deterministic; runs only on capture events.
-func on_capture_event() -> void:
+## Returns true when this event NEWLY contained the Sparx — the game triggers the pocket
+## auto-capture reward on it (fix-pass #10). Already-contained / not trapped -> false.
+func on_capture_event() -> bool:
 	if not _edge_follow or _sparx_state != SparxState.PATROL:
-		return
+		return false
 	if _is_trapped():
 		_enter_contain()
+		return true
+	return false
 
 
 ## True when the player has cut Sparx off from the main play area (or engulfed its cell).

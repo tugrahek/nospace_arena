@@ -436,14 +436,29 @@ func _on_run_ended(score: int) -> void:
 
 func _on_area_captured(percent: float, cells: Array) -> void:
 	_hud.update_percent(percent)
-	_areas_this_run += 1
 	_last_percent = percent
-	# Combo clock = accumulated game time (not wall clock): pause/slow-mo can't eat the window.
-	var earned: int = GameState.register_capture(cells.size(), _run_time, _exposed_time)
-	_exposed_time = 0.0  # consumed by this capture
-	for e in _enemies:  # edge-walkers (Sparx) self-contain when boxed into a small pocket
-		e.on_capture_event()
-	_play_capture_juice(cells, earned)
+	# Empty capture (e.g. a pocket fill that found nothing to take): state only — no area,
+	# no score, no juice popping on the player for zero cells.
+	var earned: int = 0
+	if not cells.is_empty():
+		_areas_this_run += 1
+		# Combo clock = accumulated game time (not wall clock): pause/slow-mo can't eat the window.
+		earned = GameState.register_capture(cells.size(), _run_time, _exposed_time)
+		_exposed_time = 0.0  # consumed by this capture
+	var newly_contained: bool = false
+	for e in _enemies:  # edge-walkers (Sparx) self-contain when sealed off from the main region
+		if e.on_capture_event():
+			newly_contained = true
+	if not cells.is_empty():
+		_play_capture_juice(cells, earned)
+	# Trap reward (fix-pass #10): a newly contained Sparx leaves its pocket seedless (contained
+	# Sparx is excluded from danger seeds), so one more close_capture fills that pocket through
+	# the NORMAL pipeline — %, score, combo, missions, juice and win/advance all flow from its
+	# own area_captured emission. SYNC inside this signal is safe: the player just closed a
+	# loop, so no live trail exists to be converted. A pocket still holding an ACTIVE enemy
+	# stays FREE (that enemy seeds it) — a visible enemy keeps holding its ground.
+	if newly_contained and GameState.is_playing():
+		_arena.close_capture(_enemy_cells())
 	# Target reached. Level-Endless advances to a harder stage (deferred so the arena isn't
 	# rebuilt mid capture-signal); Daily/Free are single-arena and simply win.
 	if percent >= _stage_target and GameState.is_playing():

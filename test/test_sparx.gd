@@ -275,6 +275,110 @@ func test_sparx_stays_on_border_never_interior() -> void:
 	GameState.reset()
 
 
+func test_on_capture_event_reports_new_contain_once() -> void:
+	# The bool return drives the pocket auto-capture: true ONLY on the PATROL -> CONTAINED
+	# transition; an already-contained Sparx must not re-trigger a fill.
+	var arena := _frost_arena()
+	GameState.start_run(3)
+	_carve_corner_pocket(arena)
+	var e := _sparx_on(arena, Vector2i(1, 1))
+	e.trap_pocket_max_cells = 0
+	assert_true(e.on_capture_event(), "first event: newly contained -> true")
+	assert_false(e.on_capture_event(), "already contained -> false (no second fill)")
+	GameState.reset()
+
+
+# Carves the standard corner pocket (cols 1..4, rows 1..7) into a LIVE game's grid, keeping the
+# pocket and the main region FREE (both seeded) — the trap stage for the auto-capture tests.
+func _carve_pocket_in_game(g: CaptureGrid) -> void:
+	var path: Array = []
+	for y in range(1, 9):
+		path.append(Vector2i(5, y))
+	for x in range(4, 0, -1):
+		path.append(Vector2i(x, 8))
+	g.lay_trail(path)
+	g.close_and_capture([Vector2i(2, 2), Vector2i(40, 40)])
+
+
+## Adds a Sparx to a LIVE game's enemy list, patrolling inside the pocket. The game's own
+## spawned enemy stays put as the ACTIVE main-region seed (realistic: play area always has
+## live danger; the fill must only ever take seedless pockets, never the main region).
+func _add_game_sparx(game: Node, arena: ArenaController, cell: Vector2i) -> Enemy:
+	var e := Enemy.new()
+	add_child_autofree(e)
+	e.setup(arena, arena.cell_to_world(cell), Vector2.ZERO, null, 16.0 * arena.cell_size, 0.0, true, cell, Vector2i.DOWN)
+	game.get("_enemies").append(e)
+	return e
+
+
+func test_pocket_autocaptures_when_sparx_contained() -> void:
+	# End-to-end reward (fix-pass #10): a capture event that seals the Sparx off fills its pocket
+	# in the SAME event through the normal pipeline — captured cells, percent, chained combo.
+	# The main region keeps its active enemy (seed) and must stay FREE.
+	SeedManager.enter_free()
+	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
+	add_child_autofree(game)
+	await get_tree().process_frame
+	var arena: ArenaController = game.get("_arena")
+	var g: CaptureGrid = arena.grid
+	_carve_pocket_in_game(g)
+	var e: Enemy = _add_game_sparx(game, arena, Vector2i(1, 1))
+	var pct: float = g.captured_percent()
+	var score0: int = GameState.get_score()
+	game.call("_on_area_captured", pct, [Vector2i(40, 40)])  # the player's capture event
+	assert_true(e.is_contained(), "sparx contained by the capture event")
+	assert_eq(g.cell_at(2, 2), CaptureGrid.Cell.CAPTURED, "pocket auto-captured (reward)")
+	assert_eq(g.cell_at(40, 40), CaptureGrid.Cell.FREE, "main region (active enemy) stays FREE")
+	assert_gt(g.captured_percent(), pct, "percent grew by the pocket")
+	assert_eq(GameState.get_combo(), 1, "pocket fill chains the combo (x2)")
+	assert_gt(GameState.get_score(), score0, "both captures scored")
+	# Termination: a further capture event must not re-fill or flip state.
+	var pct2: float = g.captured_percent()
+	game.call("_on_area_captured", pct2, [Vector2i(41, 40)])
+	assert_true(e.is_contained(), "still contained on later events")
+	assert_eq(g.captured_percent(), pct2, "no second fill")
+	Engine.time_scale = 1.0  # juice hit-stop cleanup (never leak a scaled clock into other tests)
+	GameState.reset()
+
+
+func test_pocket_with_active_enemy_not_filled() -> void:
+	# A visible ACTIVE enemy inside the pocket seeds it -> the pocket stays FREE (only unseen,
+	# contained Sparx ground is taken). The empty fill emission must not add score or areas.
+	SeedManager.enter_free()
+	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
+	add_child_autofree(game)
+	await get_tree().process_frame
+	var arena: ArenaController = game.get("_arena")
+	var g: CaptureGrid = arena.grid
+	_carve_pocket_in_game(g)
+	var sparx: Enemy = _add_game_sparx(game, arena, Vector2i(1, 1))
+	var buddy := Enemy.new()  # active roamer parked inside the pocket -> seeds it
+	add_child_autofree(buddy)
+	buddy.setup(arena, arena.cell_to_world(Vector2i(3, 3)), Vector2.ZERO, null, 0.0)
+	game.get("_enemies").append(buddy)
+	game.call("_on_area_captured", g.captured_percent(), [Vector2i(40, 40)])
+	assert_true(sparx.is_contained(), "sparx still contains itself")
+	assert_eq(g.cell_at(3, 3), CaptureGrid.Cell.FREE, "active enemy holds the pocket -> NOT filled")
+	assert_eq(int(game.get("_areas_this_run")), 1, "empty fill emission adds no area")
+	Engine.time_scale = 1.0
+	GameState.reset()
+
+
+func test_empty_capture_event_adds_nothing() -> void:
+	# Hardening: a 0-cell area_captured (engulf contain / seeded-pocket fill) must not add
+	# score, area or juice — and must not crash.
+	SeedManager.enter_free()
+	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
+	add_child_autofree(game)
+	await get_tree().process_frame
+	var areas0: int = int(game.get("_areas_this_run"))
+	var score0: int = GameState.get_score()
+	game.call("_on_area_captured", 0.0, [])
+	assert_eq(int(game.get("_areas_this_run")), areas0, "empty capture adds no area")
+	assert_eq(GameState.get_score(), score0, "empty capture adds no score")
+	GameState.reset()
+
+
 func test_is_contained_only_while_contained() -> void:
 	# is_contained() gates the orchestration exclusions (danger-seed + near-miss): true ONLY in
 	# the CONTAINED breather; PATROL and TELEGRAPH count as active again.
