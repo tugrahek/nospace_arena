@@ -6,7 +6,7 @@ extends Node2D
 ## Exposes a thin API the Player uses to move on / draw into the grid.
 
 signal area_captured(percent: float, cells: Array)
-signal capture_failed()
+signal capture_failed()  # RESERVED (no listeners yet): fail-side twin of area_captured for future FX/analytics
 
 @export var arena_rect: Rect2 = Rect2(40.0, 100.0, 640.0, 1100.0)
 @export var cell_size: float = 10.0

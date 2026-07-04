@@ -13,5 +13,4 @@ extends Resource
 @export var lives: int = 3
 @export var boosts_allowed: bool = true         # read by BoostPolicy in CAMPAIGN mode
 @export var speed_mult: float = 1.0             # per-level pace (enemy cells/s modifier)
-@export var star2_score: int = 0                # score for the 2nd star (0 disables)
-@export var star3_percent: float = 0.0          # capture % for the 3rd star (0 disables)
+@export var star2_score: int = 0                # score threshold star (2* = score OR flawless; 3* = both)

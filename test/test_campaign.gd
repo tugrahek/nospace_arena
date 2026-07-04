@@ -6,44 +6,43 @@ extends GutTest
 const SaveData = preload("res://scripts/meta/save_data.gd")
 
 
-func _level(target: float, s2: int, s3: float) -> LevelData:
+func _level(target: float, s2: int) -> LevelData:
 	var l := LevelData.new()
 	l.id = &"t"
 	l.target_percent = target
 	l.star2_score = s2
-	l.star3_percent = s3
 	return l
 
 
 # --- Star computation ---
 
 func test_star_zero_when_failed() -> void:
-	var l := _level(60.0, 500, 0.0)
+	var l := _level(60.0, 500)
 	assert_eq(CampaignStars.star_for(false, 9999, 0, l), 0, "not reached -> 0 stars")
 
 
 func test_star_one_cleared_only() -> void:
-	var l := _level(60.0, 500, 0.0)
+	var l := _level(60.0, 500)
 	assert_eq(CampaignStars.star_for(true, 100, 1, l), 1, "cleared, low score, died -> 1")
 
 
 func test_star_two_on_score() -> void:
-	var l := _level(60.0, 500, 0.0)
+	var l := _level(60.0, 500)
 	assert_eq(CampaignStars.star_for(true, 500, 1, l), 2, "score met but died -> 2")
 
 
 func test_star_two_on_flawless() -> void:
-	var l := _level(60.0, 500, 0.0)
+	var l := _level(60.0, 500)
 	assert_eq(CampaignStars.star_for(true, 100, 0, l), 2, "flawless but low score -> 2")
 
 
 func test_star_three_score_and_flawless() -> void:
-	var l := _level(60.0, 500, 0.0)
+	var l := _level(60.0, 500)
 	assert_eq(CampaignStars.star_for(true, 500, 0, l), 3, "score met AND flawless -> 3")
 
 
 func test_star_disabled_score_threshold() -> void:
-	var l := _level(60.0, 0, 0.0)  # score star disabled (star2_score = 0)
+	var l := _level(60.0, 0)  # score star disabled (star2_score = 0)
 	assert_eq(CampaignStars.star_for(true, 99999, 1, l), 1, "no score star + died -> 1")
 	assert_eq(CampaignStars.star_for(true, 99999, 0, l), 2, "flawless still counts -> 2")
 

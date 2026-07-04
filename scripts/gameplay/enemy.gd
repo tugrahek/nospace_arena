@@ -58,8 +58,8 @@ var _freeze_cooldown_timer: float = 0.0  # blocks re-freeze (prevents boundary j
 var _pending_cooldown: float = 0.0
 var _recovery_timer: float = 0.0  # post-bounce peel window (directional; see decide_velocity)
 var _recovery_normal: Vector2 = Vector2.ZERO  # outward normal of the wall last bounced off
-var _steered: bool = false  # TEMP: debug tint while steered/slowed (Step 15 juice replaces)
-var _frozen: bool = false  # TEMP: distinct tint while contact-frozen
+var _steered: bool = false  # tint feedback while steered/slowed (permanent lightweight readback)
+var _frozen: bool = false  # near-white tint while contact-frozen (Stasis readback)
 
 
 func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavior: EnemyBehavior, base_speed_px: float, variation: float = 0.0, edge_follow: bool = false, start_cell: Vector2i = Vector2i.ZERO, heading: Vector2i = Vector2i.DOWN) -> void:
@@ -543,8 +543,8 @@ func _state_at(world: Vector2) -> int:
 
 
 func _draw() -> void:
-	# TEMP (Step 15): debug tints so effects are visible before real VFX exist.
-	# Contact-frozen (Stasis) reads as near-white; other active effects just lighten.
+	# Effect-readback tints (permanent, lightweight): contact-frozen (Stasis) reads near-white,
+	# other active effects lighten the body. Richer VFX (real bloom) is a v1.1 renderer item.
 	var draw_color: Color = color
 	if _frozen:
 		draw_color = color.lerp(Color.WHITE, 0.8)

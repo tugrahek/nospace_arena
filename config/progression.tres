@@ -4,7 +4,6 @@
 
 [resource]
 script = ExtResource("1_prog")
-daily_stage_count = 6
 speed_ramp_per_stage = 0.12
 speed_cap = 2.5
 enemy_add_every = 2

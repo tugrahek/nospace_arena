@@ -5,6 +5,8 @@ extends Node2D
 ## once here; the active ControlScheme only reports a desired direction.
 ## Keyboard is always-on hold-to-move and takes priority over the touch scheme.
 
+# RESERVED (no listeners yet): lifecycle hooks for the planned trail-tension audio/FX
+# ("rising tension while drawing" in the juice map). Kept so wiring it is a connect, not a refactor.
 signal trail_started()
 signal returned_to_safe()
 signal loop_closed()

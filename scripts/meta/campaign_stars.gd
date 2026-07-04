@@ -2,9 +2,9 @@ class_name CampaignStars
 extends RefCounted
 
 ## Pure Campaign scoring + unlock logic (no nodes, no IO, no RNG) -> GUT-testable.
-## Stars are earned by count: clearing the level = 1, plus one for each optional threshold met
-## (score, capture %). Unlock is derived from progress: a level opens once the previous one has
-## at least one star (the first level is always open).
+## Stars: clearing the level = 1; +1 for meeting the score threshold; +1 for flawless (no life
+## lost). Unlock is derived from progress: a level opens once the previous one has at least one
+## star (the first level is always open).
 
 ## Stars (0..3) for a level attempt. 0 if the target wasn't reached (level failed). Otherwise:
 ## 1 = cleared; +1 if the score threshold is met; +1 if flawless (no life lost). So 2 stars = one

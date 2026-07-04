@@ -39,7 +39,7 @@ func _ready() -> void:
 	GameState.game_over.connect(_on_game_over)
 	GameState.run_won.connect(_on_run_won)
 	Economy.currency_changed.connect(_on_currency_changed)
-	_on_currency_changed(Economy.balance())  # DEV indicator (real currency UI Step 13/14)
+	_on_currency_changed(Economy.balance())  # seed the coins readout
 	_result_panel.visible = false
 	_combo_label.visible = false
 	_daily_label.visible = false
@@ -156,12 +156,12 @@ func show_campaign_stars(stars: int, improved: bool, has_next: bool) -> void:
 	_next_button.visible = has_next
 
 
-## DEV currency indicator (Step 13/14 replace with real currency UI).
+## In-run coins readout (full economy UI lives in the menu/store screens).
 func _on_currency_changed(balance: int) -> void:
 	_currency_label.text = tr("HUD_CURRENCY") + ": " + str(balance)
 
 
-## Minimal today's-missions list (placeholder; full panel in Step 14).
+## Compact today's-missions list on the HUD (the full panel is the Missions screen).
 func show_missions(missions: Array) -> void:
 	var lines: Array[String] = []
 	for m in missions:

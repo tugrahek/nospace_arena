@@ -1,8 +1,8 @@
 extends Control
 
-## Mode picker reached from MainMenu's Play. Each option sets the play mode on SeedManager,
-## then loads the game. The mode persists on SeedManager, so an in-run Retry replays the same
-## mode and Result → Menu returns home. Campaign (Step 18.1) slots in as a 4th option later.
+## Mode picker reached from MainMenu's Play: Daily / Free / Level-Endless start a run directly;
+## Campaign goes to the level map first. The mode persists on SeedManager, so an in-run Retry
+## replays the same mode and Result → Menu returns home.
 
 const GAME_SCENE: String = "res://scenes/main/Game.tscn"
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"

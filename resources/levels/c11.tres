@@ -16,4 +16,3 @@ lives = 2
 boosts_allowed = true
 speed_mult = 1.1
 star2_score = 1600
-star3_percent = 80.0

@@ -339,14 +339,11 @@ func _spawn_stage_enemies(spec: Dictionary, override_types: Array = []) -> void:
 		_enemies.append(enemy)
 
 
-## Stage cleared (target reached): advance, or end the run. Daily completes after N stages
-## (win); free-play is endless. Deferred from _on_area_captured so the arena isn't rebuilt
-## inside the capture signal. Lives + score carry over.
+## Stage cleared (target reached): advance to the next, harder stage. Level-Endless only —
+## Daily/Free are single-arena and win at target (18a redirect). Deferred from
+## _on_area_captured so the arena isn't rebuilt inside the capture signal. Lives + score carry over.
 func _advance_stage() -> void:
 	if not GameState.is_playing():
-		return
-	if _daily and _current_stage + 1 >= PROGRESSION.daily_stage_count:
-		GameState.win_run()  # daily gauntlet complete
 		return
 	var next: int = _current_stage + 1
 	_stage_flourish(next + 1)  # display is 1-based

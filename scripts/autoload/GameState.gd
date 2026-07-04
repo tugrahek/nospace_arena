@@ -78,6 +78,8 @@ func is_playing() -> bool:
 	return status == Status.PLAYING
 
 
+# Full back-to-IDLE reset. Production flow reloads scenes instead; tests rely on this
+# to clean session state between cases.
 func reset() -> void:
 	lives = 0
 	status = Status.IDLE

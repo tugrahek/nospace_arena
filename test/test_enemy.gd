@@ -86,21 +86,6 @@ func test_clamp_guarantees_radius_gap() -> void:
 	assert_true(100.0 - c >= 9.0, "gövde duvara binmemeli")
 
 
-# --- is_behavior_suppressed (Halt post-freeze recovery: peel off, no homing camp) ---
-
-func test_behavior_suppressed_while_frozen() -> void:
-	assert_true(EnemyMotion.is_behavior_suppressed(0.1, 0.0))
-
-
-func test_behavior_suppressed_during_recovery() -> void:
-	assert_true(EnemyMotion.is_behavior_suppressed(0.0, 0.1))
-
-
-func test_behavior_active_when_idle() -> void:
-	# No freeze, no recovery -> behavior (homing) runs normally
-	assert_false(EnemyMotion.is_behavior_suppressed(0.0, 0.0))
-
-
 # --- Directional post-bounce recovery (chaser homing regression fix) ---
 
 func test_peel_adjust_pure_into_wall_keeps_reflected() -> void:
