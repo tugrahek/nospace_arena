@@ -96,7 +96,7 @@ HOWTO_ENEMIES_TITLE,Watch the enemies
 ENEMY_BOUNCER_NAME,Bouncer
 ENEMY_STALKER_NAME,Stalker
 ENEMY_SPARX_NAME,Sparx
-HOWTO_ENEMIES_BODY,Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge — don't linger on the border.
+HOWTO_ENEMIES_BODY,Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge and ignores your territory's power — don't linger on the border.
 HOWTO_LIVES_TITLE,Stay alive
 HOWTO_LIVES_BODY,You have 3 lives. Lose one if an enemy touches your active trail. Captured ground is safe.
 CHAR_PULSE_DESC,Pushes enemies away from your territory

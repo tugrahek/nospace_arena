@@ -275,6 +275,65 @@ func test_sparx_stays_on_border_never_interior() -> void:
 	GameState.reset()
 
 
+func test_is_contained_only_while_contained() -> void:
+	# is_contained() gates the orchestration exclusions (danger-seed + near-miss): true ONLY in
+	# the CONTAINED breather; PATROL and TELEGRAPH count as active again.
+	var arena := _frost_arena()
+	GameState.start_run(3)
+	var e := _sparx_on(arena, Vector2i(1, 1))
+	assert_false(e.is_contained(), "patrol -> active (included in scans)")
+	e.set("_sparx_state", Enemy.SparxState.TELEGRAPH)
+	assert_false(e.is_contained(), "telegraph -> active again (visible warning)")
+	e.set("_sparx_state", Enemy.SparxState.CONTAINED)
+	assert_true(e.is_contained(), "contained -> excluded from scans")
+	GameState.reset()
+
+
+func test_contained_sparx_not_a_danger_seed() -> void:
+	# An invisible contained Sparx must not seed danger on capture -> its pocket stays capturable.
+	SeedManager.enter_free()
+	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
+	add_child_autofree(game)
+	await get_tree().process_frame
+	var enemies: Array = game.get("_enemies")
+	assert_gt(enemies.size(), 0, "free run spawns at least one enemy")
+	var before: Array = game.call("_enemy_cells")
+	assert_eq(before.size(), enemies.size(), "active enemies all count as danger seeds")
+	var e: Enemy = enemies[0]
+	e.set("_edge_follow", true)
+	e.set("_sparx_state", Enemy.SparxState.CONTAINED)
+	var after: Array = game.call("_enemy_cells")
+	assert_eq(after.size(), enemies.size() - 1, "contained sparx is NOT a danger seed")
+	GameState.reset()
+
+
+func test_contained_sparx_no_phantom_near_miss() -> void:
+	# A contained (invisible) Sparx sitting right on the trail must not trigger the near-miss
+	# slow-mo or danger vignette; back on PATROL the same proximity does trigger.
+	var arena := _frost_arena()
+	GameState.start_run(3)
+	var player := Player.new()
+	add_child_autofree(player)
+	player.setup(arena)
+	player.set("_is_drawing", true)
+	var tp: Array[Vector2i] = [Vector2i(10, 10)]
+	player.set("_trail_path", tp)
+	var e := _sparx_on(arena, Vector2i(10, 11))
+	e.position = arena.cell_to_world(Vector2i(10, 10))  # zero distance to the trail point
+	e.set("_edge_follow", true)
+	e.set("_sparx_state", Enemy.SparxState.CONTAINED)
+	var nm := NearMiss.new()
+	add_child_autofree(nm)
+	nm.setup(player, [e])
+	watch_signals(nm)
+	nm._physics_process(0.016)
+	assert_signal_emit_count(nm, "near_miss", 0, "contained sparx -> no phantom slow-mo")
+	e.set("_sparx_state", Enemy.SparxState.PATROL)
+	nm._physics_process(0.016)
+	assert_signal_emitted(nm, "near_miss", "patrolling sparx at the same spot still triggers")
+	GameState.reset()
+
+
 func test_sparx_telegraph_is_non_lethal() -> void:
 	# During the respawn telegraph blink, Sparx must not catch the player (warning window).
 	var arena := _frost_arena()

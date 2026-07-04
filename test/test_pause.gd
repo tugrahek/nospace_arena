@@ -21,6 +21,24 @@ func test_overlay_toggles_pause_both_ways() -> void:
 	assert_false(get_tree().paused, "Esc/toggle devam ettirir (çift yönlü)")
 
 
+func test_pause_freezes_combo_clock() -> void:
+	# The combo window now runs on accumulated game time (physics steps), not the wall clock:
+	# pausing must freeze it so a paused player can't lose (or exploit) the combo window.
+	SeedManager.enter_free()
+	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
+	add_child_autofree(game)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var t1: float = game.get("_run_time")
+	assert_gt(t1, 0.0, "oyun-zamanı fizik kareleriyle ilerliyor")
+	get_tree().paused = true
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	var t2: float = game.get("_run_time")
+	get_tree().paused = false  # restore before asserting (never leave tree paused)
+	assert_eq(t2, t1, "pause'da kombo saati durur (skor adaleti)")
+
+
 func test_pause_stops_ghost_recording() -> void:
 	SeedManager.enter_daily()  # recording runs only in daily
 	var game: Node = load("res://scenes/main/Game.tscn").instantiate()

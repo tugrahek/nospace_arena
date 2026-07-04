@@ -38,6 +38,8 @@ func _physics_process(delta: float) -> void:
 		if not trail.is_empty():
 			var nearest: float = INF
 			for e in _enemies:
+				if e.is_contained():
+					continue  # invisible contained Sparx must not drive phantom danger/slow-mo
 				nearest = minf(nearest, JuiceMath.min_distance_to_polyline(e.position, trail))
 			danger = JuiceMath.danger_from_distance(nearest, vignette_radius)
 			# Discrete slow-mo: separate channel, cooldown-gated.

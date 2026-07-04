@@ -52,6 +52,8 @@ var _slow_start_scale: float = 1.0
 var _coin_multiplier: float = 1.0  # Coin Bonus boost: run-end coin reward x this (1.0 = none)
 var _lives_lost: int = 0  # deaths this run (Campaign: 0 -> flawless star)
 var _death_grace_timer: float = 0.0  # > 0 = invulnerable (ignore hits) right after a life loss
+var _run_time: float = 0.0  # game-time seconds (fixed physics steps); combo clock — frozen by
+                            # pause and unaffected by slow-mo/hit-stop (daily score fairness)
 
 
 func _ready() -> void:
@@ -94,16 +96,18 @@ func _ready() -> void:
 	_hud.setup(start_lives)
 	_hud.set_daily(_daily, _daily_seed)
 	_player.control_scheme = AudioManager.settings().control_scheme  # persisted choice (Settings)
-	# Live-apply scheme changes from Pause → Settings (mid-run); _on_scheme_changed updates d-pad.
-	AudioManager.control_scheme_changed.connect(func(id: int) -> void: _player.set_scheme(id))
+	# Live-apply scheme changes from Pause → Settings (mid-run). Named method (not a lambda) so
+	# _exit_tree can disconnect it — otherwise every scene reload piles a stale connection
+	# onto the AudioManager autoload.
+	AudioManager.control_scheme_changed.connect(_on_scheme_setting_changed)
 	_start_stage(0)             # configures arena + player + enemies + living/near-miss refs
 	_apply_character(char_idx)  # character is constant across stages (set after arena exists)
 	_on_scheme_changed(int(_player.control_scheme))
 	_setup_leaderboard_and_ghost()
 	_setup_missions()
 	AudioManager.stop_music()  # in-run is silent (no game-music track); menu music resumes on return
-	if _daily:
-		print("Daily mode: seed=%d stages=%d" % [_daily_seed, PROGRESSION.daily_stage_count])
+	if _daily and OS.is_debug_build():
+		print("Daily mode: seed=%d" % _daily_seed)
 
 
 ## Daily only: load the leaderboard, show today's best, and play its ghost (recorded
@@ -167,6 +171,10 @@ func _resolve_boosts() -> Dictionary:
 ## Records the player path at the physics rate (daily only) for the ghost.
 ## Pause freezes _physics_process -> no samples while paused -> ghost stays deterministic.
 func _physics_process(delta: float) -> void:
+	# Game-time clock (combo window source): advances only on live physics steps, so pausing
+	# freezes it and slow-mo/hit-stop don't shrink the window in game terms.
+	if GameState.is_playing():
+		_run_time += delta
 	# Post-death invulnerability: count down + blink the player so the grace reads clearly.
 	if _death_grace_timer > 0.0:
 		_death_grace_timer -= delta
@@ -211,7 +219,8 @@ func _apply_arena(index: int) -> void:
 		i = 0
 	_arena_data = ContentCatalog.ARENAS[i]
 	_arena.configure(_arena_data, PLAY_RECT)
-	print("Arena: %s" % tr(_arena_data.display_name_key))
+	if OS.is_debug_build():
+		print("Arena: %s" % tr(_arena_data.display_name_key))
 
 
 ## Applies a character: its territory effect drives the living territory, and its
@@ -222,7 +231,8 @@ func _apply_character(index: int) -> void:
 	_living_territory.effect = ch.effect
 	_arena.captured_color = ch.accent_color
 	_arena.queue_redraw()
-	print("Karakter: %s" % tr(ch.display_name_key))
+	if OS.is_debug_build():
+		print("Karakter: %s" % tr(ch.display_name_key))
 
 
 ## Builds (or rebuilds) a stage: arena (fresh grid) + player reset + scaled enemies, then
@@ -249,8 +259,9 @@ func _start_stage(stage: int) -> void:
 	_near_miss.setup(_player, _enemies)
 	_stage_target = minf(_arena_data.target_percent + float(spec["target_bonus"]), PROGRESSION.target_cap)
 	_hud.update_percent(0.0)
-	print("Stage %d: arena=%d target=%.0f%% speed=x%.2f enemies=%d" % [
-		stage + 1, int(spec["arena_index"]), _stage_target, float(spec["speed_scale"]), _enemies.size()])
+	if OS.is_debug_build():
+		print("Stage %d: arena=%d target=%.0f%% speed=x%.2f enemies=%d" % [
+			stage + 1, int(spec["arena_index"]), _stage_target, float(spec["speed_scale"]), _enemies.size()])
 
 
 ## Campaign: a single authored level -- arena/theme + explicit enemy composition + target/pace from
@@ -264,8 +275,9 @@ func _apply_campaign_level() -> void:
 	_near_miss.setup(_player, _enemies)
 	_stage_target = _level.target_percent
 	_hud.update_percent(0.0)
-	print("Campaign level %s: arena=%s target=%.0f%% enemies=%d boosts=%s" % [
-		_level.id, _arena_data.id, _stage_target, _level.enemies.size(), str(_level.boosts_allowed)])
+	if OS.is_debug_build():
+		print("Campaign level %s: arena=%s target=%.0f%% enemies=%d boosts=%s" % [
+			_level.id, _arena_data.id, _stage_target, _level.enemies.size(), str(_level.boosts_allowed)])
 
 
 ## Spawns the stage's enemies: count = arena composition + seed/stage bonus (capped). Speed is
@@ -362,6 +374,8 @@ func _on_loop_closed() -> void:
 func _enemy_cells() -> Array:
 	var cells: Array = []
 	for e in _enemies:
+		if e.is_contained():
+			continue  # invisible/inert contained Sparx must not block capturing its pocket
 		cells.append(_arena.world_to_cell(e.position))
 	return cells
 
@@ -424,8 +438,8 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 	_hud.update_percent(percent)
 	_areas_this_run += 1
 	_last_percent = percent
-	var now: float = Time.get_ticks_msec() / 1000.0
-	var earned: int = GameState.register_capture(cells.size(), now, _exposed_time)
+	# Combo clock = accumulated game time (not wall clock): pause/slow-mo can't eat the window.
+	var earned: int = GameState.register_capture(cells.size(), _run_time, _exposed_time)
 	_exposed_time = 0.0  # consumed by this capture
 	for e in _enemies:  # edge-walkers (Sparx) self-contain when boxed into a small pocket
 		e.on_capture_event()
@@ -481,6 +495,18 @@ func _spawn_floating_score(point: Vector2, value: int) -> void:
 
 func _on_scheme_changed(id: int) -> void:
 	_dpad_view.set_active(id == Player.SchemeId.DPAD)
+
+
+## Settings changed the persisted control scheme (Pause → Settings mid-run) -> apply live.
+func _on_scheme_setting_changed(id: int) -> void:
+	_player.set_scheme(id)
+
+
+func _exit_tree() -> void:
+	# Drop the autoload connection: Game reloads on every retry/next, and stale connections
+	# from freed scenes must not accumulate on AudioManager.
+	if AudioManager.control_scheme_changed.is_connected(_on_scheme_setting_changed):
+		AudioManager.control_scheme_changed.disconnect(_on_scheme_setting_changed)
 
 
 func _on_retry() -> void:

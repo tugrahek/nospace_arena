@@ -201,7 +201,9 @@ func _keyboard_dir() -> Vector2i:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
+	# DEV scheme toggles — debug builds only (parity with game.gd dev keys; a stray keyboard
+	# on a release device must not bypass the persisted Settings choice).
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_1:
 				_apply_scheme(SchemeId.TAP_TURN)

@@ -269,6 +269,13 @@ func _begin_telegraph() -> void:
 		print("[Sparx] RE-EMERGE @ ", _grid_cell, " heading ", _heading)
 
 
+## True while a Sparx sits out its containment breather (invisible + inert). Orchestration layers
+## (capture danger-seeds, near-miss scan) exclude it: an unseen enemy must never block a capture
+## or trigger danger feedback. PATROL and TELEGRAPH count as active (visible) again.
+func is_contained() -> bool:
+	return _edge_follow and _sparx_state == SparxState.CONTAINED
+
+
 ## Called after every capture (grid changed). Connectivity trigger: Sparx is trapped when its FREE
 ## region is NOT the main (largest) FREE region -- i.e. the player sealed it off from the play area
 ## -- or when its cell was engulfed (captured). Optional size safety: also trap a tiny pocket even
