@@ -27,6 +27,7 @@ func _ready() -> void:
 	Economy.mark_tutorial_seen()  # entry -> seen once (auto-show + early exit both count)
 	_pages = [_goal, _controls, _enemies, _lives]
 	_screen_title.text = tr("HOWTO_TITLE")
+	_prev.text = tr("SETTINGS_BACK")  # was scene-hard-coded (locale sweep, Step 22a)
 	_apply_texts()
 	($Center/LivesPage/Hearts as HeartsHud).set_max(3)
 	_build_dots()

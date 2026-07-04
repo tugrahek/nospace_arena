@@ -1,117 +1,132 @@
-keys,en
-HUD_LIVES,Lives
-HUD_SCORE,Score
-HUD_COMBO,Combo
-RESULT_WIN,YOU WIN!
-RESULT_LOSE,GAME OVER
-RESULT_RETRY,Retry
-CHAR_PULSE,Pulse
-CHAR_DRAG,Drag
-CHAR_HALT,Halt
-ARENA_VOID,Void
-ARENA_EMBER,Ember
-ARENA_FROST,Frost
-HUD_DAILY,DAILY
-HUD_BEST,BEST
-HUD_CURRENCY,Coins
-MISSION_REACH_SCORE,Score %d
-MISSION_REACH_PERCENT,Capture %d%%
-MISSION_TOTAL_AREAS,Capture %d areas
-MISSION_WIN_RUNS,Win %d run(s)
-GAME_TITLE,NoSpace: Arena
-MENU_PLAY,Play
-MENU_DAILY,Daily
-MENU_LEVEL,Level
-MENU_FREE,Free
-MODE_SELECT_TITLE,Select Mode
-MODE_DAILY_DESC,Today's challenge
-MODE_FREE_DESC,Casual play
-MODE_LEVEL_DESC,Escalating difficulty
-MENU_CAMPAIGN,Campaign
-MODE_CAMPAIGN_DESC,Level challenges
-LEVELSELECT_TITLE,Select Level
-LEVEL_LABEL,Level
-LEVEL_LOCKED,Locked
-RESULT_NEW_BEST,New best!
-RESULT_NEXT,Next
-LEVEL_C01_DESC,1 Bouncer • reach 50%
-LEVEL_C02_DESC,2 Bouncers • reach 55%
-LEVEL_C03_DESC,Stalker joins • reach 55%
-LEVEL_C04_DESC,2 Stalkers • reach 60%
-LEVEL_C05_DESC,Sparx joins • reach 55%
-LEVEL_C06_DESC,2 Sparx guard the edges + Bouncer • reach 65%
-LEVEL_C07_DESC,Full combo • reach 60%
-LEVEL_C08_DESC,Combo • no boosts
-LEVEL_C09_DESC,Breather • reach 50%
-LEVEL_C10_DESC,Heavy swarm • reach 65%
-LEVEL_C11_DESC,Low lives (2) • reach 65%
-LEVEL_C12_DESC,Finale • all types, no boosts
-MENU_STORE,Store
-MENU_CREDITS,Credits
-MENU_LEADERBOARD,Leaderboard
-LEADERBOARD_TITLE,Leaderboard
-LEADERBOARD_ALLBEST,All-time best: %d
-LEADERBOARD_EMPTY,Play Daily to set a record
-MENU_LOADOUT,Loadout
-MENU_MISSIONS,Today's Missions
-RESULT_MENU,Menu
-STORE_CHARACTERS,Characters
-STORE_ARENAS,Arenas
-STORE_BUY,Buy
-STORE_SELECT,Select
-STORE_SELECTED,Selected
-STORE_BACK,Back
-CREDITS_TITLE,Credits
-DAILY_REWARD_TITLE,Daily Reward
-DAILY_REWARD_BODY,Day %d/7  +%d
-DAILY_REWARD_CLAIM,Claim
-PAUSE_RESUME,Resume
-PAUSE_SETTINGS,Settings
-PAUSE_RESTART,Restart
-PAUSE_MENU,Menu
-MISSIONS_TITLE,Missions
-HUD_STAGE,Stage %d
-SETTINGS_TITLE,Settings
-SETTINGS_MASTER,Master
-SETTINGS_SFX,Effects
-SETTINGS_MUSIC,Music
-SETTINGS_MUTE,Mute
-SETTINGS_BACK,Back
-SETTINGS_CONTROLS,Controls
-CONTROL_SWIPE,Swipe
-CONTROL_TAP,Tap
-CONTROL_DPAD,D-Pad
-HOWTO_TITLE,How to Play
-HOWTO_NEXT,Next
-HOWTO_PREV,Back
-HOWTO_DONE,Got it
-HOWTO_GOAL_TITLE,Capture the arena
-HOWTO_GOAL_BODY,Leave the safe border, draw into the void, and close a loop to claim that region. Reach the target % to win.
-HOWTO_CONTROLS_TITLE,Move
-HOWTO_CONTROLS_SWIPE,Swipe a direction to steer.
-HOWTO_CONTROLS_TAP,Tap left or right to turn.
-HOWTO_CONTROLS_DPAD,Use the on-screen d-pad to steer.
-HOWTO_CONTROLS_HINT,Change controls in Settings
-HOWTO_ENEMIES_TITLE,Watch the enemies
-ENEMY_BOUNCER_NAME,Bouncer
-ENEMY_STALKER_NAME,Stalker
-ENEMY_SPARX_NAME,Sparx
-HOWTO_ENEMIES_BODY,Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge and ignores your territory's power — don't linger on the border.
-HOWTO_LIVES_TITLE,Stay alive
-HOWTO_LIVES_BODY,You have 3 lives. Lose one if an enemy touches your active trail. Captured ground is safe.
-CHAR_PULSE_DESC,Pushes enemies away from your territory
-CHAR_DRAG_DESC,Slows enemies near your territory
-CHAR_HALT_DESC,Freezes enemies that get too close
-ARENA_VOID_DESC,Balanced starter — one drifting bouncer.
-ARENA_EMBER_DESC,Tall and tight — two bouncers, kinder target.
-ARENA_FROST_DESC,Wide and open — a stalker plus an edge-patrolling sparx.
-BOOST_EXTRA_LIFE_NAME,Extra Life
-BOOST_EXTRA_LIFE_DESC,Start the run with one more heart.
-BOOST_SLOW_START_NAME,Slow Start
-BOOST_SLOW_START_DESC,Enemies move at half speed for the first few seconds.
-BOOST_COIN_BONUS_NAME,Coin Bonus
-BOOST_COIN_BONUS_DESC,Earn 50% more coins from this run.
-STORE_BOOSTS,Boosts
-STORE_OWNED,Owned: %d
-BOOST_ARM,Arm
-BOOST_ARMED,Armed
+keys,en,tr
+HUD_SCORE,Score,Skor
+HUD_COMBO,Combo,Kombo
+RESULT_WIN,YOU WIN!,KAZANDIN!
+RESULT_LOSE,GAME OVER,OYUN BİTTİ
+RESULT_RETRY,Retry,Tekrar
+CHAR_PULSE,Pulse,Pulse
+CHAR_DRAG,Drag,Drag
+CHAR_HALT,Halt,Halt
+ARENA_VOID,Void,Void
+ARENA_EMBER,Ember,Ember
+ARENA_FROST,Frost,Frost
+HUD_DAILY,DAILY,GÜNLÜK
+HUD_BEST,BEST,REKOR
+HUD_CURRENCY,Coins,Para
+MISSION_REACH_SCORE,Score %d,Skor %d
+MISSION_REACH_PERCENT,Capture %d%%,%d%% alan ele geçir
+MISSION_TOTAL_AREAS,Capture %d areas,%d bölge ele geçir
+MISSION_WIN_RUNS,Win %d run(s),%d oyun kazan
+MENU_PLAY,Play,Oyna
+MENU_DAILY,Daily,Günlük
+MENU_LEVEL,Level,Seviye
+MENU_FREE,Free,Serbest
+MODE_SELECT_TITLE,Select Mode,Mod Seç
+MODE_DAILY_DESC,Today's challenge,Bugünün meydan okuması
+MODE_FREE_DESC,Casual play,Rahat oyun
+MODE_LEVEL_DESC,Escalating difficulty,Gittikçe zorlaşır
+MENU_CAMPAIGN,Campaign,Macera
+MODE_CAMPAIGN_DESC,Level challenges,Seviye seviye ilerle
+LEVELSELECT_TITLE,Select Level,Seviye Seç
+LEVEL_LABEL,Level,Seviye
+LEVEL_LOCKED,Locked,Kilitli
+RESULT_NEW_BEST,New best!,Yeni rekor!
+RESULT_NEXT,Next,Sonraki
+LEVEL_C01_DESC,1 Bouncer • reach 50%,1 Bouncer • %50'ye ulaş
+LEVEL_C02_DESC,2 Bouncers • reach 55%,2 Bouncer • %55'e ulaş
+LEVEL_C03_DESC,Stalker joins • reach 55%,Stalker katılır • %55'e ulaş
+LEVEL_C04_DESC,2 Stalkers • reach 60%,2 Stalker • %60'a ulaş
+LEVEL_C05_DESC,Sparx joins • reach 55%,Sparx katılır • %55'e ulaş
+LEVEL_C06_DESC,2 Sparx guard the edges + Bouncer • reach 65%,2 Sparx kenarları tutar + Bouncer • %65'e ulaş
+LEVEL_C07_DESC,Full combo • reach 60%,Tam kadro • %60'a ulaş
+LEVEL_C08_DESC,Combo • no boosts,Tam kadro • boost yok
+LEVEL_C09_DESC,Breather • reach 50%,Nefes molası • %50'ye ulaş
+LEVEL_C10_DESC,Heavy swarm • reach 65%,Yoğun sürü • %65'e ulaş
+LEVEL_C11_DESC,Low lives (2) • reach 65%,Az can (2) • %65'e ulaş
+LEVEL_C12_DESC,"Finale • all types, no boosts",Final • tüm tipler • boost yok
+MENU_STORE,Store,Mağaza
+MENU_CREDITS,Credits,Künye
+MENU_LEADERBOARD,Leaderboard,Liderlik
+LEADERBOARD_TITLE,Leaderboard,Liderlik
+LEADERBOARD_ALLBEST,All-time best: %d,Tüm zamanların rekoru: %d
+LEADERBOARD_EMPTY,Play Daily to set a record,Rekor için Günlük oyna
+LEADERBOARD_TODAY,Today,Bugün
+LEADERBOARD_YESTERDAY,Yesterday,Dün
+MONTHS_SHORT,"Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec","Oca,Şub,Mar,Nis,May,Haz,Tem,Ağu,Eyl,Eki,Kas,Ara"
+MENU_MISSIONS,Today's Missions,Bugünün Görevleri
+RESULT_MENU,Menu,Menü
+STORE_CHARACTERS,Characters,Karakterler
+STORE_ARENAS,Arenas,Arenalar
+STORE_BUY,Buy,Satın Al
+STORE_SELECT,Select,Seç
+STORE_SELECTED,Selected,Seçili
+STORE_BACK,Back,Geri
+CREDITS_TITLE,Credits,Künye
+CREDITS_BODY,"NoSpace: Arena
+© 2026 Tuğra Hekimoğlu — all rights reserved.
+
+Engine: Godot 4.6
+Test: GUT (Godot Unit Test)
+
+Assets: see docs/credits.md
+(fonts / sfx / music attributions listed there)","NoSpace: Arena
+© 2026 Tuğra Hekimoğlu — tüm hakları saklıdır.
+
+Motor: Godot 4.6
+Test: GUT (Godot Unit Test)
+
+Asset'ler: docs/credits.md
+(font / ses / müzik atıfları orada listelidir)"
+DAILY_REWARD_TITLE,Daily Reward,Günlük Ödül
+DAILY_REWARD_BODY,Day %d/7  +%d,Gün %d/7  +%d
+DAILY_REWARD_CLAIM,Claim,Al
+PAUSE_RESUME,Resume,Devam
+PAUSE_SETTINGS,Settings,Ayarlar
+PAUSE_RESTART,Restart,Yeniden
+PAUSE_MENU,Menu,Menü
+MISSIONS_TITLE,Missions,Görevler
+HUD_STAGE,Stage %d,Bölüm %d
+SETTINGS_TITLE,Settings,Ayarlar
+SETTINGS_MASTER,Master,Ana
+SETTINGS_SFX,Effects,Efektler
+SETTINGS_MUSIC,Music,Müzik
+SETTINGS_MUTE,Mute,Sessiz
+SETTINGS_BACK,Back,Geri
+SETTINGS_CONTROLS,Controls,Kontroller
+CONTROL_SWIPE,Swipe,Kaydır
+CONTROL_TAP,Tap,Dokun
+CONTROL_DPAD,D-Pad,D-Pad
+HOWTO_TITLE,How to Play,Nasıl Oynanır
+HOWTO_NEXT,Next,İleri
+HOWTO_DONE,Got it,Anladım
+HOWTO_GOAL_TITLE,Capture the arena,Arenayı ele geçir
+HOWTO_GOAL_BODY,"Leave the safe border, draw into the void, and close a loop to claim that region. Reach the target % to win.","Güvenli kenardan ayrıl, boşluğa çizgi çek ve o bölgeyi almak için döngüyü kapat. Kazanmak için hedef yüzdeye ulaş."
+HOWTO_CONTROLS_TITLE,Move,Hareket
+HOWTO_CONTROLS_SWIPE,Swipe a direction to steer.,Yön vermek için kaydır.
+HOWTO_CONTROLS_TAP,Tap left or right to turn.,Dönmek için sola ya da sağa dokun.
+HOWTO_CONTROLS_DPAD,Use the on-screen d-pad to steer.,Ekrandaki d-pad ile yön ver.
+HOWTO_CONTROLS_HINT,Change controls in Settings,Kontrolleri Ayarlar'dan değiştir
+HOWTO_ENEMIES_TITLE,Watch the enemies,Düşmanlara dikkat
+ENEMY_BOUNCER_NAME,Bouncer,Bouncer
+ENEMY_STALKER_NAME,Stalker,Stalker
+ENEMY_SPARX_NAME,Sparx,Sparx
+HOWTO_ENEMIES_BODY,Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge and ignores your territory's power — don't linger on the border.,Bouncer duvarlardan seker. Stalker sen açıkta çizerken peşine düşer. Sparx ele geçirilen kenarda devriye gezer ve bölgenin gücünden etkilenmez — kenarda oyalanma.
+HOWTO_LIVES_TITLE,Stay alive,Hayatta kal
+HOWTO_LIVES_BODY,Hearts show your lives. You lose one when an enemy touches your active trail — or when you cross it yourself. Captured ground is safe.,Kalpler canlarını gösterir. Bir düşman aktif çizgine dokunursa — ya da kendi çizgini kesersen — bir can kaybedersin. Ele geçirilen alan güvenlidir.
+CHAR_PULSE_DESC,Pushes enemies away from your territory,Düşmanları bölgenden uzağa iter
+CHAR_DRAG_DESC,Slows enemies near your territory,Bölgene yaklaşan düşmanları yavaşlatır
+CHAR_HALT_DESC,Freezes enemies that get too close,Fazla yaklaşan düşmanları dondurur
+ARENA_VOID_DESC,Balanced starter — one drifting bouncer.,Dengeli başlangıç — tek gezinen bouncer.
+ARENA_EMBER_DESC,"Tall and tight — two bouncers, kinder target.","Uzun ve dar — iki bouncer, daha kolay hedef."
+ARENA_FROST_DESC,Wide and open — a stalker plus an edge-patrolling sparx.,Geniş ve açık — bir stalker artı kenar devriyesi bir sparx.
+BOOST_EXTRA_LIFE_NAME,Extra Life,Ekstra Can
+BOOST_EXTRA_LIFE_DESC,Start the run with one more heart.,Oyuna bir fazla kalple başla.
+BOOST_SLOW_START_NAME,Slow Start,Yavaş Başlangıç
+BOOST_SLOW_START_DESC,Enemies move at half speed for the first few seconds.,İlk birkaç saniye düşmanlar yarı hızda hareket eder.
+BOOST_COIN_BONUS_NAME,Coin Bonus,Para Bonusu
+BOOST_COIN_BONUS_DESC,Earn 50% more coins from this run.,Bu oyundan %50 daha fazla para kazan.
+STORE_BOOSTS,Boosts,Boost'lar
+STORE_OWNED,Owned: %d,Sahip: %d
+BOOST_ARM,Arm,Kuşan
+BOOST_ARMED,Armed,Kuşanıldı
+BOOST_APPLY_NOTE,"Applies in Free, Level and Campaign — not in Daily","Serbest, Seviye ve Macera'da geçerli — Günlük'te değil"

@@ -1,4 +1,5 @@
 {
+  "pre_run_script": "res://test/pre_run_hook.gd",
   "dirs": ["res://test/"],
   "include_subdirs": true,
   "prefix": "test_",

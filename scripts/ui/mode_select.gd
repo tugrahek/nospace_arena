@@ -61,7 +61,7 @@ func _build_boost_strip() -> void:
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_boost_strip.add_child(header)
 	var note := Label.new()
-	note.text = "%s / %s" % [tr("MENU_FREE"), tr("MENU_LEVEL")]  # boosts apply here, not Daily
+	note.text = tr("BOOST_APPLY_NOTE")  # single key (P2-13): correct Campaign-inclusive wording
 	note.theme_type_variation = &"Muted"
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_boost_strip.add_child(note)

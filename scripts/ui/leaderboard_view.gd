@@ -9,9 +9,6 @@ const LEADERBOARD_PATH: String = "user://leaderboard.json"
 const MAX_ROWS: int = 60
 
 const EpochDay = preload("res://scripts/meta/epoch_day.gd")
-const MONTHS: Array[String] = [
-	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-]
 
 const GOLD: Color = Color(1.0, 0.82, 0.32, 1.0)
 const SILVER: Color = Color(0.85, 0.88, 0.95, 1.0)
@@ -65,11 +62,13 @@ func _populate() -> void:
 		_add_card(i + 1, rows[i]["date"], rows[i]["score"], today)
 
 
-## Friendly display for a YYYYMMDD date relative to today (also YYYYMMDD). Pure — the stored
-## leaderboard key stays ISO. Today/Yesterday via epoch-day (handles month/year boundaries).
+## Friendly display for a YYYYMMDD date relative to today (also YYYYMMDD). Display layer only —
+## the stored leaderboard key stays ISO. Today/Yesterday via epoch-day (handles month/year
+## boundaries). Localized: Today/Yesterday and the short month names come from the locale CSV
+## (MONTHS_SHORT is one comma-separated list per language; TranslationServer works in statics).
 static func format_date(date_int: int, today_int: int) -> String:
 	if date_int == today_int:
-		return "Today"
+		return TranslationServer.translate(&"LEADERBOARD_TODAY")
 	var y: int = date_int / 10000
 	var m: int = (date_int / 100) % 100
 	var d: int = date_int % 100
@@ -77,8 +76,9 @@ static func format_date(date_int: int, today_int: int) -> String:
 	var tm: int = (today_int / 100) % 100
 	var td: int = today_int % 100
 	if EpochDay.from_date(y, m, d) == EpochDay.from_date(ty, tm, td) - 1:
-		return "Yesterday"
-	var mon: String = MONTHS[clampi(m - 1, 0, 11)]
+		return TranslationServer.translate(&"LEADERBOARD_YESTERDAY")
+	var months: PackedStringArray = TranslationServer.translate(&"MONTHS_SHORT").split(",")
+	var mon: String = months[clampi(m - 1, 0, months.size() - 1)] if months.size() >= 12 else str(m)
 	if y == ty:
 		return "%s %d" % [mon, d]
 	return "%s %d, %d" % [mon, d, y]
