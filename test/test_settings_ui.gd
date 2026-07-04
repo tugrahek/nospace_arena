@@ -26,3 +26,22 @@ func test_slider_change_applies_to_audiomanager() -> void:
 func test_settings_locale_keys() -> void:
 	assert_eq(tr("SETTINGS_TITLE"), "Settings")
 	assert_eq(tr("SETTINGS_MUTE"), "Mute")
+	assert_eq(tr("SETTINGS_LANGUAGE"), "Language")
+
+
+func test_language_pick_applies_locale_and_refreshes_panel() -> void:
+	# Pressing a language button applies the locale immediately and the panel re-labels itself
+	# in place (cheap-hybrid refresh). Restores the saved preference + EN locale afterwards.
+	var saved: String = AudioManager.settings().language
+	var panel: Node = load("res://scenes/ui/Settings.tscn").instantiate()
+	add_child_autofree(panel)
+	await get_tree().process_frame
+	var tr_button: Button = panel.get_node("Center/LanguageRow/Segment/TrButton")
+	tr_button.button_pressed = true
+	tr_button.pressed.emit()
+	assert_true(TranslationServer.get_locale().begins_with("tr"), "locale switched to tr")
+	var title: Label = panel.get_node("Center/Title")
+	assert_eq(title.text, "Ayarlar", "panel re-labeled itself in the new language")
+	# Restore persisted preference + test locale.
+	AudioManager.set_language(saved)
+	TranslationServer.set_locale("en")

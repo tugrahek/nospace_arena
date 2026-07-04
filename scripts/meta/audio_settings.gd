@@ -14,6 +14,7 @@ var sfx: float = 1.0
 var music: float = 1.0
 var muted: bool = false
 var control_scheme: int = 1  # swipe (default)
+var language: String = ""  # UI language; "" = auto (follow the device, see LocaleUtil.resolve)
 
 
 func set_master(v: float) -> void:
@@ -37,6 +38,12 @@ func set_control_scheme(v: int) -> void:
 	control_scheme = clampi(v, SCHEME_MIN, SCHEME_MAX)
 
 
+## UI language preference: "" (auto/device) or a supported code; anything else normalizes
+## to auto so a corrupt/stale save can never pin an unknown locale.
+func set_language(v: String) -> void:
+	language = v if LocaleUtil.SUPPORTED.has(v) else ""
+
+
 ## Converts a linear volume [0,1] to decibels for a bus; 0 -> SILENCE_DB (no -inf).
 static func to_db(linear: float) -> float:
 	var v: float = clampf(linear, 0.0, 1.0)
@@ -46,7 +53,8 @@ static func to_db(linear: float) -> float:
 
 
 func to_dict() -> Dictionary:
-	return {"master": master, "sfx": sfx, "music": music, "muted": muted, "control_scheme": control_scheme}
+	return {"master": master, "sfx": sfx, "music": music, "muted": muted,
+		"control_scheme": control_scheme, "language": language}
 
 
 static func from_dict(d: Dictionary) -> AudioSettings:
@@ -56,4 +64,5 @@ static func from_dict(d: Dictionary) -> AudioSettings:
 	s.set_music(float(d.get("music", 1.0)))
 	s.set_muted(bool(d.get("muted", false)))
 	s.set_control_scheme(int(d.get("control_scheme", 1)))
+	s.set_language(String(d.get("language", "")))
 	return s

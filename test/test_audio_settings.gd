@@ -56,6 +56,20 @@ func test_from_dict_defaults_on_missing_keys() -> void:
 	assert_eq(s.control_scheme, 1)  # default swipe
 
 
+func test_language_sanitize_and_round_trip() -> void:
+	var s := AudioSettings.new()
+	assert_eq(s.language, "", "default = auto (device)")
+	s.set_language("tr")
+	assert_eq(s.language, "tr", "supported code sticks")
+	s.set_language("xx")
+	assert_eq(s.language, "", "unknown code normalizes to auto")
+	s.set_language("en")
+	var back := AudioSettings.from_dict(s.to_dict())
+	assert_eq(back.language, "en", "language survives the dict round-trip")
+	var legacy := AudioSettings.from_dict({"master": 0.5})
+	assert_eq(legacy.language, "", "old settings.json without language -> auto")
+
+
 func test_control_scheme_clamp_and_round_trip() -> void:
 	var s := AudioSettings.new()
 	s.set_control_scheme(2)

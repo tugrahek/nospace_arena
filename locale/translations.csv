@@ -130,3 +130,7 @@ STORE_OWNED,Owned: %d,Sahip: %d
 BOOST_ARM,Arm,Kuşan
 BOOST_ARMED,Armed,Kuşanıldı
 BOOST_APPLY_NOTE,"Applies in Free, Level and Campaign — not in Daily","Serbest, Seviye ve Macera'da geçerli — Günlük'te değil"
+SETTINGS_LANGUAGE,Language,Dil
+LANG_AUTO,Auto,Otomatik
+LANG_EN,English,English
+LANG_TR,Türkçe,Türkçe

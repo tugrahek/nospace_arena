@@ -21,6 +21,7 @@ var _music: AudioStreamPlayer
 
 func _ready() -> void:
 	_settings = SettingsStore.load_from(SETTINGS_PATH)
+	_apply_language()  # set the UI locale before ANY scene builds its texts
 	for i in maxi(sfx_pool_size, 1):
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
@@ -126,6 +127,25 @@ func set_control_scheme(id: int) -> void:
 	_settings.set_control_scheme(id)
 	_save()
 	control_scheme_changed.emit(_settings.control_scheme)
+
+
+## Emitted after the UI locale changes (Settings language pick). Screens rebuild their texts
+## on scene entry anyway; the Settings panel listens to refresh itself in place.
+signal language_changed(locale: String)
+
+
+## Sets + persists the UI language ("" = auto/device) and applies the locale immediately.
+func set_language(lang: String) -> void:
+	_settings.set_language(lang)
+	_save()
+	_apply_language()
+	language_changed.emit(TranslationServer.get_locale())
+
+
+## Resolves and applies the active locale: saved preference > device language > English.
+## The impure input (OS locale) is read here; the resolution itself is pure (LocaleUtil).
+func _apply_language() -> void:
+	TranslationServer.set_locale(LocaleUtil.resolve(_settings.language, OS.get_locale_language()))
 
 
 func _apply_settings() -> void:
