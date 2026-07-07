@@ -15,7 +15,7 @@ signal control_scheme_changed(id: int)
 
 enum SchemeId { TAP_TURN, SWIPE, DPAD }
 
-@export var move_interval: float = 0.04  # seconds per one-cell step (~250 px/s)
+@export var move_interval: float = 0.045  # seconds per one-cell step (~222 px/s; feel-pass: ~12% slower)
 @export var control_scheme: SchemeId = SchemeId.SWIPE
 
 var _arena: ArenaController

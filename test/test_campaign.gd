@@ -47,6 +47,26 @@ func test_star_disabled_score_threshold() -> void:
 	assert_eq(CampaignStars.star_for(true, 99999, 0, l), 2, "flawless still counts -> 2")
 
 
+# --- Difficulty curve (design invariant: strictly building, NO breather dips) ---
+
+func test_campaign_curve_monotonic_no_breather() -> void:
+	# The authored curve only ever climbs: speed, target and enemy count are non-decreasing
+	# across c01..c12. Pins the "no breather level" decision (2026-07-06 revision).
+	var prev_speed: float = 0.0
+	var prev_target: float = 0.0
+	var prev_enemies: int = 0
+	for l in ContentCatalog.LEVELS:
+		assert_true(l.speed_mult >= prev_speed, "%s speed_mult never dips" % l.id)
+		assert_true(l.target_percent >= prev_target, "%s target never dips" % l.id)
+		assert_true(l.enemies.size() >= prev_enemies, "%s enemy count never dips" % l.id)
+		assert_gt(l.star2_score, 0, "%s keeps a reachable score star" % l.id)
+		prev_speed = l.speed_mult
+		prev_target = l.target_percent
+		prev_enemies = l.enemies.size()
+	var last: LevelData = ContentCatalog.LEVELS[ContentCatalog.LEVELS.size() - 1]
+	assert_true(last.speed_mult > 1.0 and last.target_percent >= 75.0, "finale is the peak")
+
+
 # --- Unlock derivation ---
 
 func test_first_level_always_unlocked() -> void:

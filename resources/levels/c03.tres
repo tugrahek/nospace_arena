@@ -14,5 +14,5 @@ enemies = Array[Resource]([ExtResource("3_b"), ExtResource("4_c")])
 target_percent = 55.0
 lives = 3
 boosts_allowed = true
-speed_mult = 1.0
+speed_mult = 1.05
 star2_score = 640
