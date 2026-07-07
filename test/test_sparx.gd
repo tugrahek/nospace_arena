@@ -282,6 +282,24 @@ func test_sparx_stays_on_border_never_interior() -> void:
 	GameState.reset()
 
 
+func test_shared_main_seed_same_trap_decision() -> void:
+	# Perf-pass: the game now passes one shared main-region seed to every sparx. The trap
+	# DECISION must be identical to the self-computed path (both directions).
+	var arena := _frost_arena()
+	GameState.start_run(3)
+	_carve_corner_pocket(arena)
+	var seed: Vector2i = arena.grid._largest_free_component_seed()
+	var trapped := _sparx_on(arena, Vector2i(1, 1))
+	trapped.trap_pocket_max_cells = 0
+	assert_true(trapped.on_capture_event(seed), "pocket sparx: shared seed -> contained")
+	var free_arena := _frost_arena()
+	var seed2: Vector2i = free_arena.grid._largest_free_component_seed()
+	var roamer := _sparx_on(free_arena, Vector2i(1, 1))
+	roamer.trap_pocket_max_cells = 0
+	assert_false(roamer.on_capture_event(seed2), "open arena: shared seed -> stays on patrol")
+	GameState.reset()
+
+
 func test_on_capture_event_reports_new_contain_once() -> void:
 	# The bool return drives the pocket auto-capture: true ONLY on the PATROL -> CONTAINED
 	# transition; an already-contained Sparx must not re-trigger a fill.

@@ -30,6 +30,10 @@ enum SparxState { PATROL, CONTAINED, TELEGRAPH }
 
 const POOF_SCENE: PackedScene = preload("res://scenes/fx/CaptureBurst.tscn")
 
+## Sentinel for on_capture_event(): "no shared main-region seed supplied — compute locally".
+## Distinct from (-1,-1), which is a VALID result meaning "no FREE region at all".
+const UNKNOWN_MAIN_SEED := Vector2i(-2, -2)
+
 var shape: int = Shape.CIRCLE  # placeholder type tell (Step 14 sprites)
 
 var _arena: ArenaController
@@ -303,21 +307,31 @@ func is_contained() -> bool:
 ## inside the main region. Read-only flood-fill, deterministic; runs only on capture events.
 ## Returns true when this event NEWLY contained the Sparx — the game triggers the pocket
 ## auto-capture reward on it (fix-pass #10). Already-contained / not trapped -> false.
-func on_capture_event() -> bool:
-	if not _edge_follow or _sparx_state != SparxState.PATROL:
+## `main_seed` (perf-pass): the main FREE region's seed, computed ONCE per capture by the game
+## and shared across all edge-walkers — N sparx no longer means N full-grid floods. Omitted
+## (tests/back-compat) -> computed locally; the trap DECISION is identical either way.
+func on_capture_event(main_seed: Vector2i = UNKNOWN_MAIN_SEED) -> bool:
+	if not wants_capture_events():
 		return false
-	if _is_trapped():
+	if _is_trapped(main_seed):
 		_enter_contain()
 		return true
 	return false
 
 
+## True while this enemy actually evaluates capture events (edge-walker on patrol). The game
+## uses it to skip the shared main-seed flood entirely on sparx-free arenas.
+func wants_capture_events() -> bool:
+	return _edge_follow and _sparx_state == SparxState.PATROL
+
+
 ## True when the player has cut Sparx off from the main play area (or engulfed its cell).
-func _is_trapped() -> bool:
+func _is_trapped(main_seed: Vector2i = UNKNOWN_MAIN_SEED) -> bool:
 	var g: CaptureGrid = _arena.grid
 	if g.cell_at(_grid_cell.x, _grid_cell.y) != CaptureGrid.Cell.FREE:
 		return true  # engulfed (pocket size 0)
-	var main_seed: Vector2i = g._largest_free_component_seed()
+	if main_seed == UNKNOWN_MAIN_SEED:
+		main_seed = g._largest_free_component_seed()
 	if main_seed.x < 0:
 		return false  # no FREE region at all (board full) -> nothing to contain into
 	var region: Dictionary = _flood_free_set(_grid_cell, g.cols * g.rows)  # Sparx's component

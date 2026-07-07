@@ -451,9 +451,18 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 		earned = GameState.register_capture(cells.size(), _run_time, _exposed_time)
 		_exposed_time = 0.0  # consumed by this capture
 	var newly_contained: bool = false
-	for e in _enemies:  # edge-walkers (Sparx) self-contain when sealed off from the main region
-		if e.on_capture_event():
-			newly_contained = true
+	# Perf-pass: the main-region seed (a full-grid flood) is computed ONCE and shared by every
+	# patrolling edge-walker — and skipped entirely when none exists (bouncer-only arenas).
+	var any_walker: bool = false
+	for e in _enemies:
+		if e.wants_capture_events():
+			any_walker = true
+			break
+	if any_walker:
+		var main_seed: Vector2i = _arena.grid._largest_free_component_seed()
+		for e in _enemies:  # edge-walkers (Sparx) self-contain when sealed off from the main region
+			if e.on_capture_event(main_seed):
+				newly_contained = true
 	if not cells.is_empty():
 		_play_capture_juice(cells, earned)
 	# Trap reward (fix-pass #10): a newly contained Sparx leaves its pocket seedless (contained
