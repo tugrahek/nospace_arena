@@ -18,6 +18,12 @@ enum SchemeId { TAP_TURN, SWIPE, DPAD }
 @export var move_interval: float = 0.045  # seconds per one-cell step (~222 px/s; feel-pass: ~12% slower)
 @export var control_scheme: SchemeId = SchemeId.SWIPE
 
+# Feel-pass (visual layer only): the diamond grows + brightens while drawing in the open,
+# settling back once safe — the core risk state reads on the player itself, not just the vignette.
+@export var exposed_pulse_scale: float = 1.08
+@export var exposed_brighten: float = 0.3
+@export var exposed_ease: float = 10.0  # lerp rate/sec toward the target look
+
 var _arena: ArenaController
 var _grid_pos: Vector2i = Vector2i.ZERO
 var _safe_cell: Vector2i = Vector2i.ZERO  # last safe cell, used on respawn
@@ -31,6 +37,14 @@ var _target_world: Vector2 = Vector2.ZERO
 
 var _scheme: ControlScheme
 var _kb_was_held: bool = false
+
+@onready var _visual: Polygon2D = get_node_or_null("Visual")  # null in logic-only tests
+var _base_visual_color: Color
+
+
+func _ready() -> void:
+	if _visual != null:
+		_base_visual_color = _visual.color
 
 
 ## True while drawing a trail in the open (vulnerable). State-aware enemies hunt only
@@ -122,6 +136,18 @@ func _process(delta: float) -> void:
 		_target_world = _arena.cell_to_world(_grid_pos)
 	var t: float = clampf(_move_timer / move_interval, 0.0, 1.0)
 	position = _start_world.lerp(_target_world, t)
+	_update_exposed_visual(delta)
+
+
+## Paint-only exposed feedback (gameplay reads none of it).
+func _update_exposed_visual(delta: float) -> void:
+	if _visual == null:
+		return
+	var k: float = clampf(exposed_ease * delta, 0.0, 1.0)
+	var tgt_scale: float = exposed_pulse_scale if _is_drawing else 1.0
+	_visual.scale = _visual.scale.lerp(Vector2.ONE * tgt_scale, k)
+	var tgt_col: Color = _base_visual_color.lightened(exposed_brighten) if _is_drawing else _base_visual_color
+	_visual.color = _visual.color.lerp(tgt_col, k)
 
 
 ## Resolves this frame's movement intent: keyboard hold takes priority, otherwise

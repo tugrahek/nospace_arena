@@ -26,6 +26,9 @@ enum SparxState { PATROL, CONTAINED, TELEGRAPH }
 @export var safe_emerge_distance: int = 7      # Sparx: re-emerge >= this many cells from the player
 @export var loop_check_steps: int = 64         # Sparx: window of steps to detect a degenerate loop
 @export var loop_min_cells: int = 24           # Sparx: <= this many distinct cells in the window = stuck loop
+@export var poof_scale: float = 0.5            # contain/re-emerge burst size vs a capture burst (0 = off)
+
+const POOF_SCENE: PackedScene = preload("res://scenes/fx/CaptureBurst.tscn")
 
 var shape: int = Shape.CIRCLE  # placeholder type tell (Step 14 sprites)
 
@@ -244,11 +247,28 @@ func _reset_loop_tracker() -> void:
 	_loop_steps = 0
 
 
+## Small fire-and-forget burst in the enemy's color (visual only; reuses the capture burst).
+## `speed` scales particle velocity: low = tight inward-feeling puff (contain), higher = outward pop.
+func _spawn_poof(at: Vector2, speed: float) -> void:
+	if poof_scale <= 0.0 or not is_inside_tree():
+		return
+	var b: CPUParticles2D = POOF_SCENE.instantiate()
+	b.position = at
+	b.color = color
+	b.amount = maxi(int(b.amount * poof_scale), 4)
+	b.initial_velocity_min *= speed
+	b.initial_velocity_max *= speed
+	b.scale_amount_min *= poof_scale
+	b.scale_amount_max *= poof_scale
+	get_parent().add_child(b)
+
+
 ## PATROL -> CONTAINED: invisible + inert breather on its own timer.
 func _enter_contain() -> void:
 	_reset_loop_tracker()
 	_sparx_state = SparxState.CONTAINED
 	_contain_timer = contain_duration
+	_spawn_poof(position, 0.35)  # tight puff: reads as "collapsed/trapped", not killed
 	visible = false
 	queue_redraw()
 	if OS.is_debug_build():
@@ -264,6 +284,7 @@ func _begin_telegraph() -> void:
 	_sparx_state = SparxState.TELEGRAPH
 	_telegraph_timer = emerge_telegraph
 	visible = true
+	_spawn_poof(position, 0.7)  # outward mini-pop at the re-emerge cell (arrival reads clearly)
 	queue_redraw()
 	if OS.is_debug_build():
 		print("[Sparx] RE-EMERGE @ ", _grid_cell, " heading ", _heading)

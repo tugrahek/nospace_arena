@@ -10,8 +10,18 @@ signal next_pressed()  # Campaign: advance to the next level from the win screen
 
 ## Scale the score label punches to on each capture, then settles back to 1.0 (@export feel).
 @export var score_punch: float = 1.3
+# Feel-pass knobs (visual only):
+@export var near_target_ratio: float = 0.9   # percent label turns accent + pulses past this share of the target
+@export var result_pop_time: float = 0.2     # result panel scale-in duration
+@export var star_stagger: float = 0.15       # delay between campaign star reveals
+@export var star_punch: float = 1.5          # stars label scale punch per revealed star
+
+const PALETTE: PaletteData = preload("res://config/palette.tres")
 
 var _score_tween: Tween = null
+var _target: float = 75.0                    # stage/level capture target (display only)
+var _percent_tween: Tween = null
+var _near_target_hot: bool = false
 
 @onready var _hearts: HeartsHud = $TopBar/Hearts
 @onready var _stage_banner: Label = $StageBanner
@@ -82,8 +92,30 @@ func setup(lives: int) -> void:
 	_stage_banner.visible = false
 
 
+## The capture target for the current stage/level — shown next to the live percent so the
+## goal is always on screen ("62 / 75%"). Called by game.gd whenever a stage/level starts.
+func set_target(target: float) -> void:
+	_target = target
+	_near_target_hot = false
+	_percent_label.remove_theme_color_override("font_color")
+
+
 func update_percent(percent: float) -> void:
-	_percent_label.text = "%.0f%%" % percent
+	_percent_label.text = "%.0f / %.0f%%" % [percent, _target]
+	# Closing in on the goal: accent color + a small pulse per update (tension cue).
+	var hot: bool = _target > 0.0 and percent >= _target * near_target_ratio
+	if hot:
+		_percent_label.add_theme_color_override("font_color", PALETTE.accent)
+		if _percent_tween != null and _percent_tween.is_running():
+			_percent_tween.kill()
+		_percent_label.pivot_offset = _percent_label.size * 0.5
+		_percent_label.scale = Vector2.ONE * 1.15
+		_percent_tween = _percent_label.create_tween()
+		_percent_tween.tween_property(_percent_label, "scale", Vector2.ONE, 0.16) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	elif _near_target_hot:
+		_percent_label.remove_theme_color_override("font_color")
+	_near_target_hot = hot
 
 
 ## Stage-clear flourish (Level-Endless): "Stage N" banner scales in, holds, then fades out.
@@ -136,24 +168,64 @@ func _on_game_over(final_score: int) -> void:
 	_result_title.text = tr("RESULT_LOSE")
 	_result_title.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1.0))  # danger (soft)
 	_result_score.text = tr("HUD_SCORE") + ": " + str(final_score)
-	_result_panel.visible = true
+	_show_result_panel()
 
 
 func _on_run_won(final_score: int) -> void:
 	_result_title.text = tr("RESULT_WIN")
 	_result_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.55, 1.0))  # success
 	_result_score.text = tr("HUD_SCORE") + ": " + str(final_score)
+	_show_result_panel()
+
+
+## Result entrance: quick scale-in + fade instead of popping into existence.
+func _show_result_panel() -> void:
 	_result_panel.visible = true
+	_result_panel.pivot_offset = _result_panel.size * 0.5
+	_result_panel.scale = Vector2.ONE * 0.9
+	_result_panel.modulate.a = 0.0
+	var t: Tween = _result_panel.create_tween().set_parallel(true)
+	t.tween_property(_result_panel, "scale", Vector2.ONE, result_pop_time) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(_result_panel, "modulate:a", 1.0, result_pop_time * 0.75)
 
 
-## Campaign win: show earned stars (filled/empty) on the result panel, with a "new best" tag if
-## this run improved the level's record. Called by game.gd after recording the result.
+## Campaign win: reveal the earned stars ONE BY ONE (staggered punch + sfx hook), then pop the
+## "new best" tag last. Called by game.gd after recording the result. Visual only.
 func show_campaign_stars(stars: int, improved: bool, has_next: bool) -> void:
 	var s: int = clampi(stars, 0, 3)
-	_stars_label.text = "★".repeat(s) + "☆".repeat(3 - s)  # own line -> no overflow
 	_stars_label.visible = true
-	_new_best_label.visible = improved  # separate small line
+	_stars_label.text = ""
+	_new_best_label.visible = false
 	_next_button.visible = has_next
+	var t: Tween = _stars_label.create_tween()
+	for i in 3:
+		t.tween_interval(star_stagger)
+		t.tween_callback(_reveal_star.bind(i, s))
+	if improved:
+		t.tween_interval(star_stagger)
+		t.tween_callback(_pop_new_best)
+
+
+func _reveal_star(index: int, filled: int) -> void:
+	var shown: int = index + 1
+	_stars_label.text = "★".repeat(mini(shown, filled)) + "☆".repeat(maxi(shown - filled, 0))
+	if index < filled:
+		AudioManager.play_sfx("star")  # hook — silent until an asset is bound
+		_stars_label.pivot_offset = _stars_label.size * 0.5
+		_stars_label.scale = Vector2.ONE * star_punch
+		var t: Tween = _stars_label.create_tween()
+		t.tween_property(_stars_label, "scale", Vector2.ONE, 0.16) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+func _pop_new_best() -> void:
+	_new_best_label.visible = true
+	_new_best_label.pivot_offset = _new_best_label.size * 0.5
+	_new_best_label.scale = Vector2.ONE * 1.3
+	var t: Tween = _new_best_label.create_tween()
+	t.tween_property(_new_best_label, "scale", Vector2.ONE, 0.18) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 ## In-run coins readout (full economy UI lives in the menu/store screens).

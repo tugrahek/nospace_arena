@@ -13,6 +13,7 @@ const LEADERBOARD_PATH: String = "user://leaderboard.json"
 const MISSIONS_PATH: String = "user://missions.json"
 const MISSION_COUNT: int = 3
 const PROGRESSION: ProgressionConfig = preload("res://config/progression.tres")
+const PALETTE: PaletteData = preload("res://config/palette.tres")
 
 @export var death_grace: float = 1.0  # invulnerability window after a life loss (no chain-kills)
 
@@ -258,6 +259,7 @@ func _start_stage(stage: int) -> void:
 	_living_territory.setup(_arena, _enemies, _player)
 	_near_miss.setup(_player, _enemies)
 	_stage_target = minf(_arena_data.target_percent + float(spec["target_bonus"]), PROGRESSION.target_cap)
+	_hud.set_target(_stage_target)
 	_hud.update_percent(0.0)
 	if OS.is_debug_build():
 		print("Stage %d: arena=%d target=%.0f%% speed=x%.2f enemies=%d" % [
@@ -274,6 +276,7 @@ func _apply_campaign_level() -> void:
 	_living_territory.setup(_arena, _enemies, _player)
 	_near_miss.setup(_player, _enemies)
 	_stage_target = _level.target_percent
+	_hud.set_target(_stage_target)
 	_hud.update_percent(0.0)
 	if OS.is_debug_build():
 		print("Campaign level %s: arena=%s target=%.0f%% enemies=%d boosts=%s" % [
@@ -386,7 +389,12 @@ func _on_trail_failed() -> void:
 		return  # invulnerable right after a death -> a single event costs exactly one life
 	_death_grace_timer = death_grace  # start i-frames (blocks simultaneous/chain hits + respawn re-catch)
 	_lives_lost += 1  # tracked for the Campaign flawless star
-	# Life-loss impact: a single screen flash + heavy shake (no strobe).
+	# Life-loss impact: a single screen flash + heavy shake (no strobe) + a local burst AT the
+	# death spot (the respawn teleport otherwise leaves the moment unreadable). Visual only.
+	var death_burst: CPUParticles2D = BURST_SCENE.instantiate()
+	death_burst.position = _player.position
+	death_burst.color = PALETTE.danger
+	add_child(death_burst)
 	_overlay.flash()
 	_camera.add_trauma(_camera.trauma_life_loss)
 	AudioManager.play_sfx("life_loss")

@@ -3,6 +3,13 @@ extends GutTest
 ## Sparx (edge-walker) type + Frost roster + wall-follow movement (no stall). Threat (a) trail
 ## only in 19b-1; player-cell threat (b) is 19b-2.
 
+func after_each() -> void:
+	# Contain/re-emerge poofs self-free after their lifetime — tests end sooner; sweep them.
+	for c in get_children():
+		if c is CPUParticles2D:
+			c.free()
+
+
 func test_sparx_type_is_edge_follow_square() -> void:
 	var t: EnemyType = load("res://resources/enemies/type_sparx.tres")
 	assert_true(t.edge_follow, "edge_follow set")
