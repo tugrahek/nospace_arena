@@ -144,14 +144,12 @@ func close_and_capture(danger_seeds: Array = []) -> CaptureResultScript:
 		if largest.x >= 0:
 			seeds.append(largest)
 
-	var reachable := _flood_free(seeds)
+	var reachable: PackedByteArray = _flood_free(seeds)
 
 	for i in _cells.size():
-		if _cells[i] == Cell.FREE:
-			var cell := Vector2i(i % cols, i / cols)
-			if not reachable.has(cell):
-				_cells[i] = Cell.CAPTURED
-				newly.append(cell)
+		if _cells[i] == Cell.FREE and reachable[i] == 0:
+			_cells[i] = Cell.CAPTURED
+			newly.append(Vector2i(i % cols, i / cols))
 
 	captured_interior += newly.size()
 	result.success = true
@@ -161,50 +159,97 @@ func close_and_capture(danger_seeds: Array = []) -> CaptureResultScript:
 	return result
 
 
-## Flood-fills FREE cells reachable from the seeds; returns them as a set.
-func _flood_free(seeds: Array) -> Dictionary:
-	var visited: Dictionary = {}
-	var stack: Array[Vector2i] = []
+## Flood-fills FREE cells reachable from the seeds; returns a row-major reachability mask
+## (index = y * cols + x, 1 = reachable). Perf #5: the old Dictionary(Vector2i) bookkeeping
+## dominated capture cost on mobile — this keeps the EXACT same traversal (LIFO stack, the
+## _NEIGHBORS push order RIGHT/LEFT/DOWN/UP) and only changes the representation, so the
+## reachable SET (and every capture result derived from it) is identical.
+func _flood_free(seeds: Array) -> PackedByteArray:
+	var total: int = cols * rows
+	var mask := PackedByteArray()
+	mask.resize(total)  # zero-filled
+	var stack := PackedInt32Array()
+	stack.resize(total)  # each cell is pushed at most once -> capacity bound
+	var sp: int = 0
 	for s in seeds:
 		var sc: Vector2i = s
-		if not visited.has(sc):
-			visited[sc] = true
-			stack.append(sc)
-	while not stack.is_empty():
-		var c: Vector2i = stack.pop_back()
-		for d in _NEIGHBORS:
-			var n: Vector2i = c + d
-			if cell_at(n.x, n.y) == Cell.FREE and not visited.has(n):
-				visited[n] = true
-				stack.append(n)
-	return visited
+		if not in_bounds(sc.x, sc.y):
+			continue
+		var si: int = sc.y * cols + sc.x
+		if mask[si] == 0:
+			mask[si] = 1
+			stack[sp] = si
+			sp += 1
+	while sp > 0:
+		sp -= 1
+		var i: int = stack[sp]
+		var x: int = i % cols
+		# Neighbours in the same order as _NEIGHBORS, with explicit bounds guards — the exact
+		# equivalent of cell_at()'s out-of-bounds = CAPTURED wall (never trust the ring alone).
+		if x + 1 < cols and _cells[i + 1] == Cell.FREE and mask[i + 1] == 0:  # RIGHT
+			mask[i + 1] = 1
+			stack[sp] = i + 1
+			sp += 1
+		if x > 0 and _cells[i - 1] == Cell.FREE and mask[i - 1] == 0:  # LEFT
+			mask[i - 1] = 1
+			stack[sp] = i - 1
+			sp += 1
+		if i + cols < total and _cells[i + cols] == Cell.FREE and mask[i + cols] == 0:  # DOWN
+			mask[i + cols] = 1
+			stack[sp] = i + cols
+			sp += 1
+		if i - cols >= 0 and _cells[i - cols] == Cell.FREE and mask[i - cols] == 0:  # UP
+			mask[i - cols] = 1
+			stack[sp] = i - cols
+			sp += 1
+	return mask
 
 
 ## Returns the row-major-first cell of the largest FREE component, or (-1,-1).
 ## Tie-break is deterministic (first found) for seed determinism.
+## Perf #5: Dictionary(Vector2i) bookkeeping -> flat mask + int stack. The outer scan order
+## (ascending row-major) and the strictly-greater tie-break are unchanged, and component
+## sizes are set cardinalities (traversal-order independent) -> identical seed out.
 func _largest_free_component_seed() -> Vector2i:
-	var visited: Dictionary = {}
+	var total: int = cols * rows
+	var visited := PackedByteArray()
+	visited.resize(total)
+	var stack := PackedInt32Array()
+	stack.resize(total)
 	var best_seed := Vector2i(-1, -1)
 	var best_size: int = 0
-	for y in rows:
-		for x in cols:
-			var start := Vector2i(x, y)
-			if cell_at(x, y) != Cell.FREE or visited.has(start):
-				continue
-			var size: int = 0
-			var stack: Array[Vector2i] = [start]
-			visited[start] = true
-			while not stack.is_empty():
-				var c: Vector2i = stack.pop_back()
-				size += 1
-				for d in _NEIGHBORS:
-					var n: Vector2i = c + d
-					if cell_at(n.x, n.y) == Cell.FREE and not visited.has(n):
-						visited[n] = true
-						stack.append(n)
-			if size > best_size:
-				best_size = size
-				best_seed = start
+	for start in total:  # ascending index == the old for-y/for-x row-major scan
+		if _cells[start] != Cell.FREE or visited[start] == 1:
+			continue
+		var size: int = 0
+		var sp: int = 0
+		stack[sp] = start
+		sp += 1
+		visited[start] = 1
+		while sp > 0:
+			sp -= 1
+			var i: int = stack[sp]
+			size += 1
+			var x: int = i % cols
+			if x + 1 < cols and _cells[i + 1] == Cell.FREE and visited[i + 1] == 0:  # RIGHT
+				visited[i + 1] = 1
+				stack[sp] = i + 1
+				sp += 1
+			if x > 0 and _cells[i - 1] == Cell.FREE and visited[i - 1] == 0:  # LEFT
+				visited[i - 1] = 1
+				stack[sp] = i - 1
+				sp += 1
+			if i + cols < total and _cells[i + cols] == Cell.FREE and visited[i + cols] == 0:  # DOWN
+				visited[i + cols] = 1
+				stack[sp] = i + cols
+				sp += 1
+			if i - cols >= 0 and _cells[i - cols] == Cell.FREE and visited[i - cols] == 0:  # UP
+				visited[i - cols] = 1
+				stack[sp] = i - cols
+				sp += 1
+		if size > best_size:
+			best_size = size
+			best_seed = Vector2i(start % cols, start / cols)
 	return best_seed
 
 

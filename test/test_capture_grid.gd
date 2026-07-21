@@ -127,3 +127,67 @@ func test_capture_is_deterministic() -> void:
 	assert_eq(ra.captured_count, rb.captured_count)
 	assert_almost_eq(ra.percent, rb.percent, 0.001)
 	assert_eq(ra.newly_captured.size(), rb.newly_captured.size())
+
+
+# --- Reference-reachability property (guard for ANY future core-flood change, perf #5+) ---
+
+## Independent naive BFS over a state snapshot: which cells stay FREE given the danger seeds.
+## Deliberately a different implementation (queue + Dictionary) than the engine's flood.
+func _reference_unreached(states: Array, cols: int, rows: int, seeds: Array) -> Dictionary:
+	var reached: Dictionary = {}
+	var queue: Array = []
+	for s in seeds:
+		var sc: Vector2i = s
+		if sc.x >= 0 and sc.x < cols and sc.y >= 0 and sc.y < rows \
+				and states[sc.y * cols + sc.x] == CaptureGrid.Cell.FREE and not reached.has(sc):
+			reached[sc] = true
+			queue.append(sc)
+	while not queue.is_empty():
+		var c: Vector2i = queue.pop_front()  # BFS on purpose (engine uses DFS) — same closure
+		for d in [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]:
+			var n: Vector2i = c + d
+			if n.x < 0 or n.x >= cols or n.y < 0 or n.y >= rows:
+				continue
+			if states[n.y * cols + n.x] == CaptureGrid.Cell.FREE and not reached.has(n):
+				reached[n] = true
+				queue.append(n)
+	var unreached: Dictionary = {}
+	for y in rows:
+		for x in cols:
+			if states[y * cols + x] == CaptureGrid.Cell.FREE and not reached.has(Vector2i(x, y)):
+				unreached[Vector2i(x, y)] = true
+	return unreached
+
+
+func _assert_capture_matches_reference(g, trail: Array, seeds: Array, label: String) -> void:
+	assert_true(g.lay_trail(trail), "%s: trail laid" % label)
+	# Snapshot the post-trail state with TRAIL already converted (close's first step).
+	var states: Array = []
+	for y in g.rows:
+		for x in g.cols:
+			var s: int = g.cell_at(x, y)
+			states.append(CaptureGrid.Cell.CAPTURED if s == CaptureGrid.Cell.TRAIL else s)
+	var expected: Dictionary = _reference_unreached(states, g.cols, g.rows, seeds)
+	for t in trail:
+		expected[t] = true  # the trail itself is always newly captured
+	var r = g.close_and_capture(seeds)
+	assert_eq(r.newly_captured.size(), expected.size(), "%s: newly count == reference" % label)
+	for c in r.newly_captured:
+		assert_true(expected.has(c), "%s: %s expected by reference BFS" % [label, str(c)])
+
+
+func test_capture_matches_reference_reachability() -> void:
+	# Line that splits nothing (seed in the open).
+	var a = CaptureGrid.new(9, 9, 1.0, Vector2.ZERO)
+	_assert_capture_matches_reference(a, _vertical_wall(2, 1, 4), [Vector2i(5, 5)], "open-line")
+	# Full split, seed on the big side -> small side captured.
+	var b = CaptureGrid.new(9, 9, 1.0, Vector2.ZERO)
+	_assert_capture_matches_reference(b, _vertical_wall(3, 1, 7), [Vector2i(6, 4)], "split")
+	# L-shaped pocket, seed outside it.
+	var c = CaptureGrid.new(11, 11, 1.0, Vector2.ZERO)
+	var l_path: Array = []
+	for y in range(1, 5):
+		l_path.append(Vector2i(4, y))
+	for x in range(3, 0, -1):
+		l_path.append(Vector2i(x, 4))
+	_assert_capture_matches_reference(c, l_path, [Vector2i(8, 8)], "L-pocket")
