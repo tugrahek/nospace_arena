@@ -102,6 +102,31 @@ func test_wave_total_capped_for_big_regions() -> void:
 	assert_between(hi, 0.14, 0.16, "under the cap the per-cell pace is unchanged (3 x 0.05)")
 
 
+func test_flash_window_skips_completed_and_pending() -> void:
+	# Mobile perf: per frame only the ACTIVE wedge is touched — completed runs fall behind _lo,
+	# pending ones aren't iterated (sorted starts). Coverage/look identical (other tests pin it).
+	var arena := _arena()
+	arena.wave_delay_per_cell = 0.1
+	arena.wave_max_duration = 10.0  # cap must not bind here
+	arena.wave_quantize = 0.001
+	var path: Array = []
+	for y in range(1, 8):
+		path.append(Vector2i(3, y))  # delays span 0 .. 0.3s, duration 0.25
+	assert_true(arena.grid.lay_trail(path), "trail laid")
+	arena.close_capture([Vector2i(30, 30)])
+	var layer: Node2D = arena.get_node("FlashLayer")
+	var runs: Array = layer.get("_runs")
+	for i in range(1, runs.size()):
+		assert_true(runs[i][0] >= runs[i - 1][0], "runs sorted by pulse start")
+	assert_eq(int(layer.get("_lo")), 0, "window starts at the head")
+	layer._process(0.28)  # start-0 pulses (duration 0.25) are done; late ones still pending/active
+	var lo: int = int(layer.get("_lo"))
+	assert_gt(lo, 0, "completed runs fell behind the window")
+	assert_lt(lo, runs.size(), "wave still alive (later pulses remain)")
+	layer._process(10.0)
+	assert_eq(int(layer.get("_total")), 0, "wave finished and cleared")
+
+
 func test_cells_accessor_matches_cell_at() -> void:
 	# The rendering fast path (raw buffer) must agree with the logic path (cell_at) everywhere.
 	var arena := _arena()

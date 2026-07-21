@@ -6,7 +6,8 @@ extends Node2D
 ## draws hundreds of rects instead of thousands. State never lags: the base captured fill under
 ## this layer is complete from frame one; this is pure brightness on top.
 
-var _runs: Array = []       # each element: [start_delay: float, rect: Rect2]
+var _runs: Array = []       # each element: [start_delay: float, rect: Rect2], SORTED by start
+var _lo: int = 0            # active-window start: runs before it have fully faded (skipped forever)
 var _elapsed: float = 0.0
 var _total: float = 0.0
 var _duration: float = 0.25
@@ -43,6 +44,11 @@ func play(cells: Array, delays: PackedFloat32Array, duration: float, color: Colo
 				run_x = xs[j]
 				prev = xs[j]
 		_total = maxf(_total, start + _duration)
+	# Active-window bookkeeping (mobile perf): runs sorted by pulse start so each frame only
+	# touches the currently-fading wedge — completed runs fall behind _lo, pending ones sit
+	# past the first future start. Same rects, same look; just no full-list rescan per frame.
+	_runs.sort_custom(func(a, b) -> bool: return a[0] < b[0])
+	_lo = 0  # re-fast-forwards next frame (a merged-in later capture may interleave starts)
 	set_process(true)
 	queue_redraw()
 
@@ -54,6 +60,7 @@ func run_count() -> int:
 
 func clear_wave() -> void:
 	_runs.clear()
+	_lo = 0
 	_elapsed = 0.0
 	_total = 0.0
 	set_process(false)
@@ -65,14 +72,22 @@ func _process(delta: float) -> void:
 	if _elapsed >= _total:
 		clear_wave()
 		return
+	# Slide the window start past fully-faded runs (monotonic — they never come back).
+	while _lo < _runs.size() and _runs[_lo][0] + _duration <= _elapsed:
+		_lo += 1
 	queue_redraw()
 
 
 func _draw() -> void:
-	for r in _runs:
+	# Only the active wedge: from the first still-fading run up to the first not-yet-started
+	# one (list is sorted by start). Completed and pending runs cost nothing per frame.
+	for i in range(_lo, _runs.size()):
+		var r: Array = _runs[i]
+		if r[0] > _elapsed:
+			break  # everything after is pending (sorted)
 		var local: float = _elapsed - r[0]
-		if local < 0.0 or local >= _duration:
-			continue
+		if local >= _duration:
+			continue  # rare straggler inside the window (interleaved merge)
 		var col: Color = _color
 		col.a = _color.a * (1.0 - local / _duration)
 		draw_rect(r[1], col)
