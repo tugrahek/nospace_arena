@@ -9,6 +9,9 @@ export/
 *.apk
 *.aab
 *.ipa
+export_presets.cfg
+android/
+/NoSpace
 
 # Signing keys — CRITICAL, never commit
 *.keystore
