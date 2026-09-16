@@ -15,6 +15,12 @@ signal next_pressed()  # Campaign: advance to the next level from the win screen
 @export var result_pop_time: float = 0.2     # result panel scale-in duration
 @export var star_stagger: float = 0.15       # delay between campaign star reveals
 @export var star_punch: float = 1.5          # stars label scale punch per revealed star
+# Combo escalation (feel P1-12, visual only): bigger chains punch harder and warm accent -> gold.
+@export var combo_punch_base: float = 1.25   # combo label punch at x2
+@export var combo_punch_step: float = 0.12   # extra punch per multiplier above x2
+@export var combo_punch_max: float = 1.8     # punch ceiling
+@export var combo_heat_start: int = 3        # multiplier where the gold shift begins
+@export var combo_heat_full: int = 5         # multiplier that is fully gold
 
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 
@@ -22,6 +28,8 @@ var _score_tween: Tween = null
 var _target: float = 75.0                    # stage/level capture target (display only)
 var _percent_tween: Tween = null
 var _near_target_hot: bool = false
+var _combo_tween: Tween = null
+var _last_combo: int = 0                     # punch only when the chain actually grows
 
 @onready var _hearts: HeartsHud = $TopBar/Hearts
 @onready var _stage_banner: Label = $StageBanner
@@ -148,8 +156,25 @@ func _on_score_changed(score: int, combo: int) -> void:
 	if combo > 0:
 		_combo_label.text = tr("HUD_COMBO") + " x" + str(combo + 1)
 		_combo_label.visible = true
+		if combo > _last_combo:
+			_punch_combo(combo + 1)
 	else:
 		_combo_label.visible = false
+	_last_combo = combo
+
+
+## Combo escalation: punch grows with the multiplier and the label warms accent -> gold from
+## combo_heat_start. Visual only (the multiplier itself comes from ScoreKeeper).
+func _punch_combo(mult: int) -> void:
+	var heat: float = JuiceMath.combo_heat(mult, combo_heat_start, combo_heat_full)
+	_combo_label.add_theme_color_override("font_color", PALETTE.accent.lerp(PALETTE.coin, heat))
+	if _combo_tween != null and _combo_tween.is_running():
+		_combo_tween.kill()
+	_combo_label.pivot_offset = _combo_label.size * 0.5
+	_combo_label.scale = Vector2.ONE * JuiceMath.combo_punch(mult, combo_punch_base, combo_punch_step, combo_punch_max)
+	_combo_tween = _combo_label.create_tween()
+	_combo_tween.tween_property(_combo_label, "scale", Vector2.ONE, 0.2) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 ## A quick scale punch on the score label (settles back to 1.0). Pivot is re-centered each

@@ -29,3 +29,23 @@ static func is_unlocked(index: int, levels: Array, stars: Dictionary) -> bool:
 		return false
 	var prev: LevelData = levels[index - 1]
 	return int(stars.get(String(prev.id), 0)) >= 1
+
+
+## The campaign frontier: highest unlocked level index (0 with no progress; -1 for no levels).
+static func frontier(levels: Array, stars: Dictionary) -> int:
+	var best: int = -1
+	for i in levels.size():
+		if is_unlocked(i, levels, stars):
+			best = i
+	return best
+
+
+## Index of the level that recording `new_stars` for `id` would NEWLY unlock (the frontier grows),
+## else -1. Keeps-best semantics like SaveData: a star improvement or a replay of an already-open
+## level never counts. Pure: `stars` is not modified. Drives the level-map unlock celebration.
+static func newly_unlocked(levels: Array, stars: Dictionary, id: StringName, new_stars: int) -> int:
+	var before: int = frontier(levels, stars)
+	var after_stars: Dictionary = stars.duplicate()
+	after_stars[String(id)] = maxi(int(stars.get(String(id), 0)), clampi(new_stars, 0, 3))
+	var after: int = frontier(levels, after_stars)
+	return after if after > before else -1

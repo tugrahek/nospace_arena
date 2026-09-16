@@ -519,7 +519,7 @@ func _spawn_floating_score(point: Vector2, value: int) -> void:
 	var popup: Label = FLOATING_SCORE_SCENE.instantiate()
 	popup.position = point
 	add_child(popup)
-	popup.show_value(value, _arena.trail_color)
+	popup.show_value(value, _arena.trail_color, GameState.get_combo() + 1)  # combo escalation (feel P1-12)
 
 
 func _on_scheme_changed(id: int) -> void:

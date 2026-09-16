@@ -16,6 +16,7 @@ signal boosts_changed()
 signal campaign_changed()
 
 var _data  # SaveData
+var _pending_unlock: int = -1  # level index awaiting its map celebration (in-memory only)
 
 
 func _ready() -> void:
@@ -117,10 +118,23 @@ func campaign_star(id: StringName) -> int:
 
 
 ## Records a level result (keeps the best stars). Persists + signals only if it improved.
+## A result that opens a NEW level arms the in-memory unlock marker for the level map's
+## celebration (feel P1-11; not persisted — a lost celebration on app kill is harmless).
 func record_campaign_result(id: StringName, stars: int) -> void:
+	var unlocked: int = CampaignStars.newly_unlocked(ContentCatalog.LEVELS, _data.campaign_stars, id, stars)
 	if _data.set_campaign_star(id, stars):
+		if unlocked >= 0:
+			_pending_unlock = unlocked
 		_flush()
 		campaign_changed.emit()
+
+
+## Takes the pending unlock celebration: the newly opened level index, or -1. Clears it, so the
+## map celebrates each unlock exactly once (on its first showing after the unlock).
+func consume_pending_unlock() -> int:
+	var index: int = _pending_unlock
+	_pending_unlock = -1
+	return index
 
 
 ## Whether the level at `index` is unlocked (previous level has >= 1 star; first is always open).

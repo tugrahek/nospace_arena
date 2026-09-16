@@ -27,6 +27,11 @@ enum SparxState { PATROL, CONTAINED, TELEGRAPH }
 @export var loop_check_steps: int = 64         # Sparx: window of steps to detect a degenerate loop
 @export var loop_min_cells: int = 24           # Sparx: <= this many distinct cells in the window = stuck loop
 @export var poof_scale: float = 0.5            # contain/re-emerge burst size vs a capture burst (0 = off)
+# Feel P1-7 (visual only — gameplay never reads these; the node transform stays untouched):
+@export var turn_rate: float = 14.0            # facing responsiveness (1/s) of the triangle/square; 0 = snap
+@export var sparx_roll: bool = true            # Sparx square rolls through corner turns (false = static)
+@export var breath_amount: float = 0.06        # Bouncer draw-radius pulse (fraction of radius); 0 = off
+@export var breath_speed: float = 3.0          # Bouncer breath angular speed (rad/s)
 
 const POOF_SCENE: PackedScene = preload("res://scenes/fx/CaptureBurst.tscn")
 
@@ -67,6 +72,8 @@ var _recovery_timer: float = 0.0  # post-bounce peel window (directional; see de
 var _recovery_normal: Vector2 = Vector2.ZERO  # outward normal of the wall last bounced off
 var _steered: bool = false  # tint feedback while steered/slowed (permanent lightweight readback)
 var _frozen: bool = false  # near-white tint while contact-frozen (Stasis readback)
+var _visual_angle: float = 0.0  # drawn facing (radians) — paint-only, eased toward the motion heading
+var _breath_t: float = 0.0      # breathing clock (render time, never the physics step)
 
 
 func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavior: EnemyBehavior, base_speed_px: float, variation: float = 0.0, edge_follow: bool = false, start_cell: Vector2i = Vector2i.ZERO, heading: Vector2i = Vector2i.DOWN) -> void:
@@ -99,7 +106,34 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 	_recovery_normal = Vector2.ZERO
 	_steered = false
 	_frozen = false
+	_visual_angle = _facing_target(0.0)
 	queue_redraw()
+
+
+## Visual clock (feel P1-7): eases the drawn facing toward the motion heading and advances the
+## breath. READS _velocity/_heading only and writes nothing gameplay uses -> daily/ghost-safe.
+func _process(delta: float) -> void:
+	if not visible or _arena == null:
+		return  # CONTAINED Sparx is invisible: nothing to animate
+	if shape == Shape.CIRCLE:
+		if breath_amount > 0.0:
+			_breath_t += delta
+			queue_redraw()
+		return
+	var target: float = _facing_target(_visual_angle)
+	if absf(angle_difference(_visual_angle, target)) > 0.001:
+		_visual_angle = JuiceMath.turn_toward(_visual_angle, target, turn_rate, delta)
+		queue_redraw()
+
+
+## Facing the shape should settle on: triangle apex along the velocity, Sparx square along its
+## grid heading (roll only when enabled). Zero motion keeps `fallback` (no snap to a default).
+func _facing_target(fallback: float) -> float:
+	if shape == Shape.TRIANGLE and _velocity != Vector2.ZERO:
+		return _velocity.angle() + PI * 0.5  # apex is drawn at -Y
+	if shape == Shape.SQUARE and sparx_roll:
+		return Vector2(_heading).angle()
+	return fallback
 
 
 ## This frame's behavior decision (homing/heading), before any effect or collision.
@@ -288,6 +322,7 @@ func _begin_telegraph() -> void:
 	_sparx_state = SparxState.TELEGRAPH
 	_telegraph_timer = emerge_telegraph
 	visible = true
+	_visual_angle = _facing_target(_visual_angle)  # relocated: settle instantly, no spin-in
 	_spawn_poof(position, 0.7)  # outward mini-pop at the re-emerge cell (arrival reads clearly)
 	queue_redraw()
 	if OS.is_debug_build():
@@ -588,6 +623,7 @@ func _draw() -> void:
 	if _telegraph_timer > 0.0:  # re-emerge warning: blink (non-lethal window)
 		draw_color.a *= 0.3 + 0.7 * absf(sin(_telegraph_timer * 26.0))
 	if shape == Shape.TRIANGLE:
+		draw_set_transform(Vector2.ZERO, _visual_angle)  # paint-space rotation; node stays unrotated
 		var pts := PackedVector2Array([
 			Vector2(0, -radius),
 			Vector2(-radius * 0.866, radius * 0.5),
@@ -595,6 +631,9 @@ func _draw() -> void:
 		])
 		draw_colored_polygon(pts, draw_color)
 	elif shape == Shape.SQUARE:
+		draw_set_transform(Vector2.ZERO, _visual_angle)
 		draw_rect(Rect2(-radius, -radius, radius * 2.0, radius * 2.0), draw_color)
 	else:
-		draw_circle(Vector2.ZERO, radius, draw_color)
+		# Breathing scales the DRAWN radius only; `radius` (collision) is never modified.
+		var phase: float = _variation * 2.0  # per-enemy offset so twins don't breathe in sync
+		draw_circle(Vector2.ZERO, radius * (1.0 + breath_amount * sin(_breath_t * breath_speed + phase)), draw_color)

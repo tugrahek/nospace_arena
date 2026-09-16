@@ -41,6 +41,34 @@ static func danger_from_distance(dist: float, radius: float) -> float:
 	return smoothstep(0.0, 1.0, (radius - dist) / radius)
 
 
+## Frame-rate independent exponential turn of angle `current` toward `target` (radians), always
+## along the shortest arc (wraps across ±PI). `rate` = 1/s responsiveness; rate <= 0 snaps.
+## dt = 0 leaves the angle unchanged. Visual only (enemy facing).
+static func turn_toward(current: float, target: float, rate: float, dt: float) -> float:
+	if rate <= 0.0:
+		return wrapf(target, -PI, PI)
+	var t: float = 1.0 - exp(-rate * maxf(dt, 0.0))
+	return wrapf(current + angle_difference(current, target) * t, -PI, PI)
+
+
+## Punch scale for a combo multiplier: x1 (no combo) = 1.0; from x2 it starts at `base` and grows
+## by `step` per extra multiplier, clamped to `max_scale`. Bigger chains punch harder.
+static func combo_punch(mult: int, base: float, step: float, max_scale: float) -> float:
+	if mult <= 1:
+		return 1.0
+	return minf(base + step * float(mult - 2), max_scale)
+
+
+## Combo "heat" in [0, 1]: 0 below `start` multiplier, 1 at/above `full`, linear in between with
+## `start` itself already visibly warm (x3 of 3..5 -> 1/3). Drives the accent -> gold color shift.
+static func combo_heat(mult: int, start: int, full: int) -> float:
+	if mult < start:
+		return 0.0
+	if full <= start or mult >= full:
+		return 1.0
+	return float(mult - start + 1) / float(full - start + 1)
+
+
 ## Shortest distance from `p` to the segment a–b (clamped projection).
 static func _distance_to_segment(p: Vector2, a: Vector2, b: Vector2) -> float:
 	var ab: Vector2 = b - a
