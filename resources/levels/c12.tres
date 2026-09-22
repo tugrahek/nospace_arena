@@ -17,3 +17,4 @@ lives = 3
 boosts_allowed = false
 speed_mult = 1.3
 star2_score = 2000
+chaser_hunts_nearest = true

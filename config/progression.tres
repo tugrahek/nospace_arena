@@ -10,3 +10,4 @@ enemy_add_every = 2
 enemy_cap_bonus = 4
 target_ramp_per_stage = 2.0
 target_cap = 90.0
+chaser_hunts_nearest_stage = 5

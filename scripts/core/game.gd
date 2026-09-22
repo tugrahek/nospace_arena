@@ -271,6 +271,7 @@ func _start_stage(stage: int) -> void:
 	_player.setup(_arena)
 	_spawn_stage_enemies(spec)
 	_living_territory.setup(_arena, _enemies, _player)
+	_living_territory.set_hunt_nearest(_hunts_nearest(stage))
 	_near_miss.setup(_player, _enemies)
 	_stage_target = minf(_arena_data.target_percent + float(spec["target_bonus"]), PROGRESSION.target_cap)
 	_hud.set_target(_stage_target)
@@ -278,6 +279,15 @@ func _start_stage(stage: int) -> void:
 	if OS.is_debug_build():
 		print("Stage %d: arena=%d target=%.0f%% speed=x%.2f enemies=%d" % [
 			stage + 1, int(spec["arena_index"]), _stage_target, float(spec["speed_scale"]), _enemies.size()])
+
+
+## Adaptive chaser (#19) for this stage/level: late Campaign levels (LevelData flag) and late
+## Level-Endless stages (ProgressionConfig threshold). Free/Daily always off — Daily keeps its
+## leaderboard fair and Free stays predictable. Resolved ONCE here, handed to LivingTerritory;
+## the shared behavior resources never carry it.
+func _hunts_nearest(stage: int) -> bool:
+	var level_flag: bool = _level != null and _level.chaser_hunts_nearest
+	return ChaserPolicy.hunts_nearest(_mode, level_flag, stage, PROGRESSION.chaser_hunts_nearest_stage)
 
 
 ## Campaign: a single authored level -- arena/theme + explicit enemy composition + target/pace from
@@ -288,6 +298,7 @@ func _apply_campaign_level() -> void:
 	_player.setup(_arena)
 	_spawn_stage_enemies({"speed_scale": _level.speed_mult, "enemy_bonus": 0, "stage_seed": 0}, _level.enemies)
 	_living_territory.setup(_arena, _enemies, _player)
+	_living_territory.set_hunt_nearest(_hunts_nearest(_current_stage))
 	_near_miss.setup(_player, _enemies)
 	_stage_target = _level.target_percent
 	_hud.set_target(_stage_target)

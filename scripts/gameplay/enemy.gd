@@ -31,6 +31,9 @@ enum SparxState { PATROL, CONTAINED, TELEGRAPH }
 @export var sparx_roll: bool = true            # Sparx square rolls through corner turns (false = static)
 @export var breath_amount: float = 0.06        # Bouncer draw-radius pulse (fraction of radius); 0 = off
 @export var breath_speed: float = 3.0          # Bouncer breath angular speed (rad/s)
+## Adaptive hunt tell (#19): how far the body warms toward the trail color while it is hunting the
+## LINE instead of the head, so the switch is readable. 0 = no tint (the P1 facing still aims at it).
+@export var trail_hunt_tint: float = 0.35
 
 const POOF_SCENE: PackedScene = preload("res://scenes/fx/CaptureBurst.tscn")
 
@@ -70,6 +73,7 @@ var _recovery_timer: float = 0.0  # post-bounce peel window (directional; see de
 var _recovery_normal: Vector2 = Vector2.ZERO  # outward normal of the wall last bounced off
 var _steered: bool = false  # tint feedback while steered/slowed (permanent lightweight readback)
 var _frozen: bool = false  # near-white tint while contact-frozen (Stasis readback)
+var _hunting_trail: bool = false  # adaptive hunt (#19): aiming at the trail, not the head (tint tell)
 var _visual_angle: float = 0.0  # drawn facing (radians) — paint-only, eased toward the motion heading
 var _breath_t: float = 0.0      # breathing clock (render time, never the physics step)
 
@@ -103,6 +107,7 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 	_recovery_normal = Vector2.ZERO
 	_steered = false
 	_frozen = false
+	_hunting_trail = false
 	_visual_angle = _facing_target(0.0)
 	queue_redraw()
 
@@ -135,23 +140,46 @@ func _facing_target(fallback: float) -> float:
 
 ## This frame's behavior decision (homing/heading), before any effect or collision.
 ## Pure per type; the effect + collision layer is applied on top by apply_territory/_move.
-func decide_velocity(player_pos: Vector2, player_exposed: bool) -> Vector2:
+## `trail` (world-space, built once per frame by LivingTerritory) and `hunt_nearest` drive the
+## adaptive hunt (#19): where the rule is on, a hunting behavior aims at whichever is closer — the
+## player's head or the nearest point of the active line. Defaults keep every other caller (and
+## every mode where the rule is off) on the classic head-hunt, byte for byte.
+func decide_velocity(player_pos: Vector2, player_exposed: bool, trail: PackedVector2Array = PackedVector2Array(), hunt_nearest: bool = false) -> Vector2:
 	_last_player_pos = player_pos  # cached for Sparx edge-catch (LivingTerritory runs first)
 	_has_player = true
 	# Frozen (Halt) or no behavior: hold the current/reflected heading (no re-freeze loop).
 	if _behavior == null or _freeze_timer > 0.0:
 		return _velocity
-	# Sight gate: a behavior that hunts only what it can see (Chaser) treats a player behind
+	var target: Vector2 = _hunt_target(player_pos, player_exposed, trail, hunt_nearest)
+	# Sight gate: a behavior that hunts only what it can see (Chaser) treats a target behind
 	# captured territory as NOT exposed -> it roams instead of pressing into the wall between
 	# them (greedy-homing local minimum, device bug B2). Read-only grid query, no RNG.
-	var exposed: bool = player_exposed and (not _behavior.needs_line_of_sight() or _sees(player_pos))
-	var desired: Vector2 = _behavior.decide(_velocity, position, player_pos, exposed, _base_speed_px, _variation)
+	var exposed: bool = player_exposed and (not _behavior.needs_line_of_sight() or _sees(target))
+	var desired: Vector2 = _behavior.decide(_velocity, position, target, exposed, _base_speed_px, _variation)
 	# Post-bounce recovery is now DIRECTIONAL: keep homing in every direction EXCEPT straight back
 	# into the wall just hit. Fixes chasers circling a captured edge (blanket suppression) while
 	# still preventing wall-pin (never home directly into the surface). Freeze path is unchanged.
 	if _recovery_timer > 0.0:
 		return _peel_adjust(desired)
 	return desired
+
+
+## The point this enemy aims at: the player's head, or — where the adaptive rule is on and the
+## player is drawing — the nearest point of the active trail, whichever wins by
+## head_distance <= trail_distance * behavior bias. Sets the tint tell as a side effect.
+## Pure distance math, no RNG; `hunt_nearest` arrives per frame so no shared resource holds it.
+func _hunt_target(player_pos: Vector2, player_exposed: bool, trail: PackedVector2Array, hunt_nearest: bool) -> Vector2:
+	var on_trail: bool = false
+	var target: Vector2 = player_pos
+	if hunt_nearest and player_exposed and trail.size() > 1 and _behavior.hunts_player():
+		var nearest: Vector2 = JuiceMath.closest_point_on_polyline(position, trail)
+		if position.distance_to(player_pos) > position.distance_to(nearest) * _behavior.target_bias():
+			target = nearest
+			on_trail = true
+	if on_trail != _hunting_trail:
+		_hunting_trail = on_trail
+		queue_redraw()
+	return target
 
 
 ## Clear straight line (no CAPTURED cell) from this enemy's cell to the player's. Costs one
@@ -632,6 +660,10 @@ func _draw() -> void:
 		draw_color = color.lerp(Color.WHITE, 0.8)
 	elif _steered:
 		draw_color = color.lightened(0.5)
+	# Adaptive hunt tell (#19): warmed toward the trail's own color while it is hunting the LINE,
+	# so "it is cutting me off" is readable at a glance. Paint only.
+	if _hunting_trail and trail_hunt_tint > 0.0 and _arena != null:
+		draw_color = draw_color.lerp(_arena.trail_color, trail_hunt_tint)
 	if _telegraph_timer > 0.0:  # re-emerge warning: blink (non-lethal window)
 		draw_color.a *= 0.3 + 0.7 * absf(sin(_telegraph_timer * 26.0))
 	if shape == Shape.TRIANGLE:

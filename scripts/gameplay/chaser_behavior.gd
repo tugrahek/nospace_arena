@@ -14,6 +14,11 @@ extends "res://scripts/gameplay/enemy_behavior.gd"
 ## chaser roams instead of pressing into the wall (greedy-homing local minimum, device bug B2).
 ## false restores the pre-fix blind homing.
 @export var requires_line_of_sight: bool = true
+## Adaptive hunt (#19), only where ChaserPolicy turns it on: weights the player's HEAD against the
+## nearest point of the active trail. head <= trail * trail_bias -> head. 1.0 = pure distance;
+## > 1 favours the head, < 1 favours the line. The rule itself is resolved per frame by the enemy,
+## so this resource never carries per-run state.
+@export var trail_bias: float = 1.0
 
 func decide(velocity: Vector2, enemy_pos: Vector2, player_pos: Vector2, player_exposed: bool, base_speed_px: float, variation: float = 0.0) -> Vector2:
 	if not player_exposed:
@@ -26,3 +31,11 @@ func decide(velocity: Vector2, enemy_pos: Vector2, player_pos: Vector2, player_e
 
 func needs_line_of_sight() -> bool:
 	return requires_line_of_sight
+
+
+func hunts_player() -> bool:
+	return true
+
+
+func target_bias() -> float:
+	return trail_bias

@@ -31,6 +31,26 @@ static func min_distance_to_polyline(point: Vector2, points: PackedVector2Array)
 	return best
 
 
+## The point on the polyline `points` closest to `point` (clamped to the segments, so it is a real
+## point ON the line, not an extension). `point` itself for an empty polyline; the single vertex for
+## a one-point line. Used by the adaptive chaser to aim at the nearest part of the trail, not just
+## its head. Pure + deterministic.
+static func closest_point_on_polyline(point: Vector2, points: PackedVector2Array) -> Vector2:
+	if points.is_empty():
+		return point
+	if points.size() == 1:
+		return points[0]
+	var best: Vector2 = points[0]
+	var best_d: float = INF
+	for i in range(points.size() - 1):
+		var c: Vector2 = _closest_on_segment(point, points[i], points[i + 1])
+		var d: float = point.distance_squared_to(c)
+		if d < best_d:
+			best_d = d
+			best = c
+	return best
+
+
 ## Continuous danger level [0, 1] from a distance: 0 at/beyond `radius`, 1 at distance 0,
 ## smoothstep in between. Drives the proximity vignette (closer enemy -> darker red).
 static func danger_from_distance(dist: float, radius: float) -> float:
@@ -71,9 +91,14 @@ static func combo_heat(mult: int, start: int, full: int) -> float:
 
 ## Shortest distance from `p` to the segment a–b (clamped projection).
 static func _distance_to_segment(p: Vector2, a: Vector2, b: Vector2) -> float:
+	return p.distance_to(_closest_on_segment(p, a, b))
+
+
+## The point on segment a–b closest to `p` (projection clamped to the segment's ends).
+static func _closest_on_segment(p: Vector2, a: Vector2, b: Vector2) -> Vector2:
 	var ab: Vector2 = b - a
 	var len_sq: float = ab.length_squared()
 	if len_sq == 0.0:
-		return p.distance_to(a)
+		return a
 	var t: float = clampf((p - a).dot(ab) / len_sq, 0.0, 1.0)
-	return p.distance_to(a + ab * t)
+	return a + ab * t

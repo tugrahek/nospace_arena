@@ -11,3 +11,6 @@ extends Resource
 @export var enemy_cap_bonus: int = 4          # max extra enemies over the arena's base composition
 @export var target_ramp_per_stage: float = 2.0  # +2% capture target per stage
 @export var target_cap: float = 90.0          # max capture target (%)
+## Adaptive chaser (#19): from this 0-based stage on, Stalkers hunt the nearest threat point
+## (head OR active trail) instead of just the head. Negative disables it for the whole run.
+@export var chaser_hunts_nearest_stage: int = 5

@@ -19,3 +19,16 @@ func decide(velocity: Vector2, _enemy_pos: Vector2, _player_pos: Vector2, _playe
 ## behaviors stay grid-free. Base: false (position-only behaviors are never blinded).
 func needs_line_of_sight() -> bool:
 	return false
+
+
+## Whether this behavior actually aims at the player, so the enemy should pick the best target
+## point for it (head vs nearest trail point, where the adaptive rule is on). Base: false —
+## position-blind behaviors (Bouncer) never need the extra work.
+func hunts_player() -> bool:
+	return false
+
+
+## Weight for that choice: the head wins while head_distance <= trail_distance * this. 1.0 is
+## pure distance. Only meaningful for behaviors that hunt the player.
+func target_bias() -> float:
+	return 1.0

@@ -40,7 +40,7 @@ LEVEL_C05_DESC,Sparx joins • reach 55%,Sparx katılır • %55'e ulaş
 LEVEL_C06_DESC,2 Sparx guard the edges + Bouncer • reach 65%,2 Sparx kenarları tutar + Bouncer • %65'e ulaş
 LEVEL_C07_DESC,Full combo • reach 60%,Tam kadro • %60'a ulaş
 LEVEL_C08_DESC,Combo • no boosts,Tam kadro • boost yok
-LEVEL_C09_DESC,Rising swarm • reach 65%,Yükselen sürü • %65'e ulaş
+LEVEL_C09_DESC,"Rising swarm • the Stalker now hunts your line too","Yükselen sürü • Stalker artık çizgini de avlıyor"
 LEVEL_C10_DESC,Heavy swarm • reach 65%,Yoğun sürü • %65'e ulaş
 LEVEL_C11_DESC,Low lives (2) • reach 65%,Az can (2) • %65'e ulaş
 LEVEL_C12_DESC,"Finale • all types, no boosts",Final • tüm tipler • boost yok
@@ -110,7 +110,7 @@ HOWTO_ENEMIES_TITLE,Watch the enemies,Düşmanlara dikkat
 ENEMY_BOUNCER_NAME,Bouncer,Bouncer
 ENEMY_STALKER_NAME,Stalker,Stalker
 ENEMY_SPARX_NAME,Sparx,Sparx
-HOWTO_ENEMIES_BODY,Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge and ignores your territory's power — don't linger on the border.,Bouncer duvarlardan seker. Stalker sen açıkta çizerken peşine düşer. Sparx ele geçirilen kenarda devriye gezer ve bölgenin gücünden etkilenmez — kenarda oyalanma.
+HOWTO_ENEMIES_BODY,"Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge and ignores your territory's power — don't linger on the border. In later levels the Stalker also hunts your LINE, not just you: a long line is a real risk.","Bouncer duvarlardan seker. Stalker sen açıkta çizerken peşine düşer. Sparx ele geçirilen kenarda devriye gezer ve bölgenin gücünden etkilenmez — kenarda oyalanma. Geç bölümlerde Stalker sadece seni değil ÇİZGİNİ de avlar: uzun çizgi gerçek risktir."
 HOWTO_LIVES_TITLE,Stay alive,Hayatta kal
 HOWTO_LIVES_BODY,Hearts show your lives. You lose one when an enemy touches your active trail — or when you cross it yourself. Captured ground is safe.,Kalpler canlarını gösterir. Bir düşman aktif çizgine dokunursa — ya da kendi çizgini kesersen — bir can kaybedersin. Ele geçirilen alan güvenlidir.
 CHAR_PULSE_DESC,Pushes enemies away from your territory,Düşmanları bölgenden uzağa iter
