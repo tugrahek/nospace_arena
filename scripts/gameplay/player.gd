@@ -32,6 +32,7 @@ var _queued_dir: Vector2i = Vector2i.ZERO
 var _is_drawing: bool = false
 var _trail_path: Array[Vector2i] = []  # ordered trail cells; back() == _grid_pos while drawing
 var _move_timer: float = 0.0
+var _has_moved: bool = false  # first step since setup/respawn taken? (gates the game's start grace)
 var _start_world: Vector2 = Vector2.ZERO
 var _target_world: Vector2 = Vector2.ZERO
 
@@ -64,10 +65,17 @@ func trail_world_points() -> PackedVector2Array:
 	return pts
 
 
+## True once the player has actually stepped since the last setup/respawn. The game holds its
+## start grace until then, so a run (or a respawn) never starts with an unavoidable death.
+func has_moved() -> bool:
+	return _has_moved
+
+
 ## Wires the player to the arena, builds the control scheme, and rests it on the
 ## top-left frame corner. Always starts still regardless of auto_advance scheme.
 func setup(arena: ArenaController) -> void:
 	_arena = arena
+	_has_moved = false
 	_grid_pos = Vector2i.ZERO
 	_safe_cell = Vector2i.ZERO
 	_trail_path.clear()
@@ -86,6 +94,7 @@ func setup(arena: ArenaController) -> void:
 ## Returns the player to its last safe cell after a life loss and drops the trail
 ## state. Always starts still so the player can orient before re-entering the void.
 func respawn() -> void:
+	_has_moved = false  # re-arms the game's start grace (same fairness as a run start)
 	_is_drawing = false
 	_trail_path.clear()
 	_grid_pos = _safe_cell
@@ -181,6 +190,7 @@ func _try_step() -> void:
 	if not _arena.in_bounds_cell(target):
 		return
 	var state: int = _arena.cell_state(target)
+	_has_moved = true  # a real step is about to resolve -> the start grace may expire
 	if state == CaptureGrid.Cell.CAPTURED:
 		if _is_drawing and _trail_path.size() == 1 and target == _safe_cell:
 			# Backtrack-cancel: only one trail cell, stepping back to safe start.

@@ -10,6 +10,10 @@ extends "res://scripts/gameplay/enemy_behavior.gd"
 ## different sides instead of stacking on the exact same point (overlap fix, Step 19a).
 
 @export var spread_rad: float = 0.5  # max homing angle offset at |variation| = 1
+## Hunt only what it can see: with captured territory between them the player is "lost" and the
+## chaser roams instead of pressing into the wall (greedy-homing local minimum, device bug B2).
+## false restores the pre-fix blind homing.
+@export var requires_line_of_sight: bool = true
 
 func decide(velocity: Vector2, enemy_pos: Vector2, player_pos: Vector2, player_exposed: bool, base_speed_px: float, variation: float = 0.0) -> Vector2:
 	if not player_exposed:
@@ -18,3 +22,7 @@ func decide(velocity: Vector2, enemy_pos: Vector2, player_pos: Vector2, player_e
 	if to_player.length() < 0.001:
 		return velocity
 	return to_player.normalized().rotated(variation * spread_rad) * base_speed_px
+
+
+func needs_line_of_sight() -> bool:
+	return requires_line_of_sight

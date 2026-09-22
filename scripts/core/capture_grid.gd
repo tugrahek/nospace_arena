@@ -62,9 +62,9 @@ func cell_at(x: int, y: int) -> int:
 	return _cells[_index(x, y)]
 
 
-## Read-only view of the raw cell states (row-major, index = y * cols + x). RENDERING fast
-## path only (perf-pass: avoids ~20k cell_at() calls per redraw) — all capture LOGIC keeps
-## going through cell_at()/the mutating API. Callers must never write through this.
+## Read-only view of the raw cell states (row-major, index = y * cols + x). Fast READ paths only
+## (perf-pass rendering: avoids ~20k cell_at() calls per redraw; enemy line-of-sight walks) — all
+## capture LOGIC keeps going through cell_at()/the mutating API. Callers must never write through this.
 func cells() -> PackedByteArray:
 	return _cells
 

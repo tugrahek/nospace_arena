@@ -24,6 +24,39 @@ static func clamp_to_wall(center: float, wall: float, body_radius: float, moving
 	return maxf(center, wall + body_radius)
 
 
+## True when the straight grid line from `from` to `to` crosses no `blocked` cell (integer
+## Bresenham over a raw row-major cell buffer — the grid's read-only view). Endpoints are never
+## treated as blockers: the walker stands on its own cell and the target cell is the goal.
+## Used by sight-based behaviors (Chaser) so they lose track of a player behind captured
+## territory instead of pinning themselves against it. Pure + deterministic (no RNG, ints only).
+static func line_of_sight(cells: PackedByteArray, cols: int, from: Vector2i, to: Vector2i, blocked: int) -> bool:
+	if cols <= 0 or cells.is_empty():
+		return true  # no grid knowledge -> behave as before (always sighted)
+	var rows: int = cells.size() / cols
+	var dx: int = absi(to.x - from.x)
+	var dy: int = -absi(to.y - from.y)
+	var sx: int = 1 if from.x < to.x else -1
+	var sy: int = 1 if from.y < to.y else -1
+	var err: int = dx + dy
+	var x: int = from.x
+	var y: int = from.y
+	while x != to.x or y != to.y:
+		var e2: int = err * 2
+		if e2 >= dy:
+			err += dy
+			x += sx
+		if e2 <= dx:
+			err += dx
+			y += sy
+		if x == to.x and y == to.y:
+			break  # target cell itself is the goal, not a blocker
+		if x < 0 or y < 0 or x >= cols or y >= rows:
+			return false  # left the board: nothing to see through
+		if cells[y * cols + x] == blocked:
+			return false
+	return true
+
+
 ## Deterministic starting velocity for enemy `index` at `speed` (no RNG).
 ## Varies direction per index so multiple enemies diverge (free-play default).
 static func start_velocity(index: int, speed: float) -> Vector2:

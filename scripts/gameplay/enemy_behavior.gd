@@ -12,3 +12,10 @@ extends Resource
 ## overlap (e.g. chaser homing angle). Base = identity (keep current heading).
 func decide(velocity: Vector2, _enemy_pos: Vector2, _player_pos: Vector2, _player_exposed: bool, _base_speed_px: float, _variation: float = 0.0) -> Vector2:
 	return velocity
+
+
+## Whether this behavior only counts the player as exposed while it can actually SEE them
+## (no captured territory on the straight line between). The enemy resolves the sight check —
+## behaviors stay grid-free. Base: false (position-only behaviors are never blinded).
+func needs_line_of_sight() -> bool:
+	return false

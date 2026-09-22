@@ -125,6 +125,13 @@ func test_level_select_scene_instantiates() -> void:
 	assert_not_null(s, "LevelSelect builds its level grid")
 
 
+## Drops the start grace (player "has moved") so a test can exercise the lethal paths.
+func _clear_start_grace(game: Node) -> void:
+	game.get_node("Player").set("_has_moved", true)
+	game.set("_awaiting_first_move", false)
+	game.set("_death_grace_timer", 0.0)
+
+
 func test_death_grace_blocks_double_hit() -> void:
 	# Two hits in the same death moment (e.g. two adjacent Sparx) cost only ONE life -- the
 	# post-death invulnerability window ignores the second.
@@ -132,6 +139,7 @@ func test_death_grace_blocks_double_hit() -> void:
 	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
 	add_child_autofree(game)
 	var lives0: int = GameState.lives
+	_clear_start_grace(game)  # the run opens invulnerable until the first step (#18 start grace)
 	game.call("_on_trail_failed")  # first hit -> 1 life + starts grace
 	game.call("_on_trail_failed")  # same frame -> ignored (invulnerable)
 	assert_eq(GameState.lives, lives0 - 1, "one death event costs exactly one life")

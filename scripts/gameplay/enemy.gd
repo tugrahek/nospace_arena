@@ -19,7 +19,6 @@ enum SparxState { PATROL, CONTAINED, TELEGRAPH }
 @export var recovery_time: float = 0.18  # after a bounce/freeze, briefly suppress homing so the
                                           # enemy peels off the wall on its reflected heading
                                           # instead of re-homing into it (no boundary pin/stall)
-@export var edge_catch_cooldown: float = 1.0  # Sparx: grace after catching the player (no chain-kill)
 @export var contain_duration: float = 5.0     # Sparx: invisible breather while CONTAINED
 @export var emerge_telegraph: float = 0.4     # Sparx: warning blink on re-emerge before lethal again
 @export var trap_pocket_max_cells: int = 400  # Sparx: secondary safety -> also trapped if region <= this
@@ -55,7 +54,6 @@ var _step_to: Vector2 = Vector2.ZERO
 var _step_timer: float = 0.0
 var _last_player_pos: Vector2 = Vector2.ZERO
 var _has_player: bool = false  # set once LivingTerritory reports the player (gates edge catch)
-var _catch_cd: float = 0.0     # Sparx catch cooldown
 var _sparx_state: int = SparxState.PATROL
 var _contain_timer: float = 0.0    # CONTAINED countdown (fixed physics-step, grid-independent)
 var _telegraph_timer: float = 0.0  # TELEGRAPH countdown (non-lethal warning blink)
@@ -90,7 +88,6 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 	_step_to = start_pos
 	_step_timer = 0.0
 	_has_player = false
-	_catch_cd = 0.0
 	_sparx_state = SparxState.PATROL
 	_contain_timer = 0.0
 	_telegraph_timer = 0.0
@@ -144,13 +141,26 @@ func decide_velocity(player_pos: Vector2, player_exposed: bool) -> Vector2:
 	# Frozen (Halt) or no behavior: hold the current/reflected heading (no re-freeze loop).
 	if _behavior == null or _freeze_timer > 0.0:
 		return _velocity
-	var desired: Vector2 = _behavior.decide(_velocity, position, player_pos, player_exposed, _base_speed_px, _variation)
+	# Sight gate: a behavior that hunts only what it can see (Chaser) treats a player behind
+	# captured territory as NOT exposed -> it roams instead of pressing into the wall between
+	# them (greedy-homing local minimum, device bug B2). Read-only grid query, no RNG.
+	var exposed: bool = player_exposed and (not _behavior.needs_line_of_sight() or _sees(player_pos))
+	var desired: Vector2 = _behavior.decide(_velocity, position, player_pos, exposed, _base_speed_px, _variation)
 	# Post-bounce recovery is now DIRECTIONAL: keep homing in every direction EXCEPT straight back
 	# into the wall just hit. Fixes chasers circling a captured edge (blanket suppression) while
 	# still preventing wall-pin (never home directly into the surface). Freeze path is unchanged.
 	if _recovery_timer > 0.0:
 		return _peel_adjust(desired)
 	return desired
+
+
+## Clear straight line (no CAPTURED cell) from this enemy's cell to the player's. Costs one
+## Bresenham walk over the grid's read-only cell buffer, and only while the player is exposed
+## and the behavior asks for it — never on a capture frame, never a flood.
+func _sees(player_pos: Vector2) -> bool:
+	var g: CaptureGrid = _arena.grid
+	return EnemyMotion.line_of_sight(g.cells(), g.cols, _arena.world_to_cell(position),
+		_arena.world_to_cell(player_pos), CaptureGrid.Cell.CAPTURED)
 
 
 ## During the post-bounce window, strip the component of `v` pointing INTO the wall last hit
@@ -207,8 +217,6 @@ func _physics_process(delta: float) -> void:
 ## Sparx lifecycle dispatch (PATROL -> CONTAINED -> TELEGRAPH -> PATROL). Timers run on the fixed
 ## physics step so they are grid-independent and frame-deterministic (daily/ghost reproduce).
 func _edge_process(delta: float) -> void:
-	if _catch_cd > 0.0:
-		_catch_cd -= delta
 	match _sparx_state:
 		SparxState.CONTAINED:
 			# Invisible breather. ALWAYS expires on its own timer -> re-emerge (no capture needed).
@@ -254,11 +262,15 @@ func _patrol(delta: float) -> void:
 		_step_to = _arena.cell_to_world(next_cell)
 	position = _step_from.lerp(_step_to, clampf(_step_timer / interval, 0.0, 1.0))
 	# Threat (b): Sparx catches the player at the edge even when safe -> can't linger on the
-	# border. Cell-adjacent; a cooldown after a catch prevents chain-kills on respawn.
-	if _has_player and _catch_cd <= 0.0:
+	# border. CHEBYSHEV adjacency (diagonals included): rounding a corner the wall-follower only
+	# ever passes diagonally, so a player parked on a corner cell used to be immune (device bug
+	# B1) while the drawn bodies visibly overlapped. Both sides use the DRAWN cell (world_to_cell
+	# of the interpolated position), so lethality matches what the player sees. Chain-kills are
+	# blocked by the game's death_grace i-frames — the single owner of post-death invulnerability.
+	if _has_player:
 		var pc: Vector2i = _arena.world_to_cell(_last_player_pos)
-		if absi(pc.x - _grid_cell.x) + absi(pc.y - _grid_cell.y) <= 1:
-			_catch_cd = edge_catch_cooldown
+		var sc: Vector2i = _arena.world_to_cell(position)
+		if absi(pc.x - sc.x) <= 1 and absi(pc.y - sc.y) <= 1:
 			hit_trail.emit()
 			return
 	queue_redraw()

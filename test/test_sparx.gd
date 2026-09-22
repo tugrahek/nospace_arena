@@ -47,7 +47,10 @@ func test_sparx_moves_without_stall() -> void:
 	GameState.reset()
 
 
-func test_sparx_catches_player_at_edge_then_cooldown() -> void:
+func test_sparx_catches_player_at_edge_every_frame() -> void:
+	# Fix-pass #18: the Sparx-local catch cooldown is gone — death_grace (game) is the single
+	# owner of post-death invulnerability, so an ignored catch can no longer disarm the Sparx
+	# for a second afterwards. While adjacent, it keeps reporting the catch.
 	var arena := ArenaController.new()
 	add_child_autofree(arena)
 	arena.configure(load("res://resources/arenas/arena_frost.tres"), Rect2(40, 100, 640, 1100))
@@ -56,16 +59,14 @@ func test_sparx_catches_player_at_edge_then_cooldown() -> void:
 	add_child_autofree(e)
 	var cell := Vector2i(1, 1)
 	e.setup(arena, arena.cell_to_world(cell), Vector2.ZERO, null, 16.0 * arena.cell_size, 0.0, true, cell, Vector2i.DOWN)
-	e.edge_catch_cooldown = 0.5
 	watch_signals(e)
 	# Player on the Sparx's cell -> caught (threat b), even though not drawing.
 	e.decide_velocity(arena.cell_to_world(cell), false)  # reports player position
 	e._physics_process(0.01)
 	assert_signal_emitted(e, "hit_trail", "sparx catches the player at the edge")
-	# Immediately after: cooldown blocks a chain-kill.
 	e.decide_velocity(arena.cell_to_world(cell), false)
 	e._physics_process(0.01)
-	assert_signal_emit_count(e, "hit_trail", 1, "no chain-kill during cooldown")
+	assert_signal_emit_count(e, "hit_trail", 2, "still lethal on the next frame (no local cooldown)")
 	GameState.reset()
 
 

@@ -16,6 +16,10 @@ const PROGRESSION: ProgressionConfig = preload("res://config/progression.tres")
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 
 @export var death_grace: float = 1.0  # invulnerability window after a life loss (no chain-kills)
+## Start grace: the same i-frames at the start of a run (and after every respawn), HELD until the
+## player's first step. The player rests on a frame corner, where a passing Sparx is lethal from
+## frame one — nobody may lose a life before they have had a chance to react.
+@export var start_grace_duration: float = 1.0
 
 @onready var _arena: ArenaController = $Arena
 @onready var _player: Player = $Player
@@ -53,6 +57,7 @@ var _slow_start_scale: float = 1.0
 var _coin_multiplier: float = 1.0  # Coin Bonus boost: run-end coin reward x this (1.0 = none)
 var _lives_lost: int = 0  # deaths this run (Campaign: 0 -> flawless star)
 var _death_grace_timer: float = 0.0  # > 0 = invulnerable (ignore hits) right after a life loss
+var _awaiting_first_move: bool = true  # start grace is frozen until the player actually steps
 var _run_time: float = 0.0  # game-time seconds (fixed physics steps); combo clock — frozen by
                             # pause and unaffected by slow-mo/hit-stop (daily score fairness)
 
@@ -96,6 +101,7 @@ func _ready() -> void:
 		BALANCE.exposed_points_per_sec, BALANCE.exposed_cap_sec, BALANCE.life_loss_penalty)
 	_hud.setup(start_lives)
 	_hud.set_daily(_daily, _daily_seed)
+	_begin_grace(start_grace_duration)  # nobody dies before their first step
 	_player.control_scheme = AudioManager.settings().control_scheme  # persisted choice (Settings)
 	# Live-apply scheme changes from Pause → Settings (mid-run). Named method (not a lambda) so
 	# _exit_tree can disconnect it — otherwise every scene reload piles a stale connection
@@ -176,6 +182,14 @@ func _physics_process(delta: float) -> void:
 	# freezes it and slow-mo/hit-stop don't shrink the window in game terms.
 	if GameState.is_playing():
 		_run_time += delta
+	# Start grace holds at full value until the player takes their first step (run start and every
+	# respawn): a still player on a corner cell can be reached by a patrolling Sparx, and an
+	# unavoidable death is never fair. Deterministic (fixed duration + input, no RNG).
+	if _awaiting_first_move and GameState.is_playing():
+		if _player.has_moved():
+			_awaiting_first_move = false
+		else:
+			_death_grace_timer = maxf(_death_grace_timer, start_grace_duration)
 	# Post-death invulnerability: count down + blink the player so the grace reads clearly.
 	if _death_grace_timer > 0.0:
 		_death_grace_timer -= delta
@@ -380,6 +394,14 @@ func _enemy_cells() -> Array:
 	return cells
 
 
+## Arms the invulnerability window and re-holds it until the player's next step (respawn and run
+## start both leave the player parked and defenceless). Single owner of i-frames: every lethal
+## path — Sparx catch, enemy on the trail, self-hit — goes through _on_trail_failed.
+func _begin_grace(duration: float) -> void:
+	_death_grace_timer = duration
+	_awaiting_first_move = true
+
+
 ## Shared life-loss pipeline: an enemy touched the active trail, OR the player crossed its own
 ## trail (self_hit). Same feedback + fail_trail + respawn + lose_life for both.
 func _on_trail_failed() -> void:
@@ -387,7 +409,7 @@ func _on_trail_failed() -> void:
 		return
 	if _death_grace_timer > 0.0:
 		return  # invulnerable right after a death -> a single event costs exactly one life
-	_death_grace_timer = death_grace  # start i-frames (blocks simultaneous/chain hits + respawn re-catch)
+	_begin_grace(death_grace)  # i-frames: blocks simultaneous/chain hits, re-held until the next step
 	_lives_lost += 1  # tracked for the Campaign flawless star
 	# Life-loss impact: a single screen flash + heavy shake (no strobe) + a local burst AT the
 	# death spot (the respawn teleport otherwise leaves the moment unreadable). Visual only.
