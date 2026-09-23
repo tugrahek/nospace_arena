@@ -34,6 +34,14 @@ enum SparxState { PATROL, CONTAINED, TELEGRAPH }
 ## Adaptive hunt tell (#19): how far the body warms toward the trail color while it is hunting the
 ## LINE instead of the head, so the switch is readable. 0 = no tint (the P1 facing still aims at it).
 @export var trail_hunt_tint: float = 0.35
+# Fix-pass #20 (device findings B6/B7):
+@export var trap_recheck_steps: int = 32       # Sparx: periodic bounded re-check cadence (PATROL grid
+                                                # steps) -- a pocket sealed by a narrow one-cell-gap
+                                                # column is otherwise never re-evaluated between capture
+                                                # events (B6). 0 = disabled.
+@export var axis_lock_ratio: float = 0.08      # roam unstick: nudge off a near-axis-aligned roam
+                                                # heading (B7 -- ping-ponging along a captured edge).
+                                                # 0 = disabled.
 
 const POOF_SCENE: PackedScene = preload("res://scenes/fx/CaptureBurst.tscn")
 
@@ -62,6 +70,7 @@ var _contain_timer: float = 0.0    # CONTAINED countdown (fixed physics-step, gr
 var _telegraph_timer: float = 0.0  # TELEGRAPH countdown (non-lethal warning blink)
 var _loop_seen: Dictionary = {}    # distinct cells visited in the current loop-detection window
 var _loop_steps: int = 0           # steps taken in the current window
+var _steps_since_trap_check: int = 0  # PATROL grid-steps since the last periodic trap re-check (B6)
 var _velocity: Vector2 = Vector2.ZERO
 var _speed_scale: float = 1.0  # transient per-frame slow from territory effects (Drag)
 var run_speed_scale: float = 1.0  # run-start boost (Slow Start): < 1 slows; game resets to 1 on expiry
@@ -97,6 +106,7 @@ func setup(arena: ArenaController, start_pos: Vector2, velocity: Vector2, behavi
 	_telegraph_timer = 0.0
 	_loop_seen = {}
 	_loop_steps = 0
+	_steps_since_trap_check = 0
 	visible = true
 	_speed_scale = 1.0
 	_active_effect = null
@@ -160,7 +170,15 @@ func decide_velocity(player_pos: Vector2, player_exposed: bool, trail: PackedVec
 	# into the wall just hit. Fixes chasers circling a captured edge (blanket suppression) while
 	# still preventing wall-pin (never home directly into the surface). Freeze path is unchanged.
 	if _recovery_timer > 0.0:
-		return _peel_adjust(desired)
+		desired = _peel_adjust(desired)
+	# Roam unstick (fix-pass #20, B7): a hunting behavior that fell back to roam (not exposed, or
+	# lost its target behind captured territory) keeps its CURRENT heading -- an earlier bounce or
+	# peel can leave that perfectly axis-aligned, ping-ponging along a captured edge forever.
+	# Detected from the SAME `exposed` flag the behavior itself branched on, not from the resulting
+	# vector: homing that happens to numerically match the current heading (target straight ahead)
+	# is real homing and must not be nudged off course. Pure, deterministic (no RNG).
+	if _behavior.hunts_player() and not exposed and axis_lock_ratio > 0.0:
+		desired = EnemyMotion.unstick_axis(desired, _base_speed_px, _variation, axis_lock_ratio)
 	return desired
 
 
@@ -274,6 +292,23 @@ func _patrol(delta: float) -> void:
 	while _step_timer >= interval:
 		_step_timer -= interval
 		_grid_cell = _arena.world_to_cell(_step_to)  # arrived at the previous target
+		# Periodic bounded trap re-check (fix-pass #20, B6): the connectivity trap trigger only
+		# ever runs ON a capture event (on_capture_event). A pocket sealed by a one-cell gap that
+		# the player closes WITHOUT that gap being the capture boundary itself (or a TELEGRAPH
+		# window that made this Sparx skip the one capture that DID seal it) is otherwise never
+		# re-evaluated -- the Sparx just patrols the pocket forever. Every trap_recheck_steps
+		# PATROL steps, take another look with the size-bounded flood (same cap as the tiny-pocket
+		# safety net; NOT a full-grid connectivity check -- that stays capture-event-only, see
+		# _is_trapped). Enters CONTAINED directly; does NOT call close_capture (that would wrongly
+		# finalize a live, unclosed player trail if this fires mid-draw) so the pocket-fill reward
+		# (fix-pass #10) stays tied to real capture events, where it is safe to run synchronously.
+		if trap_recheck_steps > 0:
+			_steps_since_trap_check += 1
+			if _steps_since_trap_check >= trap_recheck_steps:
+				_steps_since_trap_check = 0
+				if _is_trapped_bounded():
+					_enter_contain()
+					return
 		if _is_stuck_in_loop():  # circling a tiny sub-loop (e.g. a captured island) -> relocate
 			_begin_telegraph()
 			return
@@ -323,6 +358,7 @@ func _is_stuck_in_loop() -> bool:
 func _reset_loop_tracker() -> void:
 	_loop_seen.clear()
 	_loop_steps = 0
+	_steps_since_trap_check = 0
 
 
 ## Small fire-and-forget burst in the enemy's color (visual only; reuses the capture burst).
@@ -376,6 +412,14 @@ func is_contained() -> bool:
 	return _edge_follow and _sparx_state == SparxState.CONTAINED
 
 
+## True for an edge-walker (Sparx), regardless of lifecycle state. Used by orchestration to skip
+## generic captured-cell evacuation (fix-pass #20, B5 safety net) -- Sparx already self-heals an
+## engulfed cell through its own engulf-check + re-emerge, and a blind position teleport would
+## desync its internal _grid_cell/_step_from/_step_to state.
+func is_edge_follow() -> bool:
+	return _edge_follow
+
+
 ## Called after every capture (grid changed). Connectivity trigger: Sparx is trapped when its FREE
 ## region is NOT the main (largest) FREE region -- i.e. the player sealed it off from the play area
 ## -- or when its cell was engulfed (captured). Optional size safety: also trap a tiny pocket even
@@ -413,6 +457,20 @@ func _is_trapped(main_seed: Vector2i = UNKNOWN_MAIN_SEED) -> bool:
 	if not region.has(main_seed):
 		return true  # Sparx is in a smaller component than the main region -> sealed off
 	return trap_pocket_max_cells > 0 and region.size() <= trap_pocket_max_cells  # tiny-pocket safety
+
+
+## Bounded size check ONLY (fix-pass #20, B6): true when this Sparx's region is engulfed or fits
+## within trap_pocket_max_cells. Deliberately NOT the full connectivity check (_is_trapped) --
+## that needs the main region's seed, a full-grid flood too expensive to repeat periodically for
+## every patrolling Sparx. The size cap alone already covers a small pocket regardless of which
+## component is "main". trap_pocket_max_cells <= 0 -> the periodic check is inert.
+func _is_trapped_bounded() -> bool:
+	if trap_pocket_max_cells <= 0:
+		return false
+	var g: CaptureGrid = _arena.grid
+	if g.cell_at(_grid_cell.x, _grid_cell.y) != CaptureGrid.Cell.FREE:
+		return true  # engulfed
+	return _flood_free_set(_grid_cell, trap_pocket_max_cells + 1).size() <= trap_pocket_max_cells
 
 
 ## The set of FREE cells 4-connected to `start`, stopping once it exceeds `cap` (so a huge main
@@ -589,15 +647,37 @@ func _move(delta: float) -> void:
 func _advance(step: float) -> bool:
 	var dir: Vector2 = _velocity.normalized()
 	var next_pos: Vector2 = position + dir * step
-	# TRAIL (lethal): center path, unchanged difficulty.
-	if _state_at(Vector2(next_pos.x, position.y)) == CaptureGrid.Cell.TRAIL \
-		or _state_at(Vector2(position.x, next_pos.y)) == CaptureGrid.Cell.TRAIL \
-		or _state_at(next_pos) == CaptureGrid.Cell.TRAIL:
-		hit_trail.emit()
-		return false
-	# CAPTURED bounce: probe the body's leading edge (radius ahead of center).
 	var sgx: float = signf(_velocity.x)
 	var sgy: float = signf(_velocity.y)
+	# TRAIL (lethal): center path, unchanged difficulty. hit_trail is handled SYNCHRONOUSLY -- by
+	# the time emit() returns, the game has either killed the player and cleared the trail, or
+	# ignored the hit during a grace window -- so re-checking the same cells afterwards tells us
+	# which happened. Gone -> fall through and move into the now-FREE cell below, same as any other
+	# free cell. Still there -> the hit was ignored; bounce off it like a wall instead of freezing
+	# on top of it (fix-pass #20, B5): an enemy left standing where the trail becomes CAPTURED
+	# drops out as a danger seed and its own region fills in around it (device finding).
+	var hit_x: bool = _state_at(Vector2(next_pos.x, position.y)) == CaptureGrid.Cell.TRAIL
+	var hit_y: bool = _state_at(Vector2(position.x, next_pos.y)) == CaptureGrid.Cell.TRAIL
+	var hit_d: bool = _state_at(next_pos) == CaptureGrid.Cell.TRAIL
+	if hit_x or hit_y or hit_d:
+		hit_trail.emit()
+		hit_x = _state_at(Vector2(next_pos.x, position.y)) == CaptureGrid.Cell.TRAIL
+		hit_y = _state_at(Vector2(position.x, next_pos.y)) == CaptureGrid.Cell.TRAIL
+		hit_d = _state_at(next_pos) == CaptureGrid.Cell.TRAIL
+		if hit_x or hit_y:
+			_velocity = EnemyMotion.reflect(_velocity, hit_x, hit_y)
+			_recovery_timer = recovery_time
+			_recovery_normal = Vector2(-sgx if hit_x else 0.0, -sgy if hit_y else 0.0).normalized()
+			queue_redraw()
+			return true
+		if hit_d:
+			_velocity = EnemyMotion.reflect(_velocity, true, true)
+			_recovery_timer = recovery_time
+			_recovery_normal = Vector2(-sgx, -sgy).normalized()
+			queue_redraw()
+			return true
+		# else: gone (the hit was lethal and the game already cleared it) -> fall through below.
+	# CAPTURED bounce: probe the body's leading edge (radius ahead of center).
 	var cx: Vector2i = _arena.world_to_cell(Vector2(next_pos.x + sgx * radius, position.y))
 	var cy: Vector2i = _arena.world_to_cell(Vector2(position.x, next_pos.y + sgy * radius))
 	var block_x: bool = _arena.cell_state(cx) == CaptureGrid.Cell.CAPTURED

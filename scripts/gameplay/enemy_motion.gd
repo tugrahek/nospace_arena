@@ -57,6 +57,25 @@ static func line_of_sight(cells: PackedByteArray, cols: int, from: Vector2i, to:
 	return true
 
 
+## Nudges a roaming velocity off a near-axis-aligned heading into a deterministic diagonal derived
+## from `variation` (no RNG) and re-normalizes to `base_speed`. Roam keeps whatever heading the
+## enemy last had (a wall reflection, a peel result, ...), which can end up perfectly axis-aligned
+## between two walls and ping-pong there forever (device finding B7, fix-pass #20). `axis_lock_ratio`
+## is the per-axis speed fraction below which that axis counts as "locked" (<= 0 disables the nudge
+## -- returns `velocity` unchanged). Already-diagonal input (both axes above the ratio) is untouched.
+static func unstick_axis(velocity: Vector2, base_speed: float, variation: float, axis_lock_ratio: float) -> Vector2:
+	if base_speed <= 0.0 or axis_lock_ratio <= 0.0:
+		return velocity
+	var speed: float = velocity.length()
+	if speed < 0.001:
+		return Vector2(1.0, 1.0).normalized() * base_speed  # no heading at all -> pick a diagonal
+	if absf(velocity.x) / speed > axis_lock_ratio and absf(velocity.y) / speed > axis_lock_ratio:
+		return velocity  # already has a real component on both axes -> leave it
+	var qx: float = 1.0 if velocity.x > 0.0 else (-1.0 if velocity.x < 0.0 else (1.0 if variation >= 0.0 else -1.0))
+	var qy: float = 1.0 if velocity.y > 0.0 else (-1.0 if velocity.y < 0.0 else (1.0 if variation >= 0.0 else -1.0))
+	return Vector2(qx, qy).normalized() * base_speed
+
+
 ## Deterministic starting velocity for enemy `index` at `speed` (no RNG).
 ## Varies direction per index so multiple enemies diverge (free-play default).
 static func start_velocity(index: int, speed: float) -> Vector2:

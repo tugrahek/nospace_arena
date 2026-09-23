@@ -14,11 +14,11 @@ func _arena() -> ArenaController:
 	return a
 
 
-func _chaser(arena: ArenaController, cell: Vector2i) -> Enemy:
+func _chaser(arena: ArenaController, cell: Vector2i, velocity: Vector2 = Vector2(0, -150)) -> Enemy:
 	var e := Enemy.new()
 	e.shape = Enemy.Shape.TRIANGLE
 	add_child_autofree(e)
-	e.setup(arena, arena.cell_to_world(cell), Vector2(0, -150), ChaserBehavior.new(), 150.0)
+	e.setup(arena, arena.cell_to_world(cell), velocity, ChaserBehavior.new(), 150.0)
 	return e
 
 
@@ -158,7 +158,8 @@ func test_sight_is_tested_against_the_chosen_target() -> void:
 		wall.append(Vector2i(x, 50))
 	g.lay_trail(wall)
 	g.close_and_capture([Vector2i(20, 30), Vector2i(20, 80)])
-	var c := _chaser(arena, Vector2i(20, 60))
+	# Non-axis-aligned start velocity: isolates "roam keeps its heading" from #20's axis-unstick.
+	var c := _chaser(arena, Vector2i(20, 60), Vector2(-90, -120))
 	var head: Vector2 = arena.cell_to_world(Vector2i(20, 20))  # behind the wall
 	var trail: PackedVector2Array = _trail(arena, 45, 20, 24)  # ALSO behind the wall
 	var before: Vector2 = c.get("_velocity")

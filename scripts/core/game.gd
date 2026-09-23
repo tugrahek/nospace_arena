@@ -14,6 +14,11 @@ const MISSIONS_PATH: String = "user://missions.json"
 const MISSION_COUNT: int = 3
 const PROGRESSION: ProgressionConfig = preload("res://config/progression.tres")
 const PALETTE: PaletteData = preload("res://config/palette.tres")
+## Fix-pass #20 (B5): search radius for the nearest FREE cell when an enemy's own cell isn't
+## walkable anymore -- both for correcting its danger seed before a capture and for evacuating it
+## afterwards if it still ended up on a CAPTURED cell. Small and rare (only the affected enemy
+## pays this), never a full-grid scan.
+const STUCK_ENEMY_SEARCH_RADIUS: int = 12
 
 @export var death_grace: float = 1.0  # invulnerability window after a life loss (no chain-kills)
 ## Start grace: the same i-frames at the start of a run (and after every respawn), HELD until the
@@ -401,8 +406,37 @@ func _enemy_cells() -> Array:
 	for e in _enemies:
 		if e.is_contained():
 			continue  # invisible/inert contained Sparx must not block capturing its pocket
-		cells.append(_arena.world_to_cell(e.position))
+		var cell: Vector2i = _arena.world_to_cell(e.position)
+		if _arena.cell_state(cell) != CaptureGrid.Cell.FREE:
+			# The enemy's own cell isn't walkable (e.g. a grace-ignored hit left it bounced right
+			# up against a trail wall, or the player's line was drawn under/through it) -- seed
+			# from the nearest FREE cell instead, so its region still doesn't get swallowed with
+			# it (fix-pass #20, B5 safety net; close_and_capture's own algorithm is untouched).
+			var nearest: Vector2i = _arena.nearest_free_cell(cell, STUCK_ENEMY_SEARCH_RADIUS)
+			if nearest.x >= 0:
+				cell = nearest
+		cells.append(cell)
 	return cells
+
+
+## Safety net (fix-pass #20, B5): after ANY capture, no active non-edge-follow enemy may be left
+## standing in CAPTURED territory -- it would sit visibly inside the player's own area (device
+## finding). Deterministic nearest-FREE-cell teleport, debug-logged. Sparx is excluded: it already
+## self-heals an engulfed cell on its own next PATROL tick (top-of-_patrol engulf check), and a
+## blind position teleport here would desync its internal _grid_cell/_step_from/_step_to state.
+func _evacuate_enemies_from_captured_cells() -> void:
+	for e in _enemies:
+		if e.is_contained() or e.is_edge_follow():
+			continue
+		var cell: Vector2i = _arena.world_to_cell(e.position)
+		if _arena.cell_state(cell) != CaptureGrid.Cell.CAPTURED:
+			continue
+		var free_cell: Vector2i = _arena.nearest_free_cell(cell, STUCK_ENEMY_SEARCH_RADIUS)
+		if free_cell.x < 0:
+			continue  # no FREE cell within range (board ~fully captured) -> nothing to do
+		e.position = _arena.cell_to_world(free_cell)
+		if OS.is_debug_build():
+			print("[Enemy] evacuated from captured cell ", cell, " -> ", free_cell)
 
 
 ## Arms the invulnerability window and re-holds it until the player's next step (respawn and run
@@ -473,6 +507,7 @@ func _on_run_ended(score: int) -> void:
 
 
 func _on_area_captured(percent: float, cells: Array) -> void:
+	_evacuate_enemies_from_captured_cells()  # fix-pass #20 (B5) -- belt-and-braces, runs every capture
 	_hud.update_percent(percent)
 	_last_percent = percent
 	# Empty capture (e.g. a pocket fill that found nothing to take): state only — no area,

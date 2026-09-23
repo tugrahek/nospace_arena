@@ -206,18 +206,20 @@ func _walled_arena() -> ArenaController:
 	return arena
 
 
-func _chaser(arena: ArenaController, cell: Vector2i) -> Enemy:
+func _chaser(arena: ArenaController, cell: Vector2i, velocity: Vector2 = Vector2(0, -150)) -> Enemy:
 	var e := Enemy.new()
 	e.shape = Enemy.Shape.TRIANGLE
 	add_child_autofree(e)
-	e.setup(arena, arena.cell_to_world(cell), Vector2(0, -150), ChaserBehavior.new(), 150.0)
+	e.setup(arena, arena.cell_to_world(cell), velocity, ChaserBehavior.new(), 150.0)
 	return e
 
 
 func test_chaser_roams_when_blind_homes_when_seen() -> void:
 	var arena := _walled_arena()
 	GameState.start_run(3)
-	var c := _chaser(arena, Vector2i(20, 75))
+	# Non-axis-aligned start velocity: isolates "roam keeps its heading" from #20's axis-unstick
+	# (which only nudges a heading that's ALREADY near axis-locked -- not the point of this test).
+	var c := _chaser(arena, Vector2i(20, 75), Vector2(-90, -120))
 	var behind: Vector2 = arena.cell_to_world(Vector2i(20, 20))  # other side of the wall
 	assert_eq(c.decide_velocity(behind, true), c.get("_velocity"), "blind -> roam (keeps heading)")
 	var open: Vector2 = arena.cell_to_world(Vector2i(30, 70))  # same side, clear line

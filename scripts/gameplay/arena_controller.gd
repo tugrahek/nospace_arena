@@ -131,6 +131,25 @@ func nearest_player_captured(world_pos: Vector2, max_radius: float) -> Vector2:
 	return best
 
 
+## Nearest FREE cell to `from` (deterministic expanding Chebyshev-ring search; `from` itself first
+## if already FREE), or (-1,-1) if none within `max_radius`. Orchestration-layer correction for
+## fix-pass #20's B5 safety net (a danger seed / an enemy whose own cell isn't walkable anymore) --
+## the capture algorithm itself is untouched, only which cell gets handed to/read from it. Pure,
+## deterministic (fixed ring/scan order, no RNG).
+func nearest_free_cell(from: Vector2i, max_radius: int) -> Vector2i:
+	if cell_state(from) == CaptureGrid.Cell.FREE:
+		return from
+	for r in range(1, max_radius + 1):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue  # only the current ring (inner cells were already checked)
+				var c := Vector2i(from.x + dx, from.y + dy)
+				if in_bounds_cell(c) and cell_state(c) == CaptureGrid.Cell.FREE:
+					return c
+	return Vector2i(-1, -1)
+
+
 func add_trail(cell: Vector2i) -> bool:
 	var ok: bool = grid.add_trail_cell(cell)
 	if ok:
