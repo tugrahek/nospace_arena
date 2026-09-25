@@ -139,9 +139,11 @@ func test_endless_late_count_growth_holds_other_pressure_axes() -> void:
 
 
 func test_endless_late_curve_is_bounded_and_monotonic() -> void:
-	var previous_count: int = 0
-	var previous_pace: float = 0.0
-	var previous_target: float = 0.0
+	# The late loop starts at HUD Stage 9, so compare it to the authored Stage 8 baseline.
+	var stage_eight := _authored(7)
+	var previous_count: int = (stage_eight["enemies"] as Array).size()
+	var previous_pace: float = float(stage_eight["pace_scale"])
+	var previous_target: float = float(stage_eight["target_percent"])
 	for stage in range(8, 18):
 		var spec := _authored(stage)
 		var count: int = (spec["enemies"] as Array).size()
