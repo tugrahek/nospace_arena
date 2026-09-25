@@ -272,18 +272,34 @@ func _start_stage(stage: int) -> void:
 		PROGRESSION.enemy_add_every, PROGRESSION.enemy_cap_bonus,
 		PROGRESSION.target_ramp_per_stage
 	)
+	var override_types: Array = []
+	var target: float = 0.0
+	var effective_pace: float = float(spec["speed_scale"])
+	var hunt_nearest: bool = _hunts_nearest(stage)
+	if _mode == SeedManager.Mode.LEVEL_ENDLESS:
+		spec = StagePlan.compute_endless(base_arena, stage, ContentCatalog.ARENAS.size(), PROGRESSION)
+		override_types = spec["enemies"]
+		effective_pace = float(spec["pace_scale"])
+		hunt_nearest = bool(spec["adaptive_chaser"])
 	_apply_arena(int(spec["arena_index"]))
 	_player.setup(_arena)
-	_spawn_stage_enemies(spec)
+	if _mode == SeedManager.Mode.LEVEL_ENDLESS:
+		assert(_arena_data.speed_mult > 0.0, "Level-Endless arena speed_mult must be positive")
+		_spawn_stage_enemies({"speed_scale": effective_pace / _arena_data.speed_mult,
+			"enemy_bonus": 0, "stage_seed": 0}, override_types)
+		target = float(spec["target_percent"])
+	else:
+		_spawn_stage_enemies(spec)
+		target = minf(_arena_data.target_percent + float(spec["target_bonus"]), PROGRESSION.target_cap)
 	_living_territory.setup(_arena, _enemies, _player)
-	_living_territory.set_hunt_nearest(_hunts_nearest(stage))
+	_living_territory.set_hunt_nearest(hunt_nearest)
 	_near_miss.setup(_player, _enemies)
-	_stage_target = minf(_arena_data.target_percent + float(spec["target_bonus"]), PROGRESSION.target_cap)
+	_stage_target = target
 	_hud.set_target(_stage_target)
 	_hud.update_percent(0.0)
 	if OS.is_debug_build():
 		print("Stage %d: arena=%d target=%.0f%% speed=x%.2f enemies=%d" % [
-			stage + 1, int(spec["arena_index"]), _stage_target, float(spec["speed_scale"]), _enemies.size()])
+			stage + 1, int(spec["arena_index"]), _stage_target, effective_pace, _enemies.size()])
 
 
 ## Adaptive chaser (#19) for this stage/level: late Campaign levels (LevelData flag) and late
@@ -313,9 +329,10 @@ func _apply_campaign_level() -> void:
 			_level.id, _arena_data.id, _stage_target, _level.enemies.size(), str(_level.boosts_allowed)])
 
 
-## Spawns the stage's enemies: count = arena composition + seed/stage bonus (capped). Speed is
-## the grid-relative type base × arena modifier × stage speed scale × fitted cell_size. Daily
-## directions derive from the (deterministic) stage seed; free-play uses the index pattern.
+## Spawns the stage's enemies: count = arena composition + seed/stage bonus (capped), unless an
+## explicit Campaign or Endless roster is supplied. Speed is the grid-relative type base × arena
+## modifier × stage speed scale × fitted cell_size. Daily directions derive from the deterministic
+## stage seed; free-play uses the index pattern.
 func _spawn_stage_enemies(spec: Dictionary, override_types: Array = []) -> void:
 	for e in _enemies:
 		e.queue_free()

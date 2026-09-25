@@ -1,6 +1,66 @@
-[gd_resource type="Resource" script_class="ProgressionConfig" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="ProgressionConfig" load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/meta/progression_config.gd" id="1_prog"]
+[ext_resource type="Script" path="res://scripts/meta/endless_stage_spec.gd" id="2_spec"]
+[ext_resource type="Resource" path="res://resources/enemies/type_bouncer.tres" id="3_bouncer"]
+[ext_resource type="Resource" path="res://resources/enemies/type_chaser.tres" id="4_chaser"]
+[ext_resource type="Resource" path="res://resources/enemies/type_sparx.tres" id="5_sparx"]
+
+[sub_resource type="Resource" id="EndlessStage1"]
+script = ExtResource("2_spec")
+arena_offset = 0
+enemies = Array[Resource]([ExtResource("3_bouncer")])
+pace_scale = 1.0
+target_percent = 75.0
+
+[sub_resource type="Resource" id="EndlessStage2"]
+script = ExtResource("2_spec")
+arena_offset = 1
+enemies = Array[Resource]([ExtResource("3_bouncer"), ExtResource("3_bouncer")])
+pace_scale = 1.0
+target_percent = 75.0
+
+[sub_resource type="Resource" id="EndlessStage3"]
+script = ExtResource("2_spec")
+arena_offset = 2
+enemies = Array[Resource]([ExtResource("3_bouncer"), ExtResource("4_chaser")])
+pace_scale = 1.0
+target_percent = 76.0
+
+[sub_resource type="Resource" id="EndlessStage4"]
+script = ExtResource("2_spec")
+arena_offset = 2
+enemies = Array[Resource]([ExtResource("3_bouncer"), ExtResource("4_chaser"), ExtResource("5_sparx")])
+pace_scale = 1.0
+target_percent = 76.0
+
+[sub_resource type="Resource" id="EndlessStage5"]
+script = ExtResource("2_spec")
+arena_offset = 2
+enemies = Array[Resource]([ExtResource("3_bouncer"), ExtResource("3_bouncer"), ExtResource("4_chaser"), ExtResource("5_sparx")])
+pace_scale = 1.0
+target_percent = 76.0
+
+[sub_resource type="Resource" id="EndlessStage6"]
+script = ExtResource("2_spec")
+arena_offset = 2
+enemies = Array[Resource]([ExtResource("3_bouncer"), ExtResource("3_bouncer"), ExtResource("4_chaser"), ExtResource("5_sparx")])
+pace_scale = 1.0
+target_percent = 76.0
+
+[sub_resource type="Resource" id="EndlessStage7"]
+script = ExtResource("2_spec")
+arena_offset = 0
+enemies = Array[Resource]([ExtResource("3_bouncer"), ExtResource("3_bouncer"), ExtResource("4_chaser"), ExtResource("4_chaser"), ExtResource("5_sparx")])
+pace_scale = 1.0
+target_percent = 76.0
+
+[sub_resource type="Resource" id="EndlessStage8"]
+script = ExtResource("2_spec")
+arena_offset = 1
+enemies = Array[Resource]([ExtResource("3_bouncer"), ExtResource("3_bouncer"), ExtResource("4_chaser"), ExtResource("4_chaser"), ExtResource("5_sparx")])
+pace_scale = 1.0
+target_percent = 77.0
 
 [resource]
 script = ExtResource("1_prog")
@@ -11,3 +71,11 @@ enemy_cap_bonus = 4
 target_ramp_per_stage = 2.0
 target_cap = 90.0
 chaser_hunts_nearest_stage = 5
+early_stages = Array[Resource]([SubResource("EndlessStage1"), SubResource("EndlessStage2"), SubResource("EndlessStage3"), SubResource("EndlessStage4"), SubResource("EndlessStage5"), SubResource("EndlessStage6"), SubResource("EndlessStage7"), SubResource("EndlessStage8")])
+late_enemy_add_every = 3
+late_enemy_cap = 2
+late_add_order = Array[Resource]([ExtResource("3_bouncer"), ExtResource("5_sparx")])
+late_speed_ramp = 0.03
+late_speed_cap = 1.75
+late_target_ramp = 1.0
+late_target_cap = 90.0

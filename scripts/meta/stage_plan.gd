@@ -32,6 +32,61 @@ static func compute(
 	}
 
 
+## Pure Level-Endless plan: eight authored onboarding stages, then a relative ramp anchored
+## to the final authored stage. The returned roster is final, so callers must not add bonuses.
+static func compute_endless(
+	base_arena_index: int, stage_index: int, arena_count: int, config: ProgressionConfig
+) -> Dictionary:
+	assert(not config.early_stages.is_empty(), "Endless progression needs authored early stages")
+	var early_count: int = config.early_stages.size()
+	if stage_index < early_count:
+		return _from_authored(config.early_stages[maxi(stage_index, 0)], base_arena_index, arena_count,
+			stage_index, config.chaser_hunts_nearest_stage)
+	var baseline: EndlessStageSpec = config.early_stages[early_count - 1]
+	var relative_stage: int = stage_index - early_count
+	var add_cap: int = mini(config.late_enemy_cap, config.late_add_order.size())
+	var additions: int = 0
+	if config.late_enemy_add_every > 0:
+		additions = mini((relative_stage + 1) / config.late_enemy_add_every, add_cap)
+	var pressure_steps: int = relative_stage + 1 - additions
+	var enemies: Array[EnemyType] = []
+	for enemy in baseline.enemies:
+		enemies.append(enemy)
+	for i in additions:
+		enemies.append(config.late_add_order[i])
+	return {
+		"arena_index": _offset_arena(base_arena_index, baseline.arena_offset + pressure_steps, arena_count),
+		"enemies": enemies,
+		"pace_scale": minf(baseline.pace_scale + float(pressure_steps) * config.late_speed_ramp,
+			config.late_speed_cap),
+		"target_percent": minf(baseline.target_percent + float(pressure_steps) * config.late_target_ramp,
+			config.late_target_cap),
+		"adaptive_chaser": _adaptive(stage_index, config.chaser_hunts_nearest_stage),
+	}
+
+
+static func _from_authored(
+	spec: EndlessStageSpec, base_arena_index: int, arena_count: int, stage_index: int, adaptive_stage: int
+) -> Dictionary:
+	return {
+		"arena_index": _offset_arena(base_arena_index, spec.arena_offset, arena_count),
+		"enemies": spec.enemies.duplicate(),
+		"pace_scale": spec.pace_scale,
+		"target_percent": spec.target_percent,
+		"adaptive_chaser": _adaptive(stage_index, adaptive_stage),
+	}
+
+
+static func _offset_arena(base: int, offset: int, count: int) -> int:
+	if count <= 0:
+		return 0
+	return posmod(base + offset, count)
+
+
+static func _adaptive(stage_index: int, threshold: int) -> bool:
+	return threshold >= 0 and stage_index >= threshold
+
+
 static func _arena_for(daily: bool, seed: int, base: int, stage_index: int, count: int) -> int:
 	if count <= 0:
 		return 0
