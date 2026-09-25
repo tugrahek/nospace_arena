@@ -98,6 +98,19 @@ func _clear_start_grace(game: Node) -> void:
 	game.set("_death_grace_timer", 0.0)
 
 
+func _endless_game() -> Node:
+	SeedManager.enter_level_endless()
+	var game: Node = load("res://scenes/main/Game.tscn").instantiate()
+	add_child_autofree(game)
+	return game
+
+
+func _take_first_grid_step(game: Node) -> void:
+	var player: Node = game.get_node("Player")
+	player.set("_direction", Vector2i.RIGHT)
+	player.call("_try_step")
+
+
 func test_start_grace_holds_until_the_first_step() -> void:
 	# Chebyshev catches made the spawn corner reachable: a still player must never lose a life
 	# before they have moved, however long they sit there.
@@ -156,6 +169,53 @@ func test_death_grace_still_owns_chain_kills() -> void:
 	_clear_start_grace(game)  # grace expired + player moved again
 	game.call("_on_trail_failed")
 	assert_eq(GameState.lives, lives0 - 2, "lethal again the moment the grace ends")
+	GameState.reset()
+
+
+# --- Endless stage-start grace ---
+
+func test_endless_transition_rearms_start_grace_and_blocks_a_hit() -> void:
+	var game := _endless_game()
+	_clear_start_grace(game)
+	var lives0: int = GameState.lives
+	game.call("_advance_stage")
+	assert_true(bool(game.get("_awaiting_first_move")), "new stage waits for the first player step")
+	assert_false(bool(game.get_node("Player").call("has_moved")), "new stage parks the player")
+	assert_gt(float(game.get("_death_grace_timer")), 0.0, "new stage arms start grace before play resumes")
+	game.call("_on_trail_failed")
+	assert_eq(GameState.lives, lives0, "spawn/catch hit cannot cost a life before the first step")
+	SeedManager.enter_free()
+	GameState.reset()
+
+
+func test_endless_stage_first_step_restores_normal_danger() -> void:
+	var game := _endless_game()
+	_clear_start_grace(game)
+	game.call("_advance_stage")
+	var lives0: int = GameState.lives
+	_take_first_grid_step(game)
+	for f in 120:
+		game._physics_process(1.0 / 60.0)
+	assert_lt(float(game.get("_death_grace_timer")), 0.001, "grace expires after the first real grid step")
+	game.call("_on_trail_failed")
+	assert_eq(GameState.lives, lives0 - 1, "enemy danger returns after stage-start grace ends")
+	SeedManager.enter_free()
+	GameState.reset()
+
+
+func test_endless_repeated_transitions_do_not_leak_previous_stage_state() -> void:
+	var game := _endless_game()
+	_clear_start_grace(game)
+	game.call("_advance_stage")
+	_take_first_grid_step(game)
+	for f in 120:
+		game._physics_process(1.0 / 60.0)
+	assert_false(bool(game.get("_awaiting_first_move")), "first transitioned stage released its grace")
+	game.call("_advance_stage")
+	assert_true(bool(game.get("_awaiting_first_move")), "second transition re-arms start grace")
+	assert_false(bool(game.get_node("Player").call("has_moved")), "second transition resets player movement state")
+	assert_gt(float(game.get("_death_grace_timer")), 0.0, "second transition restores the timer")
+	SeedManager.enter_free()
 	GameState.reset()
 
 

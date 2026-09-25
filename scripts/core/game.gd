@@ -380,6 +380,7 @@ func _advance_stage() -> void:
 		return
 	var next: int = _current_stage + 1
 	_stage_flourish(next + 1)  # display is 1-based
+	_begin_grace(start_grace_duration)  # next stage parks the player; protect until their first step
 	_start_stage(next)
 
 
