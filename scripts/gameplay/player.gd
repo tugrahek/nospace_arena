@@ -89,6 +89,7 @@ func setup(arena: ArenaController) -> void:
 	_start_world = _arena.cell_to_world(_grid_pos)
 	_target_world = _start_world
 	position = _start_world
+	_arena.clear_trail_head_presentation()
 
 
 ## Returns the player to its last safe cell after a life loss and drops the trail
@@ -104,6 +105,7 @@ func respawn() -> void:
 	_start_world = _arena.cell_to_world(_grid_pos)
 	_target_world = _start_world
 	position = _start_world
+	_arena.clear_trail_head_presentation()
 
 
 ## Public live scheme switch (Settings / Pause→Settings). Re-applies the active scheme.
@@ -136,6 +138,7 @@ func _process(delta: float) -> void:
 	_update_intent()
 	_move_timer += delta
 	if _move_timer >= move_interval:
+		var trail_size_before: int = _trail_path.size()
 		_move_timer -= move_interval
 		if _queued_dir != Vector2i.ZERO:
 			_direction = _queued_dir
@@ -143,8 +146,11 @@ func _process(delta: float) -> void:
 		_start_world = _arena.cell_to_world(_grid_pos)
 		_try_step()
 		_target_world = _arena.cell_to_world(_grid_pos)
+		_update_trail_head_step_visual(trail_size_before)
 	var t: float = clampf(_move_timer / move_interval, 0.0, 1.0)
 	position = _start_world.lerp(_target_world, t)
+	if _is_drawing:
+		_arena.update_trail_head_visual(position)
 	_update_exposed_visual(delta)
 
 
@@ -157,6 +163,18 @@ func _update_exposed_visual(delta: float) -> void:
 	_visual.scale = _visual.scale.lerp(Vector2.ONE * tgt_scale, k)
 	var tgt_col: Color = _base_visual_color.lightened(exposed_brighten) if _is_drawing else _base_visual_color
 	_visual.color = _visual.color.lerp(tgt_col, k)
+
+
+## Reports only the current movement's render data. Grid state, trail ownership, input,
+## and collision remain in the existing step logic above.
+func _update_trail_head_step_visual(trail_size_before: int) -> void:
+	if not _is_drawing:
+		_arena.clear_trail_head_presentation()
+		return
+	if _trail_path.size() > trail_size_before:
+		_arena.begin_trail_head_forward(_start_world, _target_world)
+	elif _trail_path.size() < trail_size_before:
+		_arena.begin_trail_head_retract(_start_world, _target_world)
 
 
 ## Resolves this frame's movement intent: keyboard hold takes priority, otherwise

@@ -36,9 +36,11 @@ var grid: CaptureGrid
 
 const Catalog = preload("res://scripts/meta/arena_catalog.gd")
 const FlashLayerScript = preload("res://scripts/fx/capture_flash_layer.gd")
+const TrailHeadLayerScript = preload("res://scripts/fx/trail_head_layer.gd")
 
 var _configured: bool = false
 var _flash_layer: Node2D = null  # child wave layer — ONLY it redraws per frame during a flash
+var _trail_head_layer: TrailHeadLayer = null  # child-only redraw for the moving visual trail endpoint
 var _trail_head: Vector2i = Vector2i(-1, -1)  # most recently drawn trail cell (highlight)
 
 
@@ -48,6 +50,7 @@ func _ready() -> void:
 		var rows: int = int(arena_rect.size.y / cell_size)
 		grid = CaptureGrid.new(cols, rows, cell_size, arena_rect.position)
 	_ensure_flash_layer()
+	_ensure_trail_head_layer()
 	queue_redraw()
 
 
@@ -58,6 +61,15 @@ func _ensure_flash_layer() -> void:
 		_flash_layer = FlashLayerScript.new()
 		_flash_layer.name = "FlashLayer"
 		add_child(_flash_layer)
+
+
+## Owns only the animated final trail fragment; the parent keeps logical grid rendering.
+func _ensure_trail_head_layer() -> void:
+	if _trail_head_layer == null:
+		_trail_head_layer = TrailHeadLayerScript.new()
+		_trail_head_layer.name = "TrailHeadLayer"
+		add_child(_trail_head_layer)
+	_trail_head_layer.configure(cell_size, trail_color, glow_width, glow_alpha, head_brightness)
 
 
 ## Configures the arena from data: fit-to-rect sizing (cell_size/origin derived to
@@ -76,6 +88,9 @@ func configure(data, play_rect: Rect2) -> void:
 	_configured = true
 	if _flash_layer != null:
 		_flash_layer.clear_wave()
+	if _trail_head_layer != null:
+		_trail_head_layer.clear()
+		_trail_head_layer.configure(cell_size, trail_color, glow_width, glow_alpha, head_brightness)
 	_trail_head = Vector2i(-1, -1)
 	queue_redraw()
 
@@ -158,6 +173,36 @@ func add_trail(cell: Vector2i) -> bool:
 	return ok
 
 
+## Begins a paint-only forward head. The logical trail was already added before this call.
+func begin_trail_head_forward(from: Vector2, to: Vector2) -> void:
+	if _trail_head_layer == null or _trail_head.x < 0:
+		return
+	_trail_head_layer.begin_forward(from, to, _trail_head)
+
+
+## Begins a paint-only remnant while a logically removed trail cell retracts.
+func begin_trail_head_retract(from: Vector2, to: Vector2) -> void:
+	if _trail_head_layer == null:
+		return
+	_trail_head_layer.begin_retract(from, to)
+
+
+## Updates only the small overlay, never the parent grid draw.
+func update_trail_head_visual(position: Vector2) -> void:
+	if _trail_head_layer != null:
+		_trail_head_layer.update_visual_position(position)
+
+
+func clear_trail_head_presentation() -> void:
+	if _trail_head_layer != null:
+		_trail_head_layer.clear()
+
+
+## Base rendering may hide a head only when the overlay currently covers that exact cell.
+func is_trail_head_suppressed() -> bool:
+	return _trail_head_layer != null and _trail_head_layer.covers_head(_trail_head)
+
+
 func close_capture(danger_seeds: Array = []) -> void:
 	var result: CaptureResult = grid.close_and_capture(danger_seeds)
 	# Capture flash wave: PAINT-only layer. The grid is fully CAPTURED from this very frame
@@ -166,6 +211,7 @@ func close_capture(danger_seeds: Array = []) -> void:
 	if not result.newly_captured.is_empty() and flash_duration > 0.0:
 		_queue_flash_wave(result.newly_captured)
 	_trail_head = Vector2i(-1, -1)
+	clear_trail_head_presentation()
 	queue_redraw()
 	area_captured.emit(result.percent, result.newly_captured)
 
@@ -205,6 +251,7 @@ func _queue_flash_wave(newly: Array) -> void:
 func fail_trail() -> void:
 	grid.clear_trail()
 	_trail_head = Vector2i(-1, -1)
+	clear_trail_head_presentation()
 	queue_redraw()
 	capture_failed.emit()
 
@@ -214,6 +261,7 @@ func remove_trail(cell: Vector2i) -> void:
 	grid.remove_trail_cell(cell)
 	if cell == _trail_head:
 		_trail_head = Vector2i(-1, -1)  # head unknown until the next step (visual only)
+	clear_trail_head_presentation()
 	queue_redraw()
 
 
@@ -222,13 +270,15 @@ func _draw() -> void:
 	if grid == null:
 		return
 	_draw_state_runs(CaptureGrid.Cell.CAPTURED, captured_color)
+	var suppressed_head: Vector2i = _trail_head if is_trail_head_suppressed() else Vector2i(-1, -1)
 	# Trail fake glow (gl_compat safe): a widened, low-alpha pass UNDER the crisp trail pass.
 	if glow_width > 0.0 and glow_alpha > 0.0:
 		var halo: Color = trail_color
 		halo.a = trail_color.a * glow_alpha
-		_draw_state_runs(CaptureGrid.Cell.TRAIL, halo, glow_width)
-	_draw_state_runs(CaptureGrid.Cell.TRAIL, trail_color)
-	_draw_trail_head()
+		_draw_state_runs(CaptureGrid.Cell.TRAIL, halo, glow_width, suppressed_head)
+	_draw_state_runs(CaptureGrid.Cell.TRAIL, trail_color, 0.0, suppressed_head)
+	if suppressed_head.x < 0:
+		_draw_trail_head()
 	# (Capture flash lives on the child FlashLayer — this base item never redraws for it.)
 	var r: Rect2 = arena_rect
 	draw_polyline(
@@ -250,14 +300,16 @@ func _draw() -> void:
 ## run rect on all sides (used for the trail's fake-glow under-pass).
 ## Perf-pass: scans the raw cell buffer directly (read-only) — ~20k cell_at() calls per
 ## redraw collapse into indexed array reads; identical cells, identical output.
-func _draw_state_runs(state: int, color: Color, grow: float = 0.0) -> void:
+func _draw_state_runs(state: int, color: Color, grow: float = 0.0,
+		suppressed_cell: Vector2i = Vector2i(-1, -1)) -> void:
 	var cells: PackedByteArray = grid.cells()
 	var cols: int = grid.cols
 	for y in grid.rows:
 		var base: int = y * cols
 		var run_start: int = -1
 		for x in cols + 1:
-			var matches: bool = x < cols and cells[base + x] == state
+			var matches: bool = x < cols and cells[base + x] == state \
+				and not (state == CaptureGrid.Cell.TRAIL and x == suppressed_cell.x and y == suppressed_cell.y)
 			if matches and run_start < 0:
 				run_start = x
 			elif not matches and run_start >= 0:
