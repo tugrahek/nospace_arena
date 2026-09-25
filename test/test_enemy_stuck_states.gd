@@ -9,6 +9,12 @@ extends GutTest
 const EnemyMotion = preload("res://scripts/gameplay/enemy_motion.gd")
 
 
+func after_each() -> void:
+	for c in get_children():
+		if c is CPUParticles2D:
+			c.free()
+
+
 func _arena(res: String) -> ArenaController:
 	var a := ArenaController.new()
 	add_child_autofree(a)
