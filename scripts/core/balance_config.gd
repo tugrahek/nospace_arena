@@ -11,3 +11,4 @@ extends Resource
 @export var exposed_points_per_sec: float = 10.0  # score/sec while drawing in the open (risk)
 @export var exposed_cap_sec: float = 10.0          # max exposed seconds counted per capture
 @export var life_loss_penalty: int = 400           # score lost per life (floored at 0)
+@export var free_completion_percent: float = 99.0  # Free-only near-total goal; arena targets remain for Daily

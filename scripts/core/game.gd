@@ -14,6 +14,7 @@ const MISSIONS_PATH: String = "user://missions.json"
 const MISSION_COUNT: int = 3
 const PROGRESSION: ProgressionConfig = preload("res://config/progression.tres")
 const PALETTE: PaletteData = preload("res://config/palette.tres")
+const FreeCompletionPolicy = preload("res://scripts/meta/free_completion_policy.gd")
 ## Fix-pass #20 (B5): search radius for the nearest FREE cell when an enemy's own cell isn't
 ## walkable anymore -- both for correcting its danger seed before a capture and for evacuating it
 ## afterwards if it still ended up on a CAPTURED cell. Small and rare (only the affected enemy
@@ -290,7 +291,8 @@ func _start_stage(stage: int) -> void:
 		target = float(spec["target_percent"])
 	else:
 		_spawn_stage_enemies(spec)
-		target = minf(_arena_data.target_percent + float(spec["target_bonus"]), PROGRESSION.target_cap)
+		var arena_target: float = minf(_arena_data.target_percent + float(spec["target_bonus"]), PROGRESSION.target_cap)
+		target = FreeCompletionPolicy.target_for(_mode, arena_target, BALANCE.free_completion_percent)
 	_living_territory.setup(_arena, _enemies, _player)
 	_living_territory.set_hunt_nearest(hunt_nearest)
 	_near_miss.setup(_player, _enemies)
