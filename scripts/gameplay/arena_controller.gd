@@ -20,14 +20,14 @@ signal capture_failed()  # RESERVED (no listeners yet): fail-side twin of area_c
 @export var flash_duration: float = 0.25   # each cell's bright pulse length before settling
 @export var flash_color: Color = Color(1.0, 1.0, 1.0, 0.85)  # blended over the captured fill
 @export var wave_delay_per_cell: float = 0.007  # extra pulse delay per cell of distance from the
-                                                # closure centroid -> the region reads as FILLING
-                                                # outward (0 = all cells pulse at once)
+												# closure centroid -> the region reads as FILLING
+												# outward (0 = all cells pulse at once)
 @export var wave_max_duration: float = 0.4      # cap on the total sweep: when a region is so big
-                                                # that per-cell delays would exceed this, they are
-                                                # normalized (delay = dist/max_dist x cap) so huge
-                                                # captures sweep as fast as small ones (no crawl)
+												# that per-cell delays would exceed this, they are
+												# normalized (delay = dist/max_dist x cap) so huge
+												# captures sweep as fast as small ones (no crawl)
 @export var wave_quantize: float = 1.0 / 30.0   # pulse-start rounding for run merging (perf; ~33 ms
-                                                # buckets are invisible to the eye)
+												# buckets are invisible to the eye)
 @export var glow_width: float = 5.0        # fake-glow halo around the trail (px, gl_compat safe)
 @export var glow_alpha: float = 0.28       # halo opacity (fraction of trail_color alpha)
 @export var head_brightness: float = 0.45  # how much the trail HEAD cell is lightened
