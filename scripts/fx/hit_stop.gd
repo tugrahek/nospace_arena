@@ -5,7 +5,7 @@ extends Node
 ## Engine.time_scale) so it never fights with near-miss slow-mo. `time_control` is injected
 ## by the game in _ready. Capture-freeze feel knobs are @export.
 
-@export var capture_duration: float = 0.06  # real seconds of freeze on a capture
+@export var capture_duration: float = 0.045  # real seconds of freeze on a capture
 @export var scale_during: float = 0.02       # near-frozen (not exactly 0 to avoid edge cases)
 
 var time_control: TimeControl = null
