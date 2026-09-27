@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=16 format=3]
+[gd_resource type="Theme" load_steps=20 format=3]
 
 [sub_resource type="StyleBoxFlat" id="btn_normal"]
 bg_color = Color(0.2, 0.17, 0.34, 0.92)
@@ -203,6 +203,67 @@ content_margin_bottom = 18.0
 shadow_color = Color(0.3, 0.92, 1, 0.25)
 shadow_size = 8
 
+; Opt-in semantic panels for the UI craft passes. Existing default Panel and
+; PanelContainer styles intentionally remain unchanged until a screen adopts one.
+[sub_resource type="StyleBoxFlat" id="semantic_passive"]
+bg_color = Color(0.16, 0.14, 0.28, 0.72)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxFlat" id="semantic_frontier"]
+bg_color = Color(0.18, 0.17, 0.32, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.95, 1, 0.8)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxFlat" id="semantic_captured"]
+bg_color = Color(0.22, 0.78, 0.88, 0.24)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 1, 1, 0.48)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxFlat" id="semantic_overlay"]
+bg_color = Color(0.18, 0.15, 0.32, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.95, 1, 0.4)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+content_margin_left = 22.0
+content_margin_top = 22.0
+content_margin_right = 22.0
+content_margin_bottom = 22.0
+
 [resource]
 default_font_size = 18
 Button/colors/font_color = Color(0.97, 0.97, 1, 1)
@@ -254,6 +315,14 @@ Secondary/styles/normal = SubResource("sec_normal")
 Secondary/styles/hover = SubResource("btn_hover")
 Secondary/styles/pressed = SubResource("btn_pressed")
 Secondary/styles/focus = SubResource("empty")
+Passive/base_type = "PanelContainer"
+Passive/styles/panel = SubResource("semantic_passive")
+Frontier/base_type = "PanelContainer"
+Frontier/styles/panel = SubResource("semantic_frontier")
+Captured/base_type = "PanelContainer"
+Captured/styles/panel = SubResource("semantic_captured")
+Overlay/base_type = "PanelContainer"
+Overlay/styles/panel = SubResource("semantic_overlay")
 HSlider/styles/slider = SubResource("slider_track")
 HSlider/styles/grabber_area = SubResource("slider_fill")
 HSlider/styles/grabber_area_highlight = SubResource("slider_fill_hi")
