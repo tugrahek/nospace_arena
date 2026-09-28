@@ -1,10 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://baqdpb1y08q86"]
+[gd_scene load_steps=4 format=3 uid="uid://baqdpb1y08q86"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 [ext_resource type="Script" path="res://scripts/ui/logo.gd" id="2_logo"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="3_juicy"]
 [ext_resource type="Script" path="res://scripts/ui/settings_icon.gd" id="4_seticon"]
 [ext_resource type="Script" path="res://scripts/ui/how_to_icon.gd" id="5_helpicon"]
+[ext_resource type="FontFile" path="res://assets/fonts/dynapuff/dynapuff-variable.ttf" id="6_dynapuff"]
+
+[sub_resource type="FontVariation" id="FontVariation_dynapuff"]
+base_font = ExtResource("6_dynapuff")
+variation_opentype = {"wght": 600}
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -87,12 +92,12 @@ script = ExtResource("2_logo")
 layout_mode = 2
 theme_type_variation = &"Title"
 horizontal_alignment = 1
-theme_override_colors/font_outline_color = Color(0.3, 0.95, 1, 0.22)
-theme_override_constants/outline_size = 9
+theme_override_fonts/font = SubResource("FontVariation_dynapuff")
 text = "NoSpace"
 
 [node name="Subtitle" type="Label" parent="Center"]
 layout_mode = 2
+theme_type_variation = &"Display"
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(1, 0.5, 0.95, 1)
 theme_override_font_sizes/font_size = 24

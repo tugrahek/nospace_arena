@@ -1,4 +1,11 @@
-[gd_resource type="Theme" load_steps=20 format=3]
+[gd_resource type="Theme" load_steps=22 format=3]
+
+[ext_resource type="FontFile" path="res://assets/fonts/nunitosans/nunitosans-variable.ttf" id="2_nunitosans"]
+[ext_resource type="FontFile" path="res://assets/fonts/rubik/rubik-variable.ttf" id="3_rubik"]
+
+[sub_resource type="FontVariation" id="rubik_medium"]
+base_font = ExtResource("3_rubik")
+variation_opentype = {"wght": 500}
 
 [sub_resource type="StyleBoxFlat" id="btn_normal"]
 bg_color = Color(0.2, 0.17, 0.34, 0.92)
@@ -265,6 +272,7 @@ content_margin_right = 22.0
 content_margin_bottom = 22.0
 
 [resource]
+default_font = ExtResource("2_nunitosans")
 default_font_size = 18
 Button/colors/font_color = Color(0.97, 0.97, 1, 1)
 Button/colors/font_hover_color = Color(0.6, 1, 1, 1)
@@ -285,10 +293,14 @@ ProgressBar/styles/background = SubResource("bar_bg")
 ProgressBar/styles/fill = SubResource("bar_fill")
 Title/base_type = "Label"
 Title/colors/font_color = Color(0.3, 0.95, 1, 1)
+Title/fonts/font = SubResource("rubik_medium")
 Title/font_sizes/font_size = 46
 Heading/base_type = "Label"
 Heading/colors/font_color = Color(0.3, 0.95, 1, 1)
+Heading/fonts/font = SubResource("rubik_medium")
 Heading/font_sizes/font_size = 28
+Display/base_type = "Label"
+Display/fonts/font = ExtResource("3_rubik")
 Accent/base_type = "Label"
 Accent/colors/font_color = Color(1, 0.45, 0.85, 1)
 Accent/font_sizes/font_size = 22

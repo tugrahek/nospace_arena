@@ -8,9 +8,11 @@ const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 @onready var _list: VBoxContainer = $Scroll/List
 @onready var _coins: Label = $Coins
 @onready var _back: Button = $BackButton
+@onready var _title: Label = $Title
 
 
 func _ready() -> void:
+	_title.text = tr("MENU_STORE")
 	_back.text = tr("STORE_BACK")
 	_back.pressed.connect(func() -> void: get_tree().change_scene_to_file(MENU_SCENE))
 	Economy.currency_changed.connect(func(_b: int) -> void: _refresh())

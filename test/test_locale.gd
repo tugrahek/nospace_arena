@@ -49,9 +49,11 @@ func rows_of(parsed: Array) -> Array:
 func test_locale_round_trip() -> void:
 	TranslationServer.set_locale("tr")
 	assert_eq(tr("MENU_PLAY"), "Oyna", "TR active -> Turkish text")
+	assert_eq(tr("MENU_STORE"), "Mağaza", "TR Store title")
 	assert_eq(tr("SETTINGS_BACK"), "Geri")
 	TranslationServer.set_locale("en")
 	assert_eq(tr("MENU_PLAY"), "Play", "back to EN")
+	assert_eq(tr("MENU_STORE"), "Store", "EN Store title")
 
 
 func test_unknown_key_returns_key() -> void:
