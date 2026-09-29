@@ -12,13 +12,17 @@ const LEADERBOARD_SCENE: String = "res://scenes/ui/Leaderboard.tscn"
 const HOWTO_SCENE: String = "res://scenes/ui/HowToPlay.tscn"
 
 @onready var _play_button: Button = $Center/Buttons/PlayButton
-@onready var _store_button: Button = $Center/Buttons/StoreButton
-@onready var _missions_button: Button = $Center/Buttons/MissionsButton
-@onready var _leaderboard_button: Button = $Center/Buttons/LeaderboardButton
-@onready var _credits_button: Button = $Center/Buttons/CreditsButton
+@onready var _store_button: Button = $Center/Buttons/NavigationHub/StoreButton
+@onready var _missions_button: Button = $Center/Buttons/NavigationHub/MissionsButton
+@onready var _leaderboard_button: Button = $Center/Buttons/NavigationHub/LeaderboardButton
+@onready var _credits_button: Button = $Center/Buttons/NavigationHub/CreditsButton
+@onready var _store_label: Label = $Center/Buttons/NavigationHub/StoreButton/Label
+@onready var _missions_label: Label = $Center/Buttons/NavigationHub/MissionsButton/Label
+@onready var _leaderboard_label: Label = $Center/Buttons/NavigationHub/LeaderboardButton/Label
+@onready var _credits_label: Label = $Center/Buttons/NavigationHub/CreditsButton/Label
 @onready var _settings_button: Button = $SettingsButton
 @onready var _help_button: Button = $HelpButton
-@onready var _coins: Label = $CoinsPanel/Coins
+@onready var _coins: Label = $CoinsPanel/Content/Coins
 @onready var _reward_popup: Control = $RewardPopup
 @onready var _reward_title: Label = $RewardPopup/Box/RewardTitle
 @onready var _reward_body: Label = $RewardPopup/Box/RewardBody
@@ -28,10 +32,10 @@ const HOWTO_SCENE: String = "res://scenes/ui/HowToPlay.tscn"
 func _ready() -> void:
 	# Wordmark ("NoSpace" + "A R E N A") + emblem are set in the scene.
 	_play_button.text = tr("MENU_PLAY")
-	_store_button.text = tr("MENU_STORE")
-	_missions_button.text = tr("MISSIONS_TITLE")
-	_leaderboard_button.text = tr("MENU_LEADERBOARD")
-	_credits_button.text = tr("MENU_CREDITS")
+	_store_label.text = tr("MENU_STORE")
+	_missions_label.text = tr("MENU_MISSIONS_SHORT")
+	_leaderboard_label.text = tr("MENU_LEADERBOARD")
+	_credits_label.text = tr("MENU_CREDITS")
 	_play_button.pressed.connect(_on_play)
 	_store_button.pressed.connect(_on_store)
 	_missions_button.pressed.connect(_on_missions)

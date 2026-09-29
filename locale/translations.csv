@@ -54,6 +54,7 @@ LEADERBOARD_TODAY,Today,Bugün
 LEADERBOARD_YESTERDAY,Yesterday,Dün
 MONTHS_SHORT,"Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec","Oca,Şub,Mar,Nis,May,Haz,Tem,Ağu,Eyl,Eki,Kas,Ara"
 MENU_MISSIONS,Today's Missions,Bugünün Görevleri
+MENU_MISSIONS_SHORT,Missions,Görevler
 RESULT_MENU,Menu,Menü
 STORE_CHARACTERS,Characters,Karakterler
 STORE_ARENAS,Arenas,Arenalar

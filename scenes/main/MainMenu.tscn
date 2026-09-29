@@ -6,6 +6,9 @@
 [ext_resource type="Script" path="res://scripts/ui/settings_icon.gd" id="4_seticon"]
 [ext_resource type="Script" path="res://scripts/ui/how_to_icon.gd" id="5_helpicon"]
 [ext_resource type="FontFile" path="res://assets/fonts/dynapuff/dynapuff-variable.ttf" id="6_dynapuff"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu_nav_hub.gd" id="7_navhub"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu_nav_icon.gd" id="8_navicon"]
+[ext_resource type="Script" path="res://scripts/ui/boost_icon.gd" id="9_coinicon"]
 
 [sub_resource type="FontVariation" id="FontVariation_dynapuff"]
 base_font = ExtResource("6_dynapuff")
@@ -35,9 +38,23 @@ offset_right = -20.0
 offset_bottom = 64.0
 mouse_filter = 2
 
-[node name="Coins" type="Label" parent="CoinsPanel"]
+[node name="Content" type="HBoxContainer" parent="CoinsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CoinIcon" type="Control" parent="CoinsPanel/Content"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("9_coinicon")
+effect = 2
+
+[node name="Coins" type="Label" parent="CoinsPanel/Content"]
 theme_type_variation = &"Coins"
+layout_mode = 2
+size_flags_horizontal = 3
 horizontal_alignment = 2
+vertical_alignment = 1
 text = "Coins: 0"
 
 [node name="SettingsButton" type="Button" parent="."]
@@ -75,6 +92,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 40.0
+offset_top = 72.0
 offset_right = -40.0
 offset_bottom = -120.0
 mouse_filter = 2
@@ -125,37 +143,172 @@ custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="StoreButton" type="Button" parent="Center/Buttons"]
-custom_minimum_size = Vector2(300, 58)
+[node name="NavigationHub" type="Control" parent="Center/Buttons"]
+custom_minimum_size = Vector2(580, 210)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_type_variation = &"Secondary"
+mouse_filter = 2
+script = ExtResource("7_navhub")
+
+[node name="StoreButton" type="Button" parent="Center/Buttons/NavigationHub"]
+custom_minimum_size = Vector2(260, 88)
+layout_mode = 0
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -6.0
+offset_bottom = -5.0
+flat = true
+script = ExtResource("3_juicy")
+pop_scale = 1.05
+
+[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/StoreButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 10.0
+offset_bottom = 54.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("8_navicon")
+icon_kind = 0
+
+[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/StoreButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 57.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
 text = "Store"
-script = ExtResource("3_juicy")
 
-[node name="MissionsButton" type="Button" parent="Center/Buttons"]
-custom_minimum_size = Vector2(300, 58)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"Secondary"
+[node name="MissionsButton" type="Button" parent="Center/Buttons/NavigationHub"]
+custom_minimum_size = Vector2(260, 88)
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 6.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -5.0
+flat = true
+script = ExtResource("3_juicy")
+pop_scale = 1.05
+
+[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/MissionsButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 10.0
+offset_bottom = 54.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("8_navicon")
+icon_kind = 1
+
+[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/MissionsButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 57.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
 text = "Missions"
-script = ExtResource("3_juicy")
 
-[node name="LeaderboardButton" type="Button" parent="Center/Buttons"]
-custom_minimum_size = Vector2(300, 58)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"Secondary"
+[node name="LeaderboardButton" type="Button" parent="Center/Buttons/NavigationHub"]
+custom_minimum_size = Vector2(260, 88)
+layout_mode = 0
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 5.0
+offset_right = -6.0
+offset_bottom = -10.0
+flat = true
+script = ExtResource("3_juicy")
+pop_scale = 1.05
+
+[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/LeaderboardButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 10.0
+offset_bottom = 54.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("8_navicon")
+icon_kind = 2
+
+[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/LeaderboardButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 57.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
 text = "Leaderboard"
-script = ExtResource("3_juicy")
 
-[node name="CreditsButton" type="Button" parent="Center/Buttons"]
-custom_minimum_size = Vector2(300, 58)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"Secondary"
-text = "Credits"
+[node name="CreditsButton" type="Button" parent="Center/Buttons/NavigationHub"]
+custom_minimum_size = Vector2(260, 88)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 5.0
+offset_right = -12.0
+offset_bottom = -10.0
+flat = true
 script = ExtResource("3_juicy")
+pop_scale = 1.05
+
+[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/CreditsButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 10.0
+offset_bottom = 54.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("8_navicon")
+icon_kind = 3
+
+[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/CreditsButton"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 57.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "Credits"
 
 [node name="Version" type="Label" parent="."]
 theme_type_variation = &"Muted"
