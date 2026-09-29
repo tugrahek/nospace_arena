@@ -19,7 +19,7 @@ MISSION_TOTAL_AREAS,Capture %d areas,%d bölge ele geçir
 MISSION_WIN_RUNS,Win %d run(s),%d oyun kazan
 MENU_PLAY,Play,Oyna
 MENU_DAILY,Daily,Günlük
-MENU_LEVEL,Level,Seviye
+MENU_LEVEL,Endless,Sonsuz
 MENU_FREE,Free,Serbest
 MODE_SELECT_TITLE,Select Mode,Mod Seç
 MODE_DAILY_DESC,Today's challenge,Bugünün meydan okuması

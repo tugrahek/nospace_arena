@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://scripts/ui/mode_select.gd" id="1_ms"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
+[ext_resource type="Script" path="res://scripts/ui/mode_select_grid.gd" id="3_grid"]
+[ext_resource type="Script" path="res://scripts/ui/mode_select_tile_art.gd" id="4_art"]
 
 [node name="ModeSelect" type="Control"]
 layout_mode = 3
@@ -23,9 +25,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 50.0
 offset_right = -50.0
-offset_bottom = -90.0
+offset_bottom = -72.0
 alignment = 1
-theme_override_constants/separation = 32
+theme_override_constants/separation = 24
 
 [node name="Title" type="Label" parent="Center"]
 layout_mode = 2
@@ -33,82 +35,230 @@ theme_type_variation = &"Title"
 horizontal_alignment = 1
 text = "Select Mode"
 
-[node name="Buttons" type="VBoxContainer" parent="Center"]
+[node name="ModeGrid" type="Control" parent="Center"]
+custom_minimum_size = Vector2(580, 370)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 22
+mouse_filter = 2
+script = ExtResource("3_grid")
 
-[node name="DailyRow" type="VBoxContainer" parent="Center/Buttons"]
-layout_mode = 2
-theme_override_constants/separation = 4
+[node name="DailyRow" type="Control" parent="Center/ModeGrid"]
+layout_mode = 0
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_right = -2.0
+offset_bottom = -2.0
+mouse_filter = 2
 
-[node name="Button" type="Button" parent="Center/Buttons/DailyRow"]
-custom_minimum_size = Vector2(320, 64)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"Secondary"
-text = "Daily"
+[node name="Art" type="Control" parent="Center/ModeGrid/DailyRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -55.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_art")
+tile_kind = 0
+
+[node name="Button" type="Button" parent="Center/ModeGrid/DailyRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
 script = ExtResource("2_juicy")
+pop_scale = 1.04
 
-[node name="Desc" type="Label" parent="Center/Buttons/DailyRow"]
-layout_mode = 2
+[node name="ModeLabel" type="Label" parent="Center/ModeGrid/DailyRow/Button"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 105.0
+offset_bottom = 132.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="Center/ModeGrid/DailyRow/Button"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 136.0
+offset_bottom = 160.0
+grow_horizontal = 2
+mouse_filter = 2
 theme_type_variation = &"Accent"
 horizontal_alignment = 1
-text = "Today's challenge"
 
-[node name="FreeRow" type="VBoxContainer" parent="Center/Buttons"]
-layout_mode = 2
-theme_override_constants/separation = 4
+[node name="FreeRow" type="Control" parent="Center/ModeGrid"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 2.0
+offset_bottom = -2.0
+mouse_filter = 2
 
-[node name="Button" type="Button" parent="Center/Buttons/FreeRow"]
-custom_minimum_size = Vector2(320, 64)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"Secondary"
-text = "Free"
+[node name="Art" type="Control" parent="Center/ModeGrid/FreeRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -55.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_art")
+tile_kind = 1
+
+[node name="Button" type="Button" parent="Center/ModeGrid/FreeRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
 script = ExtResource("2_juicy")
+pop_scale = 1.04
 
-[node name="Desc" type="Label" parent="Center/Buttons/FreeRow"]
-layout_mode = 2
+[node name="ModeLabel" type="Label" parent="Center/ModeGrid/FreeRow/Button"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 105.0
+offset_bottom = 132.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="Center/ModeGrid/FreeRow/Button"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 136.0
+offset_bottom = 160.0
+grow_horizontal = 2
+mouse_filter = 2
 theme_type_variation = &"Muted"
 horizontal_alignment = 1
-text = "Casual play"
 
-[node name="LevelRow" type="VBoxContainer" parent="Center/Buttons"]
-layout_mode = 2
-theme_override_constants/separation = 4
+[node name="LevelRow" type="Control" parent="Center/ModeGrid"]
+layout_mode = 0
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = -2.0
+mouse_filter = 2
 
-[node name="Button" type="Button" parent="Center/Buttons/LevelRow"]
-custom_minimum_size = Vector2(320, 64)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"Secondary"
-text = "Level"
+[node name="Art" type="Control" parent="Center/ModeGrid/LevelRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -55.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_art")
+tile_kind = 2
+
+[node name="Button" type="Button" parent="Center/ModeGrid/LevelRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
 script = ExtResource("2_juicy")
+pop_scale = 1.04
 
-[node name="Desc" type="Label" parent="Center/Buttons/LevelRow"]
-layout_mode = 2
+[node name="ModeLabel" type="Label" parent="Center/ModeGrid/LevelRow/Button"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 105.0
+offset_bottom = 132.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="Center/ModeGrid/LevelRow/Button"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 136.0
+offset_bottom = 160.0
+grow_horizontal = 2
+mouse_filter = 2
 theme_type_variation = &"Muted"
 horizontal_alignment = 1
-text = "Escalating difficulty"
 
-[node name="CampaignRow" type="VBoxContainer" parent="Center/Buttons"]
-layout_mode = 2
-theme_override_constants/separation = 4
+[node name="CampaignRow" type="Control" parent="Center/ModeGrid"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 2.0
+offset_bottom = -2.0
+mouse_filter = 2
 
-[node name="Button" type="Button" parent="Center/Buttons/CampaignRow"]
-custom_minimum_size = Vector2(320, 64)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"Secondary"
-text = "Campaign"
+[node name="Art" type="Control" parent="Center/ModeGrid/CampaignRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -55.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_art")
+tile_kind = 3
+
+[node name="Button" type="Button" parent="Center/ModeGrid/CampaignRow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
 script = ExtResource("2_juicy")
+pop_scale = 1.04
 
-[node name="Desc" type="Label" parent="Center/Buttons/CampaignRow"]
-layout_mode = 2
+[node name="ModeLabel" type="Label" parent="Center/ModeGrid/CampaignRow/Button"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 105.0
+offset_bottom = 132.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="Center/ModeGrid/CampaignRow/Button"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 136.0
+offset_bottom = 160.0
+grow_horizontal = 2
+mouse_filter = 2
 theme_type_variation = &"Muted"
 horizontal_alignment = 1
-text = "Level challenges"
 
 [node name="BoostStrip" type="VBoxContainer" parent="Center"]
 layout_mode = 2

@@ -10,27 +10,31 @@ const LEVEL_SELECT_SCENE: String = "res://scenes/ui/LevelSelect.tscn"
 const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
 
 @onready var _title: Label = $Center/Title
-@onready var _daily: Button = $Center/Buttons/DailyRow/Button
-@onready var _daily_desc: Label = $Center/Buttons/DailyRow/Desc
-@onready var _free: Button = $Center/Buttons/FreeRow/Button
-@onready var _free_desc: Label = $Center/Buttons/FreeRow/Desc
-@onready var _level: Button = $Center/Buttons/LevelRow/Button
-@onready var _level_desc: Label = $Center/Buttons/LevelRow/Desc
-@onready var _campaign: Button = $Center/Buttons/CampaignRow/Button
-@onready var _campaign_desc: Label = $Center/Buttons/CampaignRow/Desc
+@onready var _daily: Button = $Center/ModeGrid/DailyRow/Button
+@onready var _daily_label: Label = $Center/ModeGrid/DailyRow/Button/ModeLabel
+@onready var _daily_desc: Label = $Center/ModeGrid/DailyRow/Button/Desc
+@onready var _free: Button = $Center/ModeGrid/FreeRow/Button
+@onready var _free_label: Label = $Center/ModeGrid/FreeRow/Button/ModeLabel
+@onready var _free_desc: Label = $Center/ModeGrid/FreeRow/Button/Desc
+@onready var _level: Button = $Center/ModeGrid/LevelRow/Button
+@onready var _level_label: Label = $Center/ModeGrid/LevelRow/Button/ModeLabel
+@onready var _level_desc: Label = $Center/ModeGrid/LevelRow/Button/Desc
+@onready var _campaign: Button = $Center/ModeGrid/CampaignRow/Button
+@onready var _campaign_label: Label = $Center/ModeGrid/CampaignRow/Button/ModeLabel
+@onready var _campaign_desc: Label = $Center/ModeGrid/CampaignRow/Button/Desc
 @onready var _back: Button = $Center/BackButton
 @onready var _boost_strip: VBoxContainer = $Center/BoostStrip
 
 
 func _ready() -> void:
 	_title.text = tr("MODE_SELECT_TITLE")
-	_daily.text = tr("MENU_DAILY")
+	_daily_label.text = tr("MENU_DAILY")
 	_daily_desc.text = tr("MODE_DAILY_DESC")
-	_free.text = tr("MENU_FREE")
+	_free_label.text = tr("MENU_FREE")
 	_free_desc.text = tr("MODE_FREE_DESC")
-	_level.text = tr("MENU_LEVEL")
+	_level_label.text = tr("MENU_LEVEL")
 	_level_desc.text = tr("MODE_LEVEL_DESC")
-	_campaign.text = tr("MENU_CAMPAIGN")
+	_campaign_label.text = tr("MENU_CAMPAIGN")
 	_campaign_desc.text = tr("MODE_CAMPAIGN_DESC")
 	_back.text = tr("SETTINGS_BACK")
 	_daily.pressed.connect(_start.bind(SeedManager.Mode.DAILY))
@@ -46,12 +50,17 @@ func _ready() -> void:
 ## Arm strip for owned boosts (consumables). Boosts apply to Free / Level-Endless only — Daily
 ## ignores them (BoostPolicy, single source). Hidden entirely when the player owns no boosts.
 func _build_boost_strip() -> void:
-	for c in _boost_strip.get_children():
-		c.queue_free()
 	var owned: Array[BoostData] = []
 	for b in ContentCatalog.BOOSTS:
 		if Economy.boost_count(b.id) > 0:
 			owned.append(b)
+	_build_boost_strip_for(owned)
+
+
+## View helper is intentionally data-driven so hidden and owned strip states stay testable.
+func _build_boost_strip_for(owned: Array[BoostData]) -> void:
+	for c in _boost_strip.get_children():
+		c.queue_free()
 	_boost_strip.visible = not owned.is_empty()
 	if owned.is_empty():
 		return
