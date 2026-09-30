@@ -1,155 +1,202 @@
 extends Control
 
-## Store: buy locked characters/arenas with coins, or select an unlocked one. Rows are
-## built in code from ContentCatalog. Functional scaffold — visual polish is Step 15.
+## Category-first Store view. Economy remains the sole owner of purchase, selection and persistence.
 
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
+const StoreOfferTile = preload("res://scripts/ui/store_offer_tile.gd")
+const StoreShowcase = preload("res://scripts/ui/store_showcase.gd")
+const PALETTE = preload("res://config/palette.tres")
 
+enum Category { CHARACTERS, ARENAS, BOOSTS }
+
+@onready var _scroll: ScrollContainer = $Scroll
 @onready var _list: VBoxContainer = $Scroll/List
 @onready var _coins: Label = $Coins
 @onready var _back: Button = $BackButton
 @onready var _title: Label = $Title
+@onready var _strip: Control = $CategoryStrip
+@onready var _frontier: ColorRect = $CategoryStrip/Frontier
+@onready var _tabs: Array[Button] = [$CategoryStrip/Tabs/Characters, $CategoryStrip/Tabs/Arenas, $CategoryStrip/Tabs/Boosts]
+
+var _active_category: int = Category.CHARACTERS
+var _focused_indices: Array[int] = [0, 0, 0]
+var _refresh_pending: bool = false
+var _selector: HBoxContainer
 
 
 func _ready() -> void:
 	_title.text = tr("MENU_STORE")
 	_back.text = tr("STORE_BACK")
 	_back.pressed.connect(func() -> void: get_tree().change_scene_to_file(MENU_SCENE))
-	Economy.currency_changed.connect(func(_b: int) -> void: _refresh())
-	Economy.unlocks_changed.connect(_refresh)
-	Economy.boosts_changed.connect(_refresh)
+	_tabs[Category.CHARACTERS].pressed.connect(set_category.bind(Category.CHARACTERS))
+	_tabs[Category.ARENAS].pressed.connect(set_category.bind(Category.ARENAS))
+	_tabs[Category.BOOSTS].pressed.connect(set_category.bind(Category.BOOSTS))
+	_strip.resized.connect(_layout_frontier)
+	Economy.currency_changed.connect(func(_balance: int) -> void: _request_refresh())
+	Economy.unlocks_changed.connect(_request_refresh)
+	Economy.boosts_changed.connect(_request_refresh)
 	_refresh()
 
 
+## Local view state only; changing categories never changes Economy or persisted data.
+func set_category(category: int) -> void:
+	if category < Category.CHARACTERS or category > Category.BOOSTS:
+		return
+	_active_category = category
+	_request_refresh()
+
+
+func active_category() -> int:
+	return _active_category
+
+
+func offer_count() -> int:
+	return _selector.get_child_count() if _selector != null else 0
+
+
+func focused_index() -> int:
+	return _focused_indices[_active_category]
+
+
 func _refresh() -> void:
+	_refresh_pending = false
 	_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
-	for c in _list.get_children():
-		c.queue_free()
-	_add_header(tr("STORE_CHARACTERS"))
-	for ch in ContentCatalog.CHARACTERS:
-		_add_item("character", ch.id, tr(ch.display_name_key), tr(ch.description_key), ch.unlock_cost,
-			Economy.selected_character() == ch.id, Color())
-	_add_header(tr("STORE_ARENAS"))
-	for ar in ContentCatalog.ARENAS:
-		# trail_color reads more distinct per arena than border_color (Void/Frost borders are
-		# near-identical blue; trails are cyan / gold / icy-white).
-		var swatch: Color = ar.theme.trail_color if ar.theme != null else Color(1, 1, 1, 1)
-		_add_item("arena", ar.id, tr(ar.display_name_key), tr(ar.description_key), ar.unlock_cost,
-			Economy.selected_arena() == ar.id, swatch)
-	_add_header(tr("STORE_BOOSTS"))
-	for b in ContentCatalog.BOOSTS:
-		_add_boost_item(b)
+	for child in _list.get_children():
+		child.free()
+	match _active_category:
+		Category.CHARACTERS:
+			_build_characters()
+		Category.ARENAS:
+			_build_arenas()
+		Category.BOOSTS:
+			_build_boosts()
+	_scroll.scroll_vertical = 0
+	_update_tab_labels()
+	call_deferred("_layout_frontier")
 
 
-func _add_header(text: String) -> void:
-	var l := Label.new()
-	l.text = text
-	l.theme_type_variation = &"Heading"
-	_list.add_child(l)
+## Rebuild only after the current button/signal stack returns; never free an emitting control.
+func _request_refresh() -> void:
+	if _refresh_pending:
+		return
+	_refresh_pending = true
+	call_deferred("_refresh")
 
 
-const EffectIcon = preload("res://scripts/ui/effect_icon.gd")
-const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
+func _build_characters() -> void:
+	var index := _valid_focus(ContentCatalog.CHARACTERS.size())
+	var character = ContentCatalog.CHARACTERS[index]
+	var showcase: StoreShowcase = StoreShowcase.new()
+	showcase.name = "Showcase"
+	showcase.configure_loadout(StoreShowcase.Kind.CHARACTER, character.id, tr(character.display_name_key),
+		tr(character.description_key), Economy.is_unlocked("character", character.id),
+		Economy.selected_character() == character.id, Economy.can_afford(character.unlock_cost), character.unlock_cost,
+		_effect_kind(character.id))
+	_bind_showcase(showcase)
+	for selector_index in ContentCatalog.CHARACTERS.size():
+		var offer = ContentCatalog.CHARACTERS[selector_index]
+		_add_selector(StoreOfferTile.Kind.CHARACTER, offer.id, selector_index, tr(offer.display_name_key),
+			_effect_kind(offer.id))
 
 
-func _add_item(kind: String, id: StringName, item_name: String, desc: String, cost: int, is_selected: bool, swatch: Color) -> void:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	row.add_child(_make_visual(kind, id, swatch))  # leading motoriçi icon / color swatch
-	# Left column: name + one-line description (data-driven from the .tres description_key).
-	var info := VBoxContainer.new()
-	info.custom_minimum_size = Vector2(260, 0)
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_theme_constant_override("separation", 2)
-	var nl := Label.new()
-	nl.text = item_name
-	nl.add_theme_font_size_override("font_size", 20)
-	var dl := Label.new()
-	dl.text = desc
-	dl.add_theme_font_size_override("font_size", 14)
-	dl.add_theme_color_override("font_color", Color(0.74, 0.72, 0.84, 1.0))
-	dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	info.add_child(nl)
-	info.add_child(dl)
-	row.add_child(info)
-	if Economy.is_unlocked(kind, id):
-		if is_selected:
-			var s := Label.new()
-			s.text = tr("STORE_SELECTED")
-			s.add_theme_color_override("font_color", Color(0.4, 1, 0.55, 1))  # success/selected
-			row.add_child(s)
-		else:
-			var b := JuicyButton.new()
-			b.text = tr("STORE_SELECT")
-			b.custom_minimum_size = Vector2(150, 44)
-			b.pressed.connect(_on_select.bind(kind, id))
-			row.add_child(b)
-	else:
-		var b := JuicyButton.new()
-		b.text = "%s (%d)" % [tr("STORE_BUY"), cost]
-		b.custom_minimum_size = Vector2(150, 44)
-		b.disabled = not Storefront.can_purchase(false, Economy.balance(), cost)
-		b.pressed.connect(_on_buy.bind(kind, id, cost))
-		row.add_child(b)
-	_list.add_child(row)
+func _build_arenas() -> void:
+	var index := _valid_focus(ContentCatalog.ARENAS.size())
+	var arena: ArenaData = ContentCatalog.ARENAS[index]
+	var theme: ThemeData = arena.theme
+	var showcase: StoreShowcase = StoreShowcase.new()
+	showcase.name = "Showcase"
+	showcase.configure_loadout(StoreShowcase.Kind.ARENA, arena.id, tr(arena.display_name_key),
+		tr(arena.description_key), Economy.is_unlocked("arena", arena.id), Economy.selected_arena() == arena.id,
+		Economy.can_afford(arena.unlock_cost), arena.unlock_cost, 0, Vector2i(arena.cols, arena.rows), theme.void_color,
+		theme.border_color, theme.trail_color, theme.captured_base_color)
+	_bind_showcase(showcase)
+	for selector_index in ContentCatalog.ARENAS.size():
+		var offer: ArenaData = ContentCatalog.ARENAS[selector_index]
+		var offer_theme: ThemeData = offer.theme
+		_add_selector(StoreOfferTile.Kind.ARENA, offer.id, selector_index, tr(offer.display_name_key), 0,
+			Vector2i(offer.cols, offer.rows), offer_theme.void_color, offer_theme.border_color)
 
 
-## A consumable boost row: name + description + owned count + Buy (disabled if unaffordable).
-## Unlike characters/arenas, boosts are bought repeatedly (charges), never "selected".
-func _add_boost_item(b: BoostData) -> void:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
-	var icon := BoostIcon.new()  # distinct per-effect glyph (heart / coin / clock)
-	icon.set("effect", b.effect)
-	icon.custom_minimum_size = Vector2(44, 44)
-	row.add_child(icon)
-	var info := VBoxContainer.new()
-	info.custom_minimum_size = Vector2(260, 0)
-	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info.add_theme_constant_override("separation", 2)
-	var nl := Label.new()
-	nl.text = tr(b.display_name_key)
-	nl.add_theme_font_size_override("font_size", 20)
-	var dl := Label.new()
-	dl.text = tr(b.description_key)
-	dl.add_theme_font_size_override("font_size", 14)
-	dl.add_theme_color_override("font_color", Color(0.74, 0.72, 0.84, 1.0))
-	dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var ol := Label.new()
-	ol.text = tr("STORE_OWNED") % Economy.boost_count(b.id)
-	ol.add_theme_font_size_override("font_size", 13)
-	ol.add_theme_color_override("font_color", Color(0.4, 1, 0.55, 1))
-	info.add_child(nl)
-	info.add_child(dl)
-	info.add_child(ol)
-	row.add_child(info)
-	var buy := JuicyButton.new()
-	buy.text = "%s (%d)" % [tr("STORE_BUY"), b.cost]
-	buy.custom_minimum_size = Vector2(150, 44)
-	buy.disabled = not Economy.can_afford(b.cost)
-	buy.pressed.connect(_on_buy_boost.bind(b.id, b.cost))
-	row.add_child(buy)
-	_list.add_child(row)
+func _build_boosts() -> void:
+	var index := _valid_focus(ContentCatalog.BOOSTS.size())
+	var boost: BoostData = ContentCatalog.BOOSTS[index]
+	var showcase: StoreShowcase = StoreShowcase.new()
+	showcase.name = "Showcase"
+	showcase.configure_boost(boost.id, boost, Economy.boost_count(boost.id), Economy.can_afford(boost.cost))
+	_bind_showcase(showcase)
+	for selector_index in ContentCatalog.BOOSTS.size():
+		var offer: BoostData = ContentCatalog.BOOSTS[selector_index]
+		_add_selector(StoreOfferTile.Kind.BOOST, offer.id, selector_index, tr(offer.display_name_key), offer.effect)
 
 
-func _on_buy_boost(id: StringName, cost: int) -> void:
-	Economy.buy_boost(id, cost)  # success refreshes via currency/boosts signals
+func _bind_showcase(showcase: StoreShowcase) -> void:
+	showcase.select_requested.connect(_on_select)
+	showcase.purchase_requested.connect(_on_buy)
+	_list.add_child(showcase)
+	var rail := HBoxContainer.new()
+	rail.name = "Selector"
+	rail.alignment = BoxContainer.ALIGNMENT_CENTER
+	rail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rail.add_theme_constant_override("separation", 12)
+	_list.add_child(rail)
+	_selector = rail
 
 
-## Leading visual: character -> effect symbol (push/slow/freeze); arena -> theme color swatch.
-func _make_visual(kind: String, id: StringName, swatch: Color) -> Control:
+func _add_selector(offer_kind: int, id: StringName, index: int, item_name: String, effect_kind: int,
+		arena_size: Vector2i = Vector2i.ONE, void_color: Color = Color(), border_color: Color = Color()) -> void:
+	var tile: StoreOfferTile = StoreOfferTile.new()
+	tile.name = "Selector_%s" % id
+	tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tile.configure_selector(offer_kind, id, index, item_name, index == focused_index(), effect_kind,
+		arena_size, void_color, border_color)
+	tile.focus_requested.connect(_on_focus_requested)
+	_selector.add_child(tile)
+
+
+func _on_focus_requested(index: int) -> void:
+	_focused_indices[_active_category] = index
+	_request_refresh()
+
+
+func _valid_focus(count: int) -> int:
+	var index := _focused_indices[_active_category]
+	if index < 0 or index >= count:
+		index = 0
+		_focused_indices[_active_category] = index
+	return index
+
+
+func _update_tab_labels() -> void:
+	var keys: Array[String] = ["STORE_CHARACTERS", "STORE_ARENAS", "STORE_BOOSTS"]
+	for index in _tabs.size():
+		var tab: Button = _tabs[index]
+		tab.text = tr(keys[index])
+		tab.add_theme_color_override("font_color", PALETTE.accent if index == _active_category else PALETTE.text_secondary)
+
+
+func _layout_frontier() -> void:
+	if _active_category >= _tabs.size():
+		return
+	var active: Button = _tabs[_active_category]
+	_frontier.position = Vector2(active.position.x + 18.0, 51.0)
+	_frontier.size = Vector2(maxf(active.size.x - 36.0, 20.0), 2.0)
+
+
+func _on_select(kind: String, id: StringName) -> void:
 	if kind == "character":
-		var icon: Control = EffectIcon.new()
-		icon.set("kind", _effect_kind(id))
-		icon.custom_minimum_size = Vector2(44, 44)
-		return icon
-	var sw := ColorRect.new()
-	sw.color = swatch
-	sw.custom_minimum_size = Vector2(44, 44)
-	return sw
+		Economy.set_selected_character(id)
+	else:
+		Economy.set_selected_arena(id)
+	_request_refresh()
 
 
-## Character id -> effect symbol kind (0 push / 1 slow / 2 freeze).
+func _on_buy(kind: String, id: StringName, cost: int) -> void:
+	if kind == "boost":
+		Economy.buy_boost(id, cost)
+	else:
+		Economy.purchase(kind, id, cost)
+
+
 func _effect_kind(id: StringName) -> int:
 	match String(id):
 		"drag":
@@ -158,15 +205,3 @@ func _effect_kind(id: StringName) -> int:
 			return 2
 		_:
 			return 0
-
-
-func _on_select(kind: String, id: StringName) -> void:
-	if kind == "character":
-		Economy.set_selected_character(id)
-	else:
-		Economy.set_selected_arena(id)
-	_refresh()
-
-
-func _on_buy(kind: String, id: StringName, cost: int) -> void:
-	Economy.purchase(kind, id, cost)  # success refreshes via currency/unlocks signals
