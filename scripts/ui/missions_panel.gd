@@ -1,7 +1,7 @@
 extends Control
 
-## Read-only view of today's 3 missions (description + progress bar + reward + ✓). Claim
-## stays automatic at run end (Step 13); this panel only displays. Functional scaffold.
+## Read-only view of today's three territory objectives. Claim stays automatic at run end;
+## this panel only reflects real mission state through MissionProgressStrip.
 
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const MISSIONS_PATH: String = "user://missions.json"
@@ -23,18 +23,7 @@ func _ready() -> void:
 		_add_row(m)
 
 
-func _add_row(m) -> void:
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	var desc: String = tr(m.def.description_key) % m.def.goal_amount
-	var mark: String = "  ✓" if m.is_complete() else ""
-	var header := Label.new()
-	header.text = "%s   (+%d)%s" % [desc, m.def.reward, mark]
-	header.add_theme_font_size_override("font_size", 20)
-	box.add_child(header)
-	var bar := ProgressBar.new()
-	bar.max_value = m.def.goal_amount
-	bar.value = m.progress
-	bar.custom_minimum_size = Vector2(0, 24)
-	box.add_child(bar)
-	_list.add_child(box)
+func _add_row(m: Mission) -> void:
+	var strip := MissionProgressStrip.new()
+	strip.configure(m)
+	_list.add_child(strip)
