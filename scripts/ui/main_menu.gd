@@ -27,6 +27,7 @@ const HOWTO_SCENE: String = "res://scenes/ui/HowToPlay.tscn"
 @onready var _reward_title: Label = $RewardPopup/Box/RewardTitle
 @onready var _reward_body: Label = $RewardPopup/Box/RewardBody
 @onready var _claim_button: Button = $RewardPopup/Box/ClaimButton
+@onready var _emblem: Control = $Center/Emblem
 
 
 func _ready() -> void:
@@ -47,7 +48,8 @@ func _ready() -> void:
 	_claim_button.text = tr("DAILY_REWARD_CLAIM")
 	_claim_button.pressed.connect(_on_claim_reward)
 	_refresh()
-	_maybe_show_reward()
+	if not _maybe_show_reward():
+		_emblem.play_intro()
 	AudioManager.play_music("menu")  # menu track
 	# First launch: show how-to-play once (HowToPlay marks it seen on entry).
 	if not Economy.tutorial_seen():
@@ -55,19 +57,21 @@ func _ready() -> void:
 
 
 ## Shows the login-reward popup if a reward is claimable today (Step 15 polishes it).
-func _maybe_show_reward() -> void:
+func _maybe_show_reward() -> bool:
 	var status: Dictionary = Economy.login_reward_status()
 	if not status["claimable"]:
 		_reward_popup.visible = false
-		return
+		return false
 	_reward_body.text = tr("DAILY_REWARD_BODY") % [status["new_streak"], status["reward"]]
 	_reward_popup.visible = true
+	return true
 
 
 func _on_claim_reward() -> void:
 	Economy.claim_login_reward()
 	_reward_popup.visible = false
 	_refresh()
+	_emblem.play_intro()
 
 
 func _on_play() -> void:
