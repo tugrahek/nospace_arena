@@ -1,12 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://c0howto0play0a"]
+[gd_scene load_steps=6 format=3 uid="uid://c0howto0play0a"]
 
 [ext_resource type="Script" path="res://scripts/ui/how_to_play.gd" id="1_howto"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
-[ext_resource type="Script" path="res://scripts/ui/logo.gd" id="3_logo"]
-[ext_resource type="Script" path="res://scripts/ui/hearts_hud.gd" id="4_hearts"]
-[ext_resource type="Script" path="res://scripts/ui/control_glyph.gd" id="5_glyph"]
-[ext_resource type="Script" path="res://scripts/ui/enemy_glyphs.gd" id="6_enemy"]
-[ext_resource type="Script" path="res://scripts/ui/close_icon.gd" id="7_close"]
+[ext_resource type="Script" path="res://scripts/ui/close_icon.gd" id="3_close"]
+[ext_resource type="Script" path="res://scripts/ui/how_to_page_art.gd" id="4_art"]
+[ext_resource type="Script" path="res://scripts/ui/how_to_page_progress.gd" id="5_progress"]
 
 [node name="HowToPlay" type="Control"]
 layout_mode = 3
@@ -17,6 +15,8 @@ mouse_filter = 2
 script = ExtResource("1_howto")
 
 [node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.12, 0.1, 0.22, 1)
@@ -24,6 +24,7 @@ mouse_filter = 2
 
 [node name="CloseButton" type="Button" parent="."]
 custom_minimum_size = Vector2(64, 64)
+layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -84.0
@@ -34,240 +35,104 @@ flat = true
 script = ExtResource("2_juicy")
 
 [node name="Icon" type="Control" parent="CloseButton"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-script = ExtResource("7_close")
-
-[node name="Center" type="VBoxContainer" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 50.0
-offset_top = 70.0
-offset_right = -50.0
-offset_bottom = -50.0
-alignment = 1
-theme_override_constants/separation = 22
+mouse_filter = 2
+script = ExtResource("3_close")
 
-[node name="ScreenTitle" type="Label" parent="Center"]
+[node name="SafeMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 80
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 100
+
+[node name="MainVBox" type="VBoxContainer" parent="SafeMargin"]
 layout_mode = 2
-theme_type_variation = &"Title"
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 44
+
+[node name="ContextLabel" type="Label" parent="SafeMargin/MainVBox"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_type_variation = &"Muted"
+theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 text = "How to Play"
 
-[node name="GoalPage" type="VBoxContainer" parent="Center"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="Title" type="Label" parent="Center/GoalPage"]
+[node name="PageTitle" type="Label" parent="SafeMargin/MainVBox"]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 38
 horizontal_alignment = 1
 text = "Capture the arena"
 
-[node name="Diagram" type="Control" parent="Center/GoalPage"]
-custom_minimum_size = Vector2(160, 160)
+[node name="DemoCenter" type="CenterContainer" parent="SafeMargin/MainVBox"]
+custom_minimum_size = Vector2(0, 370)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="PageArt" type="Control" parent="SafeMargin/MainVBox/DemoCenter"]
+custom_minimum_size = Vector2(540, 350)
 layout_mode = 2
 size_flags_horizontal = 4
+size_flags_vertical = 4
 mouse_filter = 2
-script = ExtResource("3_logo")
+script = ExtResource("4_art")
 
-[node name="Body" type="Label" parent="Center/GoalPage"]
-custom_minimum_size = Vector2(0, 90)
+[node name="BodyCenter" type="CenterContainer" parent="SafeMargin/MainVBox"]
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="BodyText" type="Label" parent="SafeMargin/MainVBox/BodyCenter"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+theme_override_constants/line_spacing = 4
 horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 3
 text = "Goal"
 
-[node name="ControlsPage" type="VBoxContainer" parent="Center"]
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Title" type="Label" parent="Center/ControlsPage"]
-layout_mode = 2
-theme_type_variation = &"Heading"
-horizontal_alignment = 1
-text = "Move"
-
-[node name="SwipeRow" type="HBoxContainer" parent="Center/ControlsPage"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Glyph" type="Control" parent="Center/ControlsPage/SwipeRow"]
-custom_minimum_size = Vector2(48, 48)
-layout_mode = 2
-mouse_filter = 2
-script = ExtResource("5_glyph")
-kind = 0
-
-[node name="Label" type="Label" parent="Center/ControlsPage/SwipeRow"]
+[node name="ProgressCenter" type="CenterContainer" parent="SafeMargin/MainVBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 1
-autowrap_mode = 3
-text = "Swipe"
-
-[node name="TapRow" type="HBoxContainer" parent="Center/ControlsPage"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Glyph" type="Control" parent="Center/ControlsPage/TapRow"]
-custom_minimum_size = Vector2(48, 48)
-layout_mode = 2
 mouse_filter = 2
-script = ExtResource("5_glyph")
-kind = 1
 
-[node name="Label" type="Label" parent="Center/ControlsPage/TapRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-autowrap_mode = 3
-text = "Tap"
-
-[node name="DpadRow" type="HBoxContainer" parent="Center/ControlsPage"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Glyph" type="Control" parent="Center/ControlsPage/DpadRow"]
-custom_minimum_size = Vector2(48, 48)
-layout_mode = 2
-mouse_filter = 2
-script = ExtResource("5_glyph")
-kind = 2
-
-[node name="Label" type="Label" parent="Center/ControlsPage/DpadRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-autowrap_mode = 3
-text = "D-Pad"
-
-[node name="Hint" type="Label" parent="Center/ControlsPage"]
-layout_mode = 2
-theme_type_variation = &"Muted"
-horizontal_alignment = 1
-text = "Change controls in Settings"
-
-[node name="EnemiesPage" type="VBoxContainer" parent="Center"]
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="Title" type="Label" parent="Center/EnemiesPage"]
-layout_mode = 2
-theme_type_variation = &"Heading"
-horizontal_alignment = 1
-text = "Watch the enemies"
-
-[node name="EnemyRow" type="HBoxContainer" parent="Center/EnemiesPage"]
+[node name="TutorialProgress" type="Control" parent="SafeMargin/MainVBox/ProgressCenter"]
+custom_minimum_size = Vector2(220, 28)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_constants/separation = 44
-
-[node name="BouncerCol" type="VBoxContainer" parent="Center/EnemiesPage/EnemyRow"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Glyph" type="Control" parent="Center/EnemiesPage/EnemyRow/BouncerCol"]
-custom_minimum_size = Vector2(56, 56)
-layout_mode = 2
+size_flags_vertical = 4
 mouse_filter = 2
-script = ExtResource("6_enemy")
-kind = 0
+script = ExtResource("5_progress")
 
-[node name="Name" type="Label" parent="Center/EnemiesPage/EnemyRow/BouncerCol"]
-layout_mode = 2
-theme_type_variation = &"Muted"
-horizontal_alignment = 1
-text = "Bouncer"
-
-[node name="StalkerCol" type="VBoxContainer" parent="Center/EnemiesPage/EnemyRow"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Glyph" type="Control" parent="Center/EnemiesPage/EnemyRow/StalkerCol"]
-custom_minimum_size = Vector2(56, 56)
-layout_mode = 2
-mouse_filter = 2
-script = ExtResource("6_enemy")
-kind = 1
-
-[node name="Name" type="Label" parent="Center/EnemiesPage/EnemyRow/StalkerCol"]
-layout_mode = 2
-theme_type_variation = &"Muted"
-horizontal_alignment = 1
-text = "Stalker"
-
-[node name="SparxCol" type="VBoxContainer" parent="Center/EnemiesPage/EnemyRow"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Glyph" type="Control" parent="Center/EnemiesPage/EnemyRow/SparxCol"]
-custom_minimum_size = Vector2(56, 56)
-layout_mode = 2
-mouse_filter = 2
-script = ExtResource("6_enemy")
-kind = 2
-
-[node name="Name" type="Label" parent="Center/EnemiesPage/EnemyRow/SparxCol"]
-layout_mode = 2
-theme_type_variation = &"Muted"
-horizontal_alignment = 1
-text = "Sparx"
-
-[node name="Body" type="Label" parent="Center/EnemiesPage"]
-custom_minimum_size = Vector2(0, 90)
-layout_mode = 2
-horizontal_alignment = 1
-autowrap_mode = 3
-text = "Enemies"
-
-[node name="LivesPage" type="VBoxContainer" parent="Center"]
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="Title" type="Label" parent="Center/LivesPage"]
-layout_mode = 2
-theme_type_variation = &"Heading"
-horizontal_alignment = 1
-text = "Stay alive"
-
-[node name="Hearts" type="Control" parent="Center/LivesPage"]
-custom_minimum_size = Vector2(140, 36)
-layout_mode = 2
-size_flags_horizontal = 4
-mouse_filter = 2
-script = ExtResource("4_hearts")
-
-[node name="Body" type="Label" parent="Center/LivesPage"]
-custom_minimum_size = Vector2(0, 90)
-layout_mode = 2
-horizontal_alignment = 1
-autowrap_mode = 3
-text = "Lives"
-
-[node name="Dots" type="HBoxContainer" parent="Center"]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_constants/separation = 14
-
-[node name="Nav" type="HBoxContainer" parent="Center"]
+[node name="NavigationRow" type="HBoxContainer" parent="SafeMargin/MainVBox"]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 24
 
-[node name="PrevButton" type="Button" parent="Center/Nav"]
+[node name="PrevButton" type="Button" parent="SafeMargin/MainVBox/NavigationRow"]
 custom_minimum_size = Vector2(170, 64)
 layout_mode = 2
 theme_type_variation = &"Secondary"
 text = "Back"
 script = ExtResource("2_juicy")
 
-[node name="NextButton" type="Button" parent="Center/Nav"]
+[node name="NextButton" type="Button" parent="SafeMargin/MainVBox/NavigationRow"]
 custom_minimum_size = Vector2(170, 64)
 layout_mode = 2
 theme_type_variation = &"HeroButton"

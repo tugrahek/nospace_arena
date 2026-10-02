@@ -1,77 +1,60 @@
 extends Control
 
-## How-to-play carousel (4 pages, each with a motoriçi visual): goal, controls (ALL schemes),
-## enemies, lives. Shown automatically once on first launch and from the "?" icon. A persistent
-## "X" exits to the menu from any page. Marks the tutorial seen on entry (auto-show happens once).
+## Four-page tutorial. The shared presentation changes topic; navigation and exit semantics stay local.
 
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
-const DOT_ON: Color = Color(0.3, 0.95, 1.0, 1.0)
-const DOT_OFF: Color = Color(0.6, 0.58, 0.7, 0.5)
+const PAGE_TITLE_KEYS := [
+	"HOWTO_GOAL_TITLE", "HOWTO_CONTROLS_TITLE", "HOWTO_ENEMIES_TITLE", "HOWTO_LIVES_TITLE",
+]
+const PAGE_COUNT: int = 4
 
 var _index: int = 0
-var _pages: Array[Control] = []
-var _dots: Array[Label] = []
 
 @onready var _close: Button = $CloseButton
-@onready var _screen_title: Label = $Center/ScreenTitle
-@onready var _goal: VBoxContainer = $Center/GoalPage
-@onready var _controls: VBoxContainer = $Center/ControlsPage
-@onready var _enemies: VBoxContainer = $Center/EnemiesPage
-@onready var _lives: VBoxContainer = $Center/LivesPage
-@onready var _dots_box: HBoxContainer = $Center/Dots
-@onready var _prev: Button = $Center/Nav/PrevButton
-@onready var _next: Button = $Center/Nav/NextButton
+@onready var _context: Label = $SafeMargin/MainVBox/ContextLabel
+@onready var _title: Label = $SafeMargin/MainVBox/PageTitle
+@onready var _art: HowToPageArt = $SafeMargin/MainVBox/DemoCenter/PageArt
+@onready var _body: Label = $SafeMargin/MainVBox/BodyCenter/BodyText
+@onready var _progress: HowToPageProgress = $SafeMargin/MainVBox/ProgressCenter/TutorialProgress
+@onready var _prev: Button = $SafeMargin/MainVBox/NavigationRow/PrevButton
+@onready var _next: Button = $SafeMargin/MainVBox/NavigationRow/NextButton
 
 
 func _ready() -> void:
-	Economy.mark_tutorial_seen()  # entry -> seen once (auto-show + early exit both count)
-	_pages = [_goal, _controls, _enemies, _lives]
-	_screen_title.text = tr("HOWTO_TITLE")
-	_prev.text = tr("SETTINGS_BACK")  # was scene-hard-coded (locale sweep, Step 22a)
-	_apply_texts()
-	($Center/LivesPage/Hearts as HeartsHud).set_max(3)
-	_build_dots()
+	Economy.mark_tutorial_seen()
+	_context.text = tr("HOWTO_TITLE")
+	_prev.text = tr("SETTINGS_BACK")
 	_close.pressed.connect(_exit)
 	_prev.pressed.connect(_on_prev)
 	_next.pressed.connect(_on_next)
 	_show(0)
 
 
-## All page text from locale (controls page lists ALL three schemes, not the active one).
-func _apply_texts() -> void:
-	_goal.get_node("Title").text = tr("HOWTO_GOAL_TITLE")
-	_goal.get_node("Body").text = tr("HOWTO_GOAL_BODY")
-	_controls.get_node("Title").text = tr("HOWTO_CONTROLS_TITLE")
-	_controls.get_node("SwipeRow/Label").text = tr("HOWTO_CONTROLS_SWIPE")
-	_controls.get_node("TapRow/Label").text = tr("HOWTO_CONTROLS_TAP")
-	_controls.get_node("DpadRow/Label").text = tr("HOWTO_CONTROLS_DPAD")
-	_controls.get_node("Hint").text = tr("HOWTO_CONTROLS_HINT")
-	_enemies.get_node("Title").text = tr("HOWTO_ENEMIES_TITLE")
-	_enemies.get_node("EnemyRow/BouncerCol/Name").text = tr("ENEMY_BOUNCER_NAME")
-	_enemies.get_node("EnemyRow/StalkerCol/Name").text = tr("ENEMY_STALKER_NAME")
-	_enemies.get_node("EnemyRow/SparxCol/Name").text = tr("ENEMY_SPARX_NAME")
-	_enemies.get_node("Body").text = tr("HOWTO_ENEMIES_BODY")
-	_lives.get_node("Title").text = tr("HOWTO_LIVES_TITLE")
-	_lives.get_node("Body").text = tr("HOWTO_LIVES_BODY")
-
-
-func _build_dots() -> void:
-	for p in _pages.size():
-		var dot := Label.new()
-		dot.text = "●"
-		dot.add_theme_font_size_override("font_size", 18)
-		_dots_box.add_child(dot)
-		_dots.append(dot)
-
-
-func _show(i: int) -> void:
-	_index = clampi(i, 0, _pages.size() - 1)
-	for p in _pages.size():
-		_pages[p].visible = p == _index
-	for d in _dots.size():
-		_dots[d].add_theme_color_override("font_color", DOT_ON if d == _index else DOT_OFF)
+## Changes the shared page presentation without replacing the scene or altering navigation.
+func _show(index: int) -> void:
+	_index = clampi(index, 0, PAGE_COUNT - 1)
+	_title.text = tr(String(PAGE_TITLE_KEYS[_index]))
+	_body.text = _body_for_page(_index)
+	_art.set_page_mode(_index)
+	_progress.page_index = _index
 	_prev.visible = _index > 0
-	_next.text = tr("HOWTO_DONE") if _index == _pages.size() - 1 else tr("HOWTO_NEXT")
+	_next.text = tr("HOWTO_DONE") if _index == PAGE_COUNT - 1 else tr("HOWTO_NEXT")
+
+
+func _body_for_page(index: int) -> String:
+	match index:
+		0:
+			return tr("HOWTO_GOAL_BODY")
+		1:
+			return "%s\n%s\n%s\n%s" % [
+				tr("HOWTO_CONTROLS_SWIPE"), tr("HOWTO_CONTROLS_TAP"),
+				tr("HOWTO_CONTROLS_DPAD"), tr("HOWTO_CONTROLS_HINT"),
+			]
+		2:
+			return tr("HOWTO_ENEMIES_BODY")
+		3:
+			return tr("HOWTO_LIVES_BODY")
+	return ""
 
 
 func _on_prev() -> void:
@@ -79,7 +62,7 @@ func _on_prev() -> void:
 
 
 func _on_next() -> void:
-	if _index >= _pages.size() - 1:
+	if _index >= PAGE_COUNT - 1:
 		_exit()
 	else:
 		_show(_index + 1)
