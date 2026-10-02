@@ -21,11 +21,11 @@ mouse_filter = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 40.0
-offset_top = 40.0
-offset_right = -40.0
-offset_bottom = -40.0
-theme_override_constants/separation = 18
+offset_left = 56.0
+offset_top = 76.0
+offset_right = -56.0
+offset_bottom = -60.0
+theme_override_constants/separation = 24
 
 [node name="Title" type="Label" parent="Layout"]
 layout_mode = 2
@@ -33,21 +33,30 @@ theme_type_variation = &"Title"
 horizontal_alignment = 1
 text = "Leaderboard"
 
-[node name="AllBest" type="Label" parent="Layout"]
-layout_mode = 2
-theme_type_variation = &"Coins"
-horizontal_alignment = 1
-text = "All-time best: 0"
-
 [node name="Scroll" type="ScrollContainer" parent="Layout"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="List" type="VBoxContainer" parent="Layout/Scroll"]
+[node name="Content" type="VBoxContainer" parent="Layout/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 18
+
+[node name="AllBest" type="Label" parent="Layout/Scroll/Content"]
+layout_mode = 2
+theme_type_variation = &"Coins"
+theme_override_colors/font_color = Color(0.74, 0.72, 0.84, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+text = "All-time best: 0"
+
+[node name="List" type="VBoxContainer" parent="Layout/Scroll/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
 
 [node name="BackButton" type="Button" parent="Layout"]
 custom_minimum_size = Vector2(300, 64)
