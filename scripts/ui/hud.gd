@@ -7,6 +7,7 @@ extends CanvasLayer
 signal retry_pressed()
 signal menu_pressed()
 signal next_pressed()  # Campaign: advance to the next level from the win screen
+signal missions_changed(missions: Array)
 
 ## Scale the score label punches to on each capture, then settles back to 1.0 (@export feel).
 @export var score_punch: float = 1.3
@@ -40,7 +41,8 @@ var _last_combo: int = 0                     # punch only when the chain actuall
 @onready var _daily_label: Label = $DailyLabel
 @onready var _best_label: Label = $BestLabel
 @onready var _currency_label: Label = $CurrencyLabel
-@onready var _mission_label: Label = $MissionLabel
+@onready var _mission_status: HBoxContainer = $MissionStatus
+@onready var _mission_count: Label = $MissionStatus/Count
 @onready var _result_panel: Control = $ResultPanel
 @onready var _result_title: Label = $ResultPanel/VBox/TitleLabel
 @onready var _result_art: Control = $ResultPanel/VBox/ResultArt
@@ -290,11 +292,12 @@ func _on_currency_changed(balance: int) -> void:
 	_currency_label.text = tr("HUD_CURRENCY") + ": " + str(balance)
 
 
-## Compact today's-missions list on the HUD (the full panel is the Missions screen).
+## Compact mission count on the HUD; full run details belong to the pause view.
 func show_missions(missions: Array) -> void:
-	var lines: Array[String] = []
+	var completed: int = 0
 	for m in missions:
-		var desc: String = tr(m.def.description_key) % m.def.goal_amount
-		var mark: String = " ✓" if m.is_complete() else ""
-		lines.append("%s  %d/%d%s" % [desc, m.progress, m.def.goal_amount, mark])
-	_mission_label.text = "\n".join(lines)
+		if m.is_complete():
+			completed += 1
+	_mission_status.visible = not missions.is_empty()
+	_mission_count.text = "%d/%d" % [completed, missions.size()]
+	missions_changed.emit(missions)

@@ -28,55 +28,79 @@ mouse_filter = 0
 [node name="Dim" type="ColorRect" parent="Overlay"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.02, 0.015, 0.05, 0.88)
+color = Color(0.02, 0.015, 0.05, 0.72)
 mouse_filter = 2
-
-[node name="Glass" type="PanelContainer" parent="Overlay"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = -210.0
-offset_right = 180.0
-offset_bottom = 210.0
 
 [node name="Box" type="VBoxContainer" parent="Overlay"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -188.0
-offset_right = 160.0
-offset_bottom = 188.0
+offset_left = -260.0
+offset_top = -350.0
+offset_right = 260.0
+offset_bottom = 350.0
 alignment = 1
-theme_override_constants/separation = 24
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Overlay/Box"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_type_variation = &"Title"
+theme_override_font_sizes/font_size = 42
+text = "Paused"
 
 [node name="ResumeButton" type="Button" parent="Overlay/Box"]
 layout_mode = 2
-custom_minimum_size = Vector2(280, 70)
+custom_minimum_size = Vector2(420, 68)
+size_flags_horizontal = 4
+theme_type_variation = &"HeroButton"
 text = "Resume"
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 script = ExtResource("2_juicy")
 
-[node name="SettingsButton" type="Button" parent="Overlay/Box"]
+[node name="MissionSection" type="VBoxContainer" parent="Overlay/Box"]
+visible = false
 layout_mode = 2
-custom_minimum_size = Vector2(280, 70)
+theme_override_constants/separation = 11
+
+[node name="Heading" type="Label" parent="Overlay/Box/MissionSection"]
+layout_mode = 2
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 22
+text = "Missions"
+
+[node name="Rows" type="VBoxContainer" parent="Overlay/Box/MissionSection"]
+layout_mode = 2
+theme_override_constants/separation = 9
+
+[node name="SecondaryActions" type="HBoxContainer" parent="Overlay/Box"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="SettingsButton" type="Button" parent="Overlay/Box/SecondaryActions"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 52)
+size_flags_horizontal = 3
+theme_type_variation = &"Secondary"
 text = "Settings"
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 20
 script = ExtResource("2_juicy")
 
-[node name="RestartButton" type="Button" parent="Overlay/Box"]
+[node name="RestartButton" type="Button" parent="Overlay/Box/SecondaryActions"]
 layout_mode = 2
-custom_minimum_size = Vector2(280, 70)
+custom_minimum_size = Vector2(0, 52)
+size_flags_horizontal = 3
+theme_type_variation = &"Secondary"
 text = "Restart"
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 20
 script = ExtResource("2_juicy")
 
 [node name="MenuButton" type="Button" parent="Overlay/Box"]
 layout_mode = 2
-custom_minimum_size = Vector2(280, 70)
+custom_minimum_size = Vector2(220, 48)
+size_flags_horizontal = 4
+theme_type_variation = &"Secondary"
 text = "Menu"
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 18
 script = ExtResource("2_juicy")

@@ -83,6 +83,7 @@ DAILY_REWARD_TITLE,Daily Reward,Günlük Ödül
 DAILY_REWARD_BODY,Day %d/7  +%d,Gün %d/7  +%d
 DAILY_REWARD_CLAIM,Claim,Al
 PAUSE_RESUME,Resume,Devam
+PAUSE_TITLE,Paused,Duraklatıldı
 PAUSE_SETTINGS,Settings,Ayarlar
 PAUSE_RESTART,Restart,Yeniden
 PAUSE_MENU,Menu,Menü

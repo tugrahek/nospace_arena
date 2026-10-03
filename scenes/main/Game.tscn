@@ -57,3 +57,5 @@ script = ExtResource("4_dpad")
 [node name="HUD" parent="." unique_id=1417517464 instance=ExtResource("5_hud")]
 
 [node name="PauseOverlay" parent="." instance=ExtResource("8_pause")]
+
+[connection signal="missions_changed" from="HUD" to="PauseOverlay" method="show_missions"]

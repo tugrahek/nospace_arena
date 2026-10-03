@@ -9,28 +9,59 @@ signal restart_requested()
 signal menu_requested()
 
 const SETTINGS_SCENE: PackedScene = preload("res://scenes/ui/Settings.tscn")
+const MISSION_ROW: Script = preload("res://scripts/ui/pause_mission_row.gd")
 
 @onready var _pause_button: Button = $PauseButton
 @onready var _overlay: Control = $Overlay
+@onready var _title: Label = $Overlay/Box/Title
 @onready var _resume_button: Button = $Overlay/Box/ResumeButton
-@onready var _settings_button: Button = $Overlay/Box/SettingsButton
-@onready var _restart_button: Button = $Overlay/Box/RestartButton
+@onready var _mission_section: VBoxContainer = $Overlay/Box/MissionSection
+@onready var _mission_heading: Label = $Overlay/Box/MissionSection/Heading
+@onready var _mission_rows: VBoxContainer = $Overlay/Box/MissionSection/Rows
+@onready var _settings_button: Button = $Overlay/Box/SecondaryActions/SettingsButton
+@onready var _restart_button: Button = $Overlay/Box/SecondaryActions/RestartButton
 @onready var _menu_button: Button = $Overlay/Box/MenuButton
 
 var _settings_panel: Control = null  # active in-pause Settings overlay, if open
+var _missions: Array = []
+var _rows: Array[PauseMissionRow] = []
 
 
 func _ready() -> void:
 	_overlay.visible = false
-	_resume_button.text = tr("PAUSE_RESUME")
-	_settings_button.text = tr("PAUSE_SETTINGS")
-	_restart_button.text = tr("PAUSE_RESTART")
-	_menu_button.text = tr("PAUSE_MENU")
+	_apply_texts()
 	_pause_button.pressed.connect(pause)
 	_resume_button.pressed.connect(resume)
 	_settings_button.pressed.connect(_on_settings)
 	_restart_button.pressed.connect(_on_restart)
 	_menu_button.pressed.connect(_on_menu)
+
+
+## Receives the real run missions from HUD; keeps row nodes reusable across refreshes.
+func show_missions(missions: Array) -> void:
+	_missions = missions.duplicate()
+	_refresh_missions()
+
+
+func _apply_texts() -> void:
+	_title.text = tr("PAUSE_TITLE")
+	_resume_button.text = tr("PAUSE_RESUME")
+	_mission_heading.text = tr("MISSIONS_TITLE")
+	_settings_button.text = tr("PAUSE_SETTINGS")
+	_restart_button.text = tr("PAUSE_RESTART")
+	_menu_button.text = tr("PAUSE_MENU")
+
+
+func _refresh_missions() -> void:
+	_mission_section.visible = not _missions.is_empty()
+	while _rows.size() < _missions.size():
+		var row: PauseMissionRow = MISSION_ROW.new()
+		_mission_rows.add_child(row)
+		_rows.append(row)
+	for i in _rows.size():
+		_rows[i].visible = i < _missions.size()
+		if i < _missions.size():
+			_rows[i].configure(_missions[i])
 
 
 func _input(event: InputEvent) -> void:
@@ -52,6 +83,13 @@ func _on_settings() -> void:
 	panel.process_mode = Node.PROCESS_MODE_ALWAYS  # interactive while the tree is paused
 	add_child(panel)
 	_settings_panel = panel
+	panel.tree_exited.connect(_on_settings_closed, CONNECT_ONE_SHOT)
+
+
+func _on_settings_closed() -> void:
+	_settings_panel = null
+	_apply_texts()
+	_refresh_missions()
 
 
 func toggle() -> void:
@@ -65,6 +103,8 @@ func toggle() -> void:
 func pause() -> void:
 	if not GameState.is_playing() or get_tree().paused:
 		return
+	_apply_texts()
+	_refresh_missions()
 	get_tree().paused = true
 	_overlay.visible = true
 	_pause_button.visible = false
