@@ -32,6 +32,7 @@ LEVEL_LABEL,Level,Seviye
 LEVEL_LOCKED,Locked,Kilitli
 RESULT_NEW_BEST,New best!,Yeni rekor!
 RESULT_NEXT,Next,Sonraki
+RESULT_STAGE_REACHED,Stage %d,Aşama %d
 LEVEL_C01_DESC,1 Bouncer • reach 50%,1 Bouncer • %50'ye ulaş
 LEVEL_C02_DESC,2 Bouncers • reach 55%,2 Bouncer • %55'e ulaş
 LEVEL_C03_DESC,Stalker joins • reach 55%,Stalker katılır • %55'e ulaş

@@ -26,6 +26,7 @@ const PALETTE: PaletteData = preload("res://config/palette.tres")
 
 var _score_tween: Tween = null
 var _target: float = 75.0                    # stage/level capture target (display only)
+var _last_percent: float = 0.0               # latest real capture percent for the result motif
 var _percent_tween: Tween = null
 var _near_target_hot: bool = false
 var _combo_tween: Tween = null
@@ -42,7 +43,11 @@ var _last_combo: int = 0                     # punch only when the chain actuall
 @onready var _mission_label: Label = $MissionLabel
 @onready var _result_panel: Control = $ResultPanel
 @onready var _result_title: Label = $ResultPanel/VBox/TitleLabel
+@onready var _result_art: Control = $ResultPanel/VBox/ResultArt
+@onready var _result_score_caption: Label = $ResultPanel/VBox/ScoreCaption
 @onready var _result_score: Label = $ResultPanel/VBox/ResultScore
+@onready var _stage_reached_label: Label = $ResultPanel/VBox/StageReachedLabel
+@onready var _result_progress: Label = $ResultPanel/VBox/ProgressLabel
 @onready var _stars_label: Label = $ResultPanel/VBox/StarsLabel
 @onready var _new_best_label: Label = $ResultPanel/VBox/NewBestLabel
 @onready var _next_button: Button = $ResultPanel/VBox/NextButton
@@ -66,6 +71,7 @@ func _ready() -> void:
 	_menu_button.text = tr("RESULT_MENU")
 	_next_button.text = tr("RESULT_NEXT")
 	_new_best_label.text = tr("RESULT_NEW_BEST")
+	_result_score_caption.text = tr("HUD_SCORE")
 	_retry_button.pressed.connect(func() -> void: retry_pressed.emit())
 	_menu_button.pressed.connect(func() -> void: menu_pressed.emit())
 	_next_button.pressed.connect(func() -> void: next_pressed.emit())
@@ -92,11 +98,16 @@ func setup(lives: int) -> void:
 	_hearts.set_max(lives)
 	_score_label.text = tr("HUD_SCORE") + ": 0"
 	_percent_label.text = "0%"
+	_last_percent = 0.0
 	_combo_label.visible = false
 	_result_panel.visible = false
 	_stars_label.visible = false
 	_new_best_label.visible = false
 	_next_button.visible = false
+	_stage_reached_label.visible = false
+	_result_progress.visible = false
+	_retry_button.theme_type_variation = &"Secondary"
+	_result_art.set_result(_last_percent, _target, false)
 	_stage_banner.visible = false
 
 
@@ -109,6 +120,7 @@ func set_target(target: float) -> void:
 
 
 func update_percent(percent: float) -> void:
+	_last_percent = percent
 	_percent_label.text = "%.0f / %.0f%%" % [percent, _target]
 	# Closing in on the goal: accent color + a small pulse per update (tension cue).
 	var hot: bool = _target > 0.0 and percent >= _target * near_target_ratio
@@ -192,15 +204,34 @@ func _punch_score() -> void:
 func _on_game_over(final_score: int) -> void:
 	_result_title.text = tr("RESULT_LOSE")
 	_result_title.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1.0))  # danger (soft)
-	_result_score.text = tr("HUD_SCORE") + ": " + str(final_score)
+	_show_result_data(final_score, false)
+	_next_button.visible = false
+	_retry_button.theme_type_variation = &"HeroButton"
 	_show_result_panel()
 
 
 func _on_run_won(final_score: int) -> void:
 	_result_title.text = tr("RESULT_WIN")
 	_result_title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.55, 1.0))  # success
-	_result_score.text = tr("HUD_SCORE") + ": " + str(final_score)
+	_show_result_data(final_score, true)
+	_retry_button.theme_type_variation = &"HeroButton" if not _next_button.visible else &"Secondary"
 	_show_result_panel()
+
+
+## Binds only real run values to the compact result presentation.
+func _show_result_data(final_score: int, did_win: bool) -> void:
+	_result_score_caption.text = tr("HUD_SCORE")
+	_result_score.text = str(final_score)
+	_result_progress.visible = _target > 0.0
+	if _result_progress.visible:
+		_result_progress.text = "%.0f / %.0f%%" % [_last_percent, _target]
+	_result_art.set_result(_last_percent, _target, did_win)
+
+
+## Shows the reached stage for the Endless run only.
+func show_endless_stage_reached(stage_number: int) -> void:
+	_stage_reached_label.text = tr("RESULT_STAGE_REACHED") % maxi(stage_number, 1)
+	_stage_reached_label.visible = true
 
 
 ## Result entrance: quick scale-in + fade instead of popping into existence.
@@ -223,6 +254,7 @@ func show_campaign_stars(stars: int, improved: bool, has_next: bool) -> void:
 	_stars_label.text = ""
 	_new_best_label.visible = false
 	_next_button.visible = has_next
+	_retry_button.theme_type_variation = &"Secondary" if has_next else &"HeroButton"
 	var t: Tween = _stars_label.create_tween()
 	for i in 3:
 		t.tween_interval(star_stagger)

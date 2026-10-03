@@ -517,6 +517,7 @@ func _on_run_won(final_score: int) -> void:
 func _on_run_ended(score: int) -> void:
 	_submit_run(score)
 	_update_missions(score)
+	_show_endless_result_stage()
 	if _mode == SeedManager.Mode.CAMPAIGN and _level != null and _won:
 		var stars: int = CampaignStars.star_for(true, score, _lives_lost, _level)
 		var improved: bool = stars > Economy.campaign_star(_level.id)
@@ -524,6 +525,12 @@ func _on_run_ended(score: int) -> void:
 		var next_i: int = SeedManager.campaign_level + 1
 		var has_next: bool = next_i < ContentCatalog.LEVELS.size() and Economy.is_level_unlocked(next_i)
 		_hud.show_campaign_stars(stars, improved, has_next)
+
+
+## Presents the active zero-based stage as the one-based Endless stage reached.
+func _show_endless_result_stage() -> void:
+	if _mode == SeedManager.Mode.LEVEL_ENDLESS:
+		_hud.show_endless_stage_reached(_current_stage + 1)
 
 
 func _on_area_captured(percent: float, cells: Array) -> void:
