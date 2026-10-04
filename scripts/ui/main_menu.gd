@@ -10,6 +10,7 @@ const CREDITS_SCENE: String = "res://scenes/ui/Credits.tscn"
 const SETTINGS_SCENE: String = "res://scenes/ui/Settings.tscn"
 const LEADERBOARD_SCENE: String = "res://scenes/ui/Leaderboard.tscn"
 const HOWTO_SCENE: String = "res://scenes/ui/HowToPlay.tscn"
+@export var reward_context_alpha: float = 0.25
 
 @onready var _play_button: Button = $Center/Buttons/PlayButton
 @onready var _store_button: Button = $Center/Buttons/NavigationHub/StoreButton
@@ -22,12 +23,14 @@ const HOWTO_SCENE: String = "res://scenes/ui/HowToPlay.tscn"
 @onready var _credits_label: Label = $Center/Buttons/NavigationHub/CreditsButton/Label
 @onready var _settings_button: Button = $SettingsButton
 @onready var _help_button: Button = $HelpButton
+@onready var _reward_entry: Button = $RewardEntry
+@onready var _reward_progress: Label = $RewardEntry/Progress
 @onready var _coins: Label = $CoinsPanel/Content/Coins
-@onready var _reward_popup: Control = $RewardPopup
-@onready var _reward_title: Label = $RewardPopup/Box/RewardTitle
-@onready var _reward_body: Label = $RewardPopup/Box/RewardBody
-@onready var _claim_button: Button = $RewardPopup/Box/ClaimButton
+@onready var _reward_popup: DailyRewardPopup = $RewardPopup
 @onready var _emblem: Control = $Center/Emblem
+@onready var _menu_buttons: VBoxContainer = $Center/Buttons
+@onready var _brand_title: Label = $Center/Title
+@onready var _brand_subtitle: Label = $Center/Subtitle
 
 
 func _ready() -> void:
@@ -44,9 +47,9 @@ func _ready() -> void:
 	_credits_button.pressed.connect(_on_credits)
 	_settings_button.pressed.connect(func() -> void: get_tree().change_scene_to_file(SETTINGS_SCENE))
 	_help_button.pressed.connect(func() -> void: get_tree().change_scene_to_file(HOWTO_SCENE))
-	_reward_title.text = tr("DAILY_REWARD_TITLE")
-	_claim_button.text = tr("DAILY_REWARD_CLAIM")
-	_claim_button.pressed.connect(_on_claim_reward)
+	_reward_popup.reward_claimed.connect(func(_amount: int) -> void: _refresh())
+	_reward_popup.dismissed.connect(_on_reward_dismissed)
+	_reward_entry.pressed.connect(_open_reward)
 	_refresh()
 	if not _maybe_show_reward():
 		_emblem.play_intro()
@@ -58,20 +61,28 @@ func _ready() -> void:
 
 ## Shows the login-reward popup if a reward is claimable today (Step 15 polishes it).
 func _maybe_show_reward() -> bool:
-	var status: Dictionary = Economy.login_reward_status()
-	if not status["claimable"]:
-		_reward_popup.visible = false
-		return false
-	_reward_body.text = tr("DAILY_REWARD_BODY") % [status["new_streak"], status["reward"]]
-	_reward_popup.visible = true
-	return true
+	var shown: bool = _reward_popup.present(Economy.login_reward_status())
+	_set_reward_context(shown)
+	return shown
 
 
-func _on_claim_reward() -> void:
-	Economy.claim_login_reward()
-	_reward_popup.visible = false
-	_refresh()
+func _set_reward_context(active: bool) -> void:
+	var opacity: float = reward_context_alpha if active else 1.0
+	_menu_buttons.modulate.a = opacity
+	_play_button.modulate.a = 0.0 if active else 1.0
+	_brand_title.modulate.a = opacity
+	_brand_subtitle.modulate.a = opacity
+	_emblem.modulate.a = opacity
+
+
+func _on_reward_dismissed() -> void:
+	_set_reward_context(false)
 	_emblem.play_intro()
+
+
+func _open_reward() -> void:
+	_refresh()
+	_set_reward_context(_reward_popup.present(Economy.login_reward_status(), true))
 
 
 func _on_play() -> void:
@@ -93,3 +104,7 @@ func _on_credits() -> void:
 func _refresh() -> void:
 	# Missions + loadout/selection have their own panels (Missions/Store) — not here.
 	_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
+	var status: Dictionary = Economy.login_reward_status()
+	_reward_progress.text = "%d/7" % clampi(int(status["new_streak"]), 1, 7)
+	_reward_entry.tooltip_text = tr("DAILY_REWARD_TITLE")
+	_reward_entry.modulate = Color.WHITE if status["claimable"] else Color(1, 1, 1, 0.55)

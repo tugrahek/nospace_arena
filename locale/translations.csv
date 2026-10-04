@@ -82,6 +82,13 @@ Asset'ler: docs/credits.md
 DAILY_REWARD_TITLE,Daily Reward,Günlük Ödül
 DAILY_REWARD_BODY,Day %d/7  +%d,Gün %d/7  +%d
 DAILY_REWARD_CLAIM,Claim,Al
+DAILY_REWARD_RECEIVED,Received,Alındı
+DAILY_REWARD_DAY,Day %d/7,Gün %d/7
+DAILY_REWARD_TODAY,Today's reward · Day %d/7,Bugünün ödülü · Gün %d/7
+DAILY_REWARD_PREVIEW,Preview · Day %d/7,Önizleme · Gün %d/7
+DAILY_REWARD_CLAIM_TODAY,Claim Today,Bugün Al
+DAILY_REWARD_DAY_TODAY,Today · Day %d/7,Bugün · Gün %d/7
+DAILY_REWARD_DAY_CLAIMED,Claimed · Day %d/7,Alındı · Gün %d/7
 PAUSE_RESUME,Resume,Devam
 PAUSE_TITLE,Paused,Duraklatıldı
 PAUSE_SETTINGS,Settings,Ayarlar

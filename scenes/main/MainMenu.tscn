@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/ui/main_menu_nav_hub.gd" id="7_navhub"]
 [ext_resource type="Script" path="res://scripts/ui/main_menu_nav_icon.gd" id="8_navicon"]
 [ext_resource type="Script" path="res://scripts/ui/boost_icon.gd" id="9_coinicon"]
+[ext_resource type="Script" path="res://scripts/ui/daily_reward_popup.gd" id="10_reward"]
+[ext_resource type="Script" path="res://scripts/ui/daily_reward_route.gd" id="11_route"]
 
 [sub_resource type="FontVariation" id="FontVariation_dynapuff"]
 base_font = ExtResource("6_dynapuff")
@@ -86,6 +88,33 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("5_helpicon")
+
+[node name="RewardEntry" type="Button" parent="."]
+offset_left = 190.0
+offset_top = 20.0
+offset_right = 300.0
+offset_bottom = 84.0
+flat = true
+
+[node name="Coin" type="Control" parent="RewardEntry"]
+offset_left = 10.0
+offset_top = 18.0
+offset_right = 38.0
+offset_bottom = 46.0
+mouse_filter = 2
+script = ExtResource("9_coinicon")
+effect = 2
+
+[node name="Progress" type="Label" parent="RewardEntry"]
+offset_left = 46.0
+offset_top = 14.0
+offset_right = 102.0
+offset_bottom = 50.0
+mouse_filter = 2
+theme_type_variation = &"Coins"
+theme_override_font_sizes/font_size = 22
+vertical_alignment = 1
+text = "1/7"
 
 [node name="Center" type="VBoxContainer" parent="."]
 anchors_preset = 15
@@ -326,50 +355,105 @@ visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 0
+script = ExtResource("10_reward")
 
 [node name="Dim" type="ColorRect" parent="RewardPopup"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.02, 0.015, 0.05, 0.88)
+color = Color(0.02, 0.015, 0.05, 0.78)
 mouse_filter = 2
-
-[node name="Glass" type="PanelContainer" parent="RewardPopup"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -130.0
-offset_right = 220.0
-offset_bottom = 130.0
 
 [node name="Box" type="VBoxContainer" parent="RewardPopup"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -110.0
-offset_right = 200.0
-offset_bottom = 110.0
+offset_left = -230.0
+offset_top = -300.0
+offset_right = 230.0
+offset_bottom = 300.0
 alignment = 1
-theme_override_constants/separation = 20
+theme_override_constants/separation = 16
 
 [node name="RewardTitle" type="Label" parent="RewardPopup/Box"]
-theme_type_variation = &"Heading"
+theme_type_variation = &"Title"
+theme_override_font_sizes/font_size = 32
 layout_mode = 2
 horizontal_alignment = 1
 text = "Daily Reward"
 
-[node name="RewardBody" type="Label" parent="RewardPopup/Box"]
+[node name="Coin" type="Control" parent="RewardPopup/Box"]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+script = ExtResource("9_coinicon")
+effect = 2
+
+[node name="RewardAmount" type="Label" parent="RewardPopup/Box"]
+layout_mode = 2
 theme_type_variation = &"Coins"
+theme_override_font_sizes/font_size = 64
+horizontal_alignment = 1
+text = "+0"
+
+[node name="Bonus" type="HBoxContainer" parent="RewardPopup/Box"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+
+[node name="BonusIcon" type="Control" parent="RewardPopup/Box/Bonus"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("9_coinicon")
+
+[node name="BonusLabel" type="Label" parent="RewardPopup/Box/Bonus"]
+layout_mode = 2
+theme_type_variation = &"Heading"
+horizontal_alignment = 1
+
+[node name="Currency" type="Label" parent="RewardPopup/Box"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+text = "Coins"
+
+[node name="Route" type="Control" parent="RewardPopup/Box"]
+custom_minimum_size = Vector2(420, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("11_route")
+
+[node name="RewardBody" type="Label" parent="RewardPopup/Box"]
+theme_type_variation = &"Muted"
+theme_override_font_sizes/font_size = 18
 layout_mode = 2
 horizontal_alignment = 1
-text = "Day 1/7  +50"
+text = "Day 1/7"
 
 [node name="ClaimButton" type="Button" parent="RewardPopup/Box"]
 layout_mode = 2
-custom_minimum_size = Vector2(200, 60)
+custom_minimum_size = Vector2(260, 64)
 size_flags_horizontal = 4
 text = "Claim"
 theme_override_font_sizes/font_size = 26
+theme_type_variation = &"HeroButton"
+script = ExtResource("3_juicy")
+
+[node name="Received" type="Label" parent="RewardPopup/Box"]
+visible = false
+layout_mode = 2
+theme_type_variation = &"Coins"
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = ""
+
+[node name="CloseButton" type="Button" parent="RewardPopup/Box"]
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"Passive"
+theme_override_font_sizes/font_size = 20
+flat = true
