@@ -90,10 +90,13 @@ PAUSE_MENU,Menu,Menü
 MISSIONS_TITLE,Missions,Görevler
 HUD_STAGE,Stage %d,Bölüm %d
 SETTINGS_TITLE,Settings,Ayarlar
+SETTINGS_AUDIO,Audio,Ses
 SETTINGS_MASTER,Master,Ana
 SETTINGS_SFX,Effects,Efektler
 SETTINGS_MUSIC,Music,Müzik
 SETTINGS_MUTE,Mute,Sessiz
+SETTINGS_STATE_ON,On,Açık
+SETTINGS_STATE_OFF,Off,Kapalı
 SETTINGS_BACK,Back,Geri
 SETTINGS_CONTROLS,Controls,Kontroller
 CONTROL_SWIPE,Swipe,Kaydır

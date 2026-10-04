@@ -79,13 +79,15 @@ func test_pause_settings_round_trip_and_actions_keep_existing_semantics() -> voi
 		pause.resume()
 		assert_false(get_tree().paused)
 	pause.pause()
-	pause.call("_on_settings")
-	assert_true(get_tree().paused)
-	var panel: Control = pause.get("_settings_panel")
-	assert_not_null(panel)
-	panel.call("close")
-	await get_tree().process_frame
-	assert_true(get_tree().paused, "Settings return keeps the run paused")
+	for i in 3:
+		pause.call("_on_settings")
+		assert_true(get_tree().paused)
+		var panel: Control = pause.get("_settings_panel")
+		assert_not_null(panel)
+		panel.call("close")
+		await get_tree().process_frame
+		assert_null(pause.get("_settings_panel"), "Settings closes cleanly on each return")
+		assert_true(get_tree().paused, "Settings return keeps the run paused")
 	var restart_count := [0]
 	pause.restart_requested.connect(func() -> void: restart_count[0] += 1)
 	pause.call("_on_restart")
