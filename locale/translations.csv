@@ -64,21 +64,6 @@ STORE_SELECT,Select,Seç
 STORE_SELECTED,Selected,Seçili
 STORE_BACK,Back,Geri
 CREDITS_TITLE,Credits,Künye
-CREDITS_BODY,"NoSpace: Arena
-© 2026 Tuğra Hekimoğlu — all rights reserved.
-
-Engine: Godot 4.6
-Test: GUT (Godot Unit Test)
-
-Assets: see docs/credits.md
-(fonts / sfx / music attributions listed there)","NoSpace: Arena
-© 2026 Tuğra Hekimoğlu — tüm hakları saklıdır.
-
-Motor: Godot 4.6
-Test: GUT (Godot Unit Test)
-
-Asset'ler: docs/credits.md
-(font / ses / müzik atıfları orada listelidir)"
 DAILY_REWARD_TITLE,Daily Reward,Günlük Ödül
 DAILY_REWARD_BODY,Day %d/7  +%d,Gün %d/7  +%d
 DAILY_REWARD_CLAIM,Claim,Al
@@ -147,3 +132,12 @@ SETTINGS_LANGUAGE,Language,Dil
 LANG_AUTO,Auto,Otomatik
 LANG_EN,English,English
 LANG_TR,Türkçe,Türkçe
+CREDITS_CREATED,Created by,Geliştiren
+CREDITS_CREATOR,Tuğra Hekimoğlu,Tuğra Hekimoğlu
+CREDITS_COPYRIGHT,"© 2026 Tuğra Hekimoğlu — all rights reserved (proprietary).","© 2026 Tuğra Hekimoğlu — tüm hakları saklıdır (özel mülkiyet)."
+CREDITS_TECH,Technology,Teknoloji
+CREDITS_TECH_CONTENT,"Godot Engine 4.6 · GUT — Godot Unit Test by Tom 'Butch' Wesley","Godot Engine 4.6 · GUT — Godot Unit Test, Tom 'Butch' Wesley"
+CREDITS_FONTS,Fonts / Assets,Yazı Tipleri / Varlıklar
+CREDITS_FONTS_CONTENT,"DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSFX and menu music: Tuğra Hekimoğlu (original / synthesized)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSes efektleri ve menü müziği: Tuğra Hekimoğlu (özgün / sentezlenmiş)"
+CREDITS_LICENSES,Licenses,Lisanslar
+CREDITS_LICENSES_CONTENT,"Godot Engine and GUT: MIT License\nGUT: addons/gut/LICENSE.md\nOFL 1.1 texts are bundled beside each font","Godot Engine ve GUT: MIT Lisansı\nGUT: addons/gut/LICENSE.md\nOFL 1.1 metinleri yazı tiplerinin yanında bulunur"
