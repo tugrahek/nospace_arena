@@ -25,10 +25,9 @@ func _draw() -> void:
 	# Dividers stay deliberately quieter than the shared arena boundary and destination icons.
 	var divider: Color = _with_alpha(PALETTE.border, 0.18)
 	var margin: float = minf(size.x, size.y) * 0.15
-	var center := size * 0.5
+	var center: Vector2 = size * 0.5
 	draw_line(Vector2(center.x, margin), Vector2(center.x, size.y - margin), divider, 1.0, true)
 	draw_line(Vector2(margin, center.y), Vector2(size.x - margin, center.y), divider, 1.0, true)
-
 
 func _with_alpha(color: Color, alpha: float) -> Color:
 	return Color(color.r, color.g, color.b, alpha)

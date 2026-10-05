@@ -48,6 +48,7 @@ LEVEL_C12_DESC,"Finale • all types, no boosts",Final • tüm tipler • boost
 MENU_STORE,Store,Mağaza
 MENU_CREDITS,Credits,Künye
 MENU_LEADERBOARD,Leaderboard,Liderlik
+MENU_HOWTO,How to Play,Nasıl Oynanır
 LEADERBOARD_TITLE,Leaderboard,Liderlik
 LEADERBOARD_ALLBEST,All-time best: %d,Tüm zamanların rekoru: %d
 LEADERBOARD_EMPTY,Play Daily to set a record,Rekor için Günlük oyna
@@ -141,3 +142,6 @@ CREDITS_FONTS,Fonts / Assets,Yazı Tipleri / Varlıklar
 CREDITS_FONTS_CONTENT,"DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSFX and menu music: Tuğra Hekimoğlu (original / synthesized)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSes efektleri ve menü müziği: Tuğra Hekimoğlu (özgün / sentezlenmiş)"
 CREDITS_LICENSES,Licenses,Lisanslar
 CREDITS_LICENSES_CONTENT,"Godot Engine and GUT: MIT License\nGUT: addons/gut/LICENSE.md\nOFL 1.1 texts are bundled beside each font","Godot Engine ve GUT: MIT Lisansı\nGUT: addons/gut/LICENSE.md\nOFL 1.1 metinleri yazı tiplerinin yanında bulunur"
+SETTINGS_COPYRIGHT,© 2026 Tuğra Hekimoğlu. All rights reserved.,© 2026 Tuğra Hekimoğlu. Tüm hakları saklıdır.
+SETTINGS_LICENSES,Open-source licenses,Açık kaynak lisansları
+LEGAL_TITLE,Licenses,Lisanslar

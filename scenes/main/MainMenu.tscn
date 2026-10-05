@@ -74,25 +74,10 @@ anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("4_seticon")
 
-[node name="HelpButton" type="Button" parent="."]
-custom_minimum_size = Vector2(64, 64)
-offset_left = 94.0
-offset_top = 20.0
-offset_right = 158.0
-offset_bottom = 84.0
-flat = true
-script = ExtResource("3_juicy")
-
-[node name="Icon" type="Control" parent="HelpButton"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-script = ExtResource("5_helpicon")
-
 [node name="RewardEntry" type="Button" parent="."]
-offset_left = 190.0
+offset_left = 99.0
 offset_top = 20.0
-offset_right = 300.0
+offset_right = 209.0
 offset_bottom = 84.0
 flat = true
 
@@ -298,7 +283,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 text = "Leaderboard"
 
-[node name="CreditsButton" type="Button" parent="Center/Buttons/NavigationHub"]
+[node name="HowToButton" type="Button" parent="Center/Buttons/NavigationHub"]
 custom_minimum_size = Vector2(260, 88)
 layout_mode = 0
 anchor_left = 0.5
@@ -313,7 +298,7 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/CreditsButton"]
+[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/HowToButton"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -321,10 +306,9 @@ offset_top = 10.0
 offset_bottom = 54.0
 grow_horizontal = 2
 mouse_filter = 2
-script = ExtResource("8_navicon")
-icon_kind = 3
+script = ExtResource("5_helpicon")
 
-[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/CreditsButton"]
+[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/HowToButton"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -337,18 +321,7 @@ mouse_filter = 2
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 vertical_alignment = 1
-text = "Credits"
-
-[node name="Version" type="Label" parent="."]
-theme_type_variation = &"Muted"
-modulate = Color(1, 1, 1, 0.6)
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -44.0
-offset_bottom = -16.0
-horizontal_alignment = 1
-text = "NoSpace: Arena"
+text = "How to Play"
 
 [node name="RewardPopup" type="Control" parent="."]
 visible = false

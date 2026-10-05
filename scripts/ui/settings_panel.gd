@@ -4,6 +4,7 @@ extends Control
 ## AudioManager (which owns AudioSettings + SettingsStore). Live-applies while dragging and
 ## persists once on drag end (debounced). Mute is a single event -> applied + saved at once.
 
+const LEGAL_SCENE: PackedScene = preload("res://scenes/ui/Credits.tscn")
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const LANGUAGE_SELECTOR = preload("res://scripts/ui/settings_language_selector.gd")
@@ -11,6 +12,7 @@ const LANGUAGE_SELECTOR = preload("res://scripts/ui/settings_language_selector.g
 ## When true the panel was opened as an overlay (e.g. from in-run Pause); Back closes it.
 ## When false (launched from MainMenu) Back returns to the main menu.
 var embedded: bool = false
+var _legal_view: Control
 var _language_overlay: SettingsLanguageSelector
 
 @onready var _title: Label = $Center/Title
@@ -33,6 +35,8 @@ var _language_overlay: SettingsLanguageSelector
 @onready var _dpad: Button = $Center/ControlsRow/Segment/DpadButton
 @onready var _language_label: Label = $Center/LanguageRow/NameLabel
 @onready var _language_button: Button = $Center/LanguageRow/LanguageButton
+@onready var _copyright: Label = $Center/LegalFooter/Copyright
+@onready var _licenses: Button = $Center/LegalFooter/LicensesButton
 @onready var _back: Button = $Center/BackButton
 
 
@@ -61,6 +65,7 @@ func _ready() -> void:
 	_connect_audio()
 	_mute.toggled.connect(_on_mute_toggled)
 	_back.pressed.connect(_on_back)
+	_licenses.pressed.connect(_open_legal)
 
 
 func _connect_audio() -> void:
@@ -79,6 +84,8 @@ func _connect_audio() -> void:
 ## All panel texts from the ACTIVE locale — called on ready and again after a language switch
 ## so the panel itself updates in place. (Language names stay endonyms: English / Türkçe.)
 func _apply_texts() -> void:
+	_copyright.text = tr("SETTINGS_COPYRIGHT")
+	_licenses.text = tr("SETTINGS_LICENSES")
 	_title.text = tr("SETTINGS_TITLE")
 	_audio_label.text = tr("SETTINGS_AUDIO")
 	_master_label.text = tr("SETTINGS_MASTER")
@@ -155,7 +162,9 @@ func _style_mute() -> void:
 
 ## Back: close the overlay when embedded (return to Pause), else go to the main menu.
 func close() -> void:
-	if is_instance_valid(_language_overlay):
+	if is_instance_valid(_legal_view):
+		_legal_view.close()
+	elif is_instance_valid(_language_overlay):
 		_language_overlay.queue_free()
 	elif embedded:
 		queue_free()
@@ -165,3 +174,12 @@ func close() -> void:
 
 func _on_back() -> void:
 	close()
+
+
+## Opens licenses above this same Settings instance, preserving paused/embedded context.
+func _open_legal() -> void:
+	if is_instance_valid(_legal_view):
+		return
+	_legal_view = LEGAL_SCENE.instantiate() as Control
+	_legal_view.tree_exited.connect(func() -> void: _legal_view = null, CONNECT_ONE_SHOT)
+	add_child(_legal_view)
