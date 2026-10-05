@@ -29,18 +29,10 @@ func _ready() -> void:
 
 
 ## Binds the canonical day and a read-only preview selection.
-func bind(day: int, completed: int, selected: int, rewards: Array[int]) -> void:
+func bind(day: int, completed: int, selected: int, _rewards: Array[int]) -> void:
 	current_day = day
 	completed_days = completed
 	selected_day = selected
-	for index in checkpoints.size():
-		var status: String = tr("DAILY_REWARD_DAY_TODAY") if index + 1 == current_day else tr("DAILY_REWARD_DAY_CLAIMED") if index + 1 <= completed_days else tr("DAILY_REWARD_DAY")
-		var award: String = "+%d " % rewards[index] + tr("HUD_CURRENCY")
-		var spec: Dictionary = Economy.login_reward_spec(index + 1)
-		if not spec["boost_ids"].is_empty():
-			var boost: BoostData = ContentCatalog.boost_by_id(StringName(spec["boost_ids"][0]))
-			award = "1× " + tr(boost.display_name_key)
-		checkpoints[index].tooltip_text = (status % (index + 1)) + "  " + award
 	queue_redraw()
 
 

@@ -369,9 +369,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -230.0
-offset_top = -300.0
+offset_top = -350.0
 offset_right = 230.0
-offset_bottom = 300.0
+offset_bottom = 350.0
 alignment = 1
 theme_override_constants/separation = 16
 
@@ -382,13 +382,24 @@ layout_mode = 2
 horizontal_alignment = 1
 text = "Daily Reward"
 
-[node name="Coin" type="Control" parent="RewardPopup/Box"]
-custom_minimum_size = Vector2(96, 96)
+[node name="Hero" type="CenterContainer" parent="RewardPopup/Box"]
+custom_minimum_size = Vector2(0, 128)
 layout_mode = 2
-size_flags_horizontal = 4
+mouse_filter = 2
+
+[node name="Coin" type="Control" parent="RewardPopup/Box/Hero"]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
 mouse_filter = 2
 script = ExtResource("9_coinicon")
 effect = 2
+
+[node name="BoostIcon" type="Control" parent="RewardPopup/Box/Hero"]
+visible = false
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("9_coinicon")
 
 [node name="RewardAmount" type="Label" parent="RewardPopup/Box"]
 layout_mode = 2
@@ -397,26 +408,9 @@ theme_override_font_sizes/font_size = 64
 horizontal_alignment = 1
 text = "+0"
 
-[node name="Bonus" type="HBoxContainer" parent="RewardPopup/Box"]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_constants/separation = 8
-
-[node name="BonusIcon" type="Control" parent="RewardPopup/Box/Bonus"]
-custom_minimum_size = Vector2(36, 36)
-layout_mode = 2
-mouse_filter = 2
-script = ExtResource("9_coinicon")
-
-[node name="BonusLabel" type="Label" parent="RewardPopup/Box/Bonus"]
-layout_mode = 2
-theme_type_variation = &"Heading"
-horizontal_alignment = 1
-
 [node name="Currency" type="Label" parent="RewardPopup/Box"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 text = "Coins"
 
@@ -443,7 +437,7 @@ theme_type_variation = &"HeroButton"
 script = ExtResource("3_juicy")
 
 [node name="Received" type="Label" parent="RewardPopup/Box"]
-visible = false
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 theme_type_variation = &"Coins"
 theme_override_font_sizes/font_size = 24

@@ -27,9 +27,8 @@ var claim_action: Callable
 var _motion: Tween
 @onready var _box: VBoxContainer = $Box
 @onready var _title: Label = $Box/RewardTitle
-@onready var _coin: Control = $Box/Coin
-@onready var _bonus_icon: Control = $Box/Bonus/BonusIcon
-@onready var _bonus_label: Label = $Box/Bonus/BonusLabel
+@onready var _coin: Control = $Box/Hero/Coin
+@onready var _bonus_icon: Control = $Box/Hero/BoostIcon
 @onready var _amount: Label = $Box/RewardAmount
 @onready var _currency: Label = $Box/Currency
 @onready var _day: Label = $Box/RewardBody
@@ -114,25 +113,25 @@ func _update_selection() -> void:
 	reward_amount = int(preview_spec["coins"])
 	_show_reward_spec(preview_spec)
 	if selected_day == current_day:
-		_day.text = tr("DAILY_REWARD_TODAY") % current_day
+		_day.text = tr("DAILY_REWARD_DAY") % current_day
 	else:
 		_day.text = tr("DAILY_REWARD_PREVIEW") % selected_day
 	_claim.visible = _eligible
 	_claim.disabled = not _claim.visible
-	_received.visible = selected_day <= completed_days
+	_received.visible = true
+	_received.text = tr("DAILY_REWARD_RECEIVED") if selected_day <= completed_days else ""
 	_route.bind(current_day, completed_days, selected_day, Economy.LOGIN_REWARDS)
 
 
 func _show_reward_spec(spec: Dictionary) -> void:
 	var coins: int = int(spec.get("coins", 0))
-	_coin.visible = coins > 0
-	_amount.visible = coins > 0
-	_currency.visible = coins > 0
-	_amount.text = "+%d" % coins if coins > 0 else ""
 	var boost_ids: Array = spec.get("boost_ids", [])
-	_bonus_icon.get_parent().visible = not boost_ids.is_empty()
+	_coin.visible = coins > 0
+	_amount.visible = coins > 0 or not boost_ids.is_empty()
+	_currency.visible = _amount.visible
+	_amount.text = "+%d" % coins if coins > 0 else "1×"
+	_currency.text = tr("HUD_CURRENCY")
 	_bonus_icon.visible = not boost_ids.is_empty()
-	_bonus_label.visible = not boost_ids.is_empty()
 	var names: PackedStringArray = []
 	if not boost_ids.is_empty():
 		var data: BoostData = ContentCatalog.boost_by_id(StringName(boost_ids[0]))
@@ -143,7 +142,8 @@ func _show_reward_spec(spec: Dictionary) -> void:
 			var boost: BoostData = ContentCatalog.boost_by_id(StringName(boost_id))
 			if boost != null:
 				names.append(tr(boost.display_name_key))
-	_bonus_label.text = ", ".join(names)
+	if not boost_ids.is_empty():
+		_currency.text = ", ".join(names)
 
 
 func _on_claim() -> void:
