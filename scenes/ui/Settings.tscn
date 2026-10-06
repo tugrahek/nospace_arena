@@ -289,3 +289,12 @@ size_flags_horizontal = 4
 flat = true
 theme_override_font_sizes/font_size = 18
 script = ExtResource("2_juicy")
+
+[node name="PrivacyButton" type="Button" parent="Center/LegalFooter"]
+visible = false
+custom_minimum_size = Vector2(280, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+flat = true
+theme_override_font_sizes/font_size = 18
+script = ExtResource("2_juicy")

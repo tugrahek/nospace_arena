@@ -94,6 +94,7 @@ SETTINGS_MUTE,Mute,Sessiz
 SETTINGS_STATE_ON,On,Açık
 SETTINGS_STATE_OFF,Off,Kapalı
 SETTINGS_BACK,Back,Geri
+SETTINGS_PRIVACY_CHOICES,Privacy choices,Gizlilik tercihleri
 SETTINGS_CONTROLS,Controls,Kontroller
 CONTROL_SWIPE,Swipe,Kaydır
 CONTROL_TAP,Tap,Dokun

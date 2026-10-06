@@ -37,6 +37,7 @@ var _language_overlay: SettingsLanguageSelector
 @onready var _language_button: Button = $Center/LanguageRow/LanguageButton
 @onready var _copyright: Label = $Center/LegalFooter/Copyright
 @onready var _licenses: Button = $Center/LegalFooter/LicensesButton
+@onready var _privacy: Button = $Center/LegalFooter/PrivacyButton
 @onready var _back: Button = $Center/BackButton
 
 
@@ -66,6 +67,13 @@ func _ready() -> void:
 	_mute.toggled.connect(_on_mute_toggled)
 	_back.pressed.connect(_on_back)
 	_licenses.pressed.connect(_open_legal)
+	_connect_privacy_options()
+
+
+func _connect_privacy_options() -> void:
+	_privacy.pressed.connect(_open_privacy_options)
+	AdsService.privacy_options_changed.connect(_on_privacy_options_changed)
+	_on_privacy_options_changed(AdsService.is_privacy_options_required(), AdsService.is_privacy_options_busy())
 
 
 func _connect_audio() -> void:
@@ -86,6 +94,7 @@ func _connect_audio() -> void:
 func _apply_texts() -> void:
 	_copyright.text = tr("SETTINGS_COPYRIGHT")
 	_licenses.text = tr("SETTINGS_LICENSES")
+	_privacy.text = tr("SETTINGS_PRIVACY_CHOICES")
 	_title.text = tr("SETTINGS_TITLE")
 	_audio_label.text = tr("SETTINGS_AUDIO")
 	_master_label.text = tr("SETTINGS_MASTER")
@@ -174,6 +183,15 @@ func close() -> void:
 
 func _on_back() -> void:
 	close()
+
+
+func _open_privacy_options() -> void:
+	AdsService.show_privacy_options()
+
+
+func _on_privacy_options_changed(required: bool, busy: bool) -> void:
+	_privacy.visible = required
+	_privacy.disabled = busy
 
 
 ## Opens licenses above this same Settings instance, preserving paused/embedded context.

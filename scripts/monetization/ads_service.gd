@@ -1,8 +1,8 @@
 extends Node
 
 ## Autoload boundary for rewarded ads. No UI references, economy calls, or SDK types.
-## Initialization is automatic on boot with a safe no-op backend. A future consent
-## coordinator must explicitly allow requests before a network backend can run.
+## Android boot selects the native adapter; UMP explicitly gates every ad request.
+## Other platforms and missing native SDKs retain the safe no-op backend.
 const Backend = preload("res://scripts/monetization/ads_backend.gd")
 const NoopBackend = preload("res://scripts/monetization/noop_ads_backend.gd")
 
@@ -11,6 +11,7 @@ signal ads_unavailable(reason: StringName)
 signal ad_failed(context_id: String, request_token: int, reason: StringName)
 signal reward_earned(context_id: String, request_token: int)
 signal ad_closed(context_id: String, request_token: int)
+signal privacy_options_changed(required: bool, busy: bool)
 
 enum State { UNAVAILABLE, INITIALIZING, IDLE, LOADING, READY, SHOWING, REWARDED, CLOSED, FAILED }
 
@@ -25,6 +26,7 @@ var _load_token: int = 0
 var _show_token: int = 0
 var _context_id: String = ""
 var _reward_emitted: bool = false
+var _consent: AdsConsentCoordinator
 
 
 func _init() -> void:
@@ -32,7 +34,43 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	_bootstrap_native()
 	initialize()
+
+
+func _bootstrap_native() -> void:
+	if not _backend is NoopBackend or not NativeAdsBackend.native_sdk_available():
+		return
+	var bridge: RefCounted = load("res://scripts/monetization/poing_ads_bridge.gd").new()
+	if not bridge.is_native_available():
+		return
+	configure_backend(NativeAdsBackend.new(bridge, AdsConfig.rewarded_id()))
+	_consent = AdsConsentCoordinator.new(bridge)
+	_consent.consent_changed.connect(_on_consent_changed)
+	_consent.start()
+
+
+## Settings uses only this service, never native UMP types.
+func is_privacy_options_required() -> bool:
+	return _consent != null and _consent.privacy_required
+
+
+## A pending session update or open form prevents overlapping privacy actions.
+func is_privacy_options_busy() -> bool:
+	return _consent != null and _consent.busy
+
+
+## Opens the required UMP privacy form; returns false when not applicable or busy.
+func show_privacy_options() -> bool:
+	return _consent != null and _consent.open_privacy_options()
+
+
+func _on_consent_changed(allowed: bool, required: bool, busy: bool) -> void:
+	set_requests_allowed(allowed)
+	privacy_options_changed.emit(required, busy)
+	if allowed:
+		initialize()
+		preload_rewarded()
 
 
 ## Injects an adapter before initialization begins; tests use the fake backend.
@@ -44,7 +82,7 @@ func configure_backend(backend: Backend) -> bool:
 	return true
 
 
-## Future privacy gate. Default is denied; revocation invalidates pending loads.
+## UMP privacy gate. Default is denied; revocation invalidates pending loads.
 ## An already-presented ad can finish its valid reward/close sequence.
 func set_requests_allowed(allowed: bool) -> void:
 	_requests_allowed = allowed
@@ -135,6 +173,8 @@ func _on_initialized(token: int, available: bool) -> void:
 	state = State.IDLE if available else State.UNAVAILABLE
 	if not available:
 		ads_unavailable.emit(&"sdk_unavailable")
+	elif _consent != null:
+		preload_rewarded()
 
 
 func _on_loaded(token: int) -> void:

@@ -8,6 +8,10 @@
 
 config_version=5
 
+[admob]
+
+general/ios/enabled=false
+
 [application]
 
 config/name="NoSpace: Arena"
@@ -35,7 +39,7 @@ window/handheld/orientation=1
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg")
+enabled=PackedStringArray("res://addons/gut/plugin.cfg", "res://addons/admob/plugin.cfg")
 
 [gui]
 
@@ -48,6 +52,11 @@ pointing/emulate_touch_from_mouse=true
 [internationalization]
 
 locale/translations=PackedStringArray("res://locale/translations.en.translation", "res://locale/translations.tr.translation")
+
+[monetization]
+
+ads/use_test_ads=true
+ads/android_rewarded_id=""
 
 [rendering]
 

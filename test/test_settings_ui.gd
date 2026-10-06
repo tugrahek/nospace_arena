@@ -72,6 +72,29 @@ func test_settings_locale_keys() -> void:
 	assert_eq(tr("SETTINGS_LANGUAGE"), "Language")
 
 
+func test_privacy_choices_follow_ump_availability_busy_state_and_locale() -> void:
+	var panel: Control = SETTINGS_SCENE.instantiate()
+	add_child_autofree(panel)
+	var button: Button = panel.get_node("Center/LegalFooter/PrivacyButton")
+	assert_false(button.visible, "desktop/no UMP requirement has no misleading action")
+	assert_eq(button.text, "Privacy choices")
+	AdsService.privacy_options_changed.emit(true, true)
+	assert_true(button.visible)
+	assert_true(button.disabled)
+	AdsService.privacy_options_changed.emit(true, false)
+	assert_false(button.disabled)
+	await get_tree().process_frame
+	assert_lte(button.get_global_rect().end.y, 1280.0)
+	assert_gte(button.size.x, button.get_combined_minimum_size().x)
+	panel.call("_on_language", "tr")
+	assert_eq(button.text, "Gizlilik tercihleri")
+	await get_tree().process_frame
+	assert_lte(button.get_global_rect().end.y, 1280.0)
+	assert_gte(button.size.x, button.get_combined_minimum_size().x)
+	AdsService.privacy_options_changed.emit(false, false)
+	assert_false(button.visible)
+
+
 func test_language_pick_applies_locale_and_refreshes_panel() -> void:
 	# Pressing a language button applies the locale immediately and the panel re-labels itself
 	# in place (cheap-hybrid refresh). Restores the saved preference + EN locale afterwards.
