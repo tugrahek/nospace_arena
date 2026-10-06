@@ -50,6 +50,13 @@ const MISSIONS: Array[MissionDef] = [
 	preload("res://resources/missions/m_win_1.tres"),
 	preload("res://resources/missions/m_win_2.tres"),
 	preload("res://resources/missions/m_win_3.tres"),
+	preload("res://resources/missions/m_stage_2.tres"),
+	preload("res://resources/missions/m_stage_4.tres"),
+	preload("res://resources/missions/m_stage_6.tres"),
+	preload("res://resources/missions/m_time_30.tres"),
+	preload("res://resources/missions/m_time_60.tres"),
+	preload("res://resources/missions/m_runs_2.tres"),
+	preload("res://resources/missions/m_runs_4.tres"),
 ]
 
 

@@ -150,9 +150,9 @@ func _setup_missions() -> void:
 
 ## Evaluates missions against this run's stats, pays newly-completed rewards once, saves.
 func _update_missions(score: int) -> void:
-	var stats: Dictionary = {
-		"score": score, "percent": _last_percent, "areas": _areas_this_run, "won": _won,
-	}
+	var stage: int = _current_stage + 1 if _mode == SeedManager.Mode.LEVEL_ENDLESS else 0
+	var stats: Dictionary = MissionService.completed_run_stats(score, _last_percent,
+		_areas_this_run, _won, stage, _run_time)
 	var reward: int = 0
 	for m in _missions:
 		m.advance(stats)

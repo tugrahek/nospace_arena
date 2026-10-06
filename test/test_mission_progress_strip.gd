@@ -10,11 +10,11 @@ func after_each() -> void:
 	TranslationServer.set_locale("en")
 
 
-func _mission(progress: int, goal: int, reward: int = 35) -> Mission:
+func _mission(progress: int, goal: int, reward: int = 35, goal_type: int = MissionDef.GoalType.REACH_PERCENT) -> Mission:
 	var definition := MissionDef.new()
 	definition.id = &"progress_strip"
 	definition.description_key = "MISSION_REACH_PERCENT"
-	definition.goal_type = MissionDef.GoalType.REACH_PERCENT
+	definition.goal_type = goal_type
 	definition.goal_amount = goal
 	definition.reward = reward
 	var mission := Mission.new(definition)
@@ -28,12 +28,12 @@ func _contained(child: Control, parent: Control) -> bool:
 	return parent_rect.encloses(child_rect)
 
 
-func test_zero_progress_keeps_void_without_active_frontier() -> void:
+func test_zero_progress_keeps_void_with_start_marker() -> void:
 	var strip := MissionProgressStrip.new()
 	strip.configure(_mission(0, 80))
 	assert_eq(strip.progress_ratio, 0.0)
-	assert_false(strip.has_active_frontier)
-	assert_false(strip.shows_diamond)
+	assert_true(strip.has_active_frontier)
+	assert_true(strip.shows_diamond)
 	assert_false(strip.is_completed)
 	strip.free()
 
@@ -141,3 +141,64 @@ func test_long_turkish_objective_stays_in_its_header() -> void:
 	assert_eq(strip.objective_text, "50 bölge ele geçir")
 	assert_true(_contained(strip.objective_label(), strip))
 	assert_true(_contained(strip.reward_cluster(), strip))
+
+
+func test_integer_routes_follow_actual_count_at_zero_partial_and_complete() -> void:
+	for goal in [2, 3, 50]:
+		for progress in [0, 1, goal]:
+			var mission: Mission = _mission(progress, goal, 140, MissionDef.GoalType.WIN_RUNS)
+			var strip := MissionProgressStrip.new()
+			strip.configure(mission)
+			assert_true(strip.uses_checkpoints)
+			for index in goal:
+				var expected: StringName = &"captured" if index < progress else (&"next" if index == progress else &"future")
+				assert_eq(strip.territory_patch().checkpoint_state(index), expected)
+			assert_eq(strip.has_active_frontier, progress < goal)
+			strip.free()
+
+
+func test_geometry_follows_goal_type_and_never_mutates_or_claims_mission() -> void:
+	for goal_type in [MissionDef.GoalType.REACH_SCORE, MissionDef.GoalType.REACH_PERCENT,
+			MissionDef.GoalType.TOTAL_AREAS, MissionDef.GoalType.WIN_RUNS,
+			MissionDef.GoalType.REACH_STAGE, MissionDef.GoalType.SURVIVE_TIME, MissionDef.GoalType.COMPLETE_RUNS]:
+		var mission: Mission = _mission(2, 3, 200, goal_type)
+		var before: Dictionary = mission.to_dict().duplicate()
+		var strip := MissionProgressStrip.new()
+		strip.configure(mission)
+		assert_eq(strip.uses_checkpoints, goal_type in [MissionDef.GoalType.TOTAL_AREAS, MissionDef.GoalType.WIN_RUNS,
+			MissionDef.GoalType.REACH_STAGE, MissionDef.GoalType.COMPLETE_RUNS])
+		assert_eq(mission.to_dict(), before, "rendering cannot advance or claim the mission")
+		assert_eq(mission.def.goal_amount, 3)
+		assert_eq(strip.reward_value, 200)
+		strip.free()
+
+
+func test_percent_silhouette_is_connected_and_preserves_exact_total_coverage() -> void:
+	for progress in [0, 1, 5, 20, 25, 49, 50]:
+		var strip := MissionProgressStrip.new()
+		strip.configure(_mission(progress, 50))
+		var widths: Array[float] = strip.territory_patch().territory_row_ratios()
+		var total: float = 0.0
+		for width in widths:
+			total += width
+			assert_gte(width, 0.0)
+			assert_lte(width, 1.0)
+			if progress > 0:
+				assert_gt(width, 0.0, "all captured rows connect to the same left territory")
+		assert_almost_eq(total / widths.size(), float(progress) / 50.0, 0.000001)
+		assert_almost_eq(strip.rendered_captured_area_ratio(), float(progress) / 50.0, 0.000001)
+		if progress > 0 and progress < 50:
+			assert_ne(widths[0], widths[1], "partial frontier is stepped rather than a loading bar")
+		strip.free()
+
+
+func test_area_field_has_exactly_one_captured_cell_per_completed_area() -> void:
+	for progress in [0, 5, 49, 50]:
+		var mission: Mission = _mission(progress, 50, 180, MissionDef.GoalType.TOTAL_AREAS)
+		var before: Dictionary = mission.to_dict().duplicate()
+		var strip := MissionProgressStrip.new()
+		strip.configure(mission)
+		assert_eq(strip.territory_patch().captured_cell_count(), progress)
+		assert_eq(mission.to_dict(), before)
+		assert_eq(strip.has_active_frontier, progress < 50)
+		strip.free()

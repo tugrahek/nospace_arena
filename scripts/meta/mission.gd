@@ -2,8 +2,8 @@ class_name Mission
 extends RefCounted
 
 ## Runtime state for one mission: progress toward its def's goal + claimed flag.
-## advance() is evaluated at run end with {score, percent, areas, won}. REACH_* take the
-## best single-run value (max); TOTAL_AREAS / WIN_RUNS accumulate across runs. claim() is
+## advance() reads completed-run stats. Score/percent/stage/time keep the best single run;
+## area/win/completed-run counts accumulate. Stage is one-based Endless only. claim() is
 ## idempotent — the reward is paid exactly once (no double reward). Pure, GUT-testable.
 
 const MissionDefScript = preload("res://scripts/meta/mission_def.gd")
@@ -27,6 +27,12 @@ func advance(stats: Dictionary) -> void:
 			progress += int(stats.get("areas", 0))
 		MissionDefScript.GoalType.WIN_RUNS:
 			progress += 1 if stats.get("won", false) else 0
+		MissionDefScript.GoalType.REACH_STAGE:
+			progress = maxi(progress, int(stats.get("stage", 0)))
+		MissionDefScript.GoalType.SURVIVE_TIME:
+			progress = maxi(progress, int(stats.get("run_seconds", 0)))
+		MissionDefScript.GoalType.COMPLETE_RUNS:
+			progress += int(stats.get("completed_runs", 0))
 	progress = mini(progress, def.goal_amount)  # cap at goal (display 3/3, not 5/3)
 
 
