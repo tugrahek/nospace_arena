@@ -11,6 +11,7 @@ var selected_character_id: String = "pulse"  # persisted loadout (free-play)
 var selected_arena_id: String = "void"
 var last_claim_epoch_day: int = -1  # daily login reward; -1 = never claimed
 var streak_day: int = 0  # 1..7 login streak
+var rewarded_mission_bonus_epoch_day: int = -1  # -1 = never claimed
 var tutorial_seen: bool = false  # how-to-play shown once (first launch)
 var boost_charges: Dictionary = {}  # boost id:String -> owned count:int (consumables)
 var armed_boosts: Array = []  # boost ids:String armed for the next run
@@ -109,6 +110,7 @@ func to_dict() -> Dictionary:
 		"selected_arena": selected_arena_id,
 		"last_claim_epoch_day": last_claim_epoch_day,
 		"streak_day": streak_day,
+		"rewarded_mission_bonus_epoch_day": rewarded_mission_bonus_epoch_day,
 		"tutorial_seen": tutorial_seen,
 		"boost_charges": boost_charges.duplicate(true),
 		"armed_boosts": armed_boosts.duplicate(),
@@ -123,6 +125,7 @@ static func from_dict(d: Dictionary) -> SaveData:
 	data.selected_arena_id = String(d.get("selected_arena", "void"))
 	data.last_claim_epoch_day = int(d.get("last_claim_epoch_day", -1))
 	data.streak_day = int(d.get("streak_day", 0))
+	data.rewarded_mission_bonus_epoch_day = int(d.get("rewarded_mission_bonus_epoch_day", -1))
 	data.tutorial_seen = bool(d.get("tutorial_seen", false))
 	var u: Variant = d.get("unlocked", {})
 	if typeof(u) == TYPE_DICTIONARY:

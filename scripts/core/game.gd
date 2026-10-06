@@ -159,6 +159,7 @@ func _update_missions(score: int) -> void:
 		reward += m.claim()  # 0 unless newly complete; idempotent (no double reward)
 	if reward > 0:
 		Economy.earn(int(round(reward * _coin_multiplier)))  # Coin Bonus boost (1.0 = no change)
+	Economy.prepare_rewarded_mission_bonus(reward)
 	var progress: Dictionary = {}
 	for m in _missions:
 		progress[String(m.def.id)] = m.to_dict()

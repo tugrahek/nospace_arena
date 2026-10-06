@@ -22,9 +22,13 @@ static func load_from(path: String) -> SaveDataScript:
 	return SaveDataScript.from_dict(data)
 
 
-static func save_to(path: String, data: SaveDataScript) -> void:
+## Writes and flushes one profile; returns false on open/write failure.
+static func save_to(path: String, data: SaveDataScript) -> bool:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
-		return
+		return false
 	f.store_string(JSON.stringify(data.to_dict()))
+	f.flush()
+	var success: bool = f.get_error() == OK
 	f.close()
+	return success
