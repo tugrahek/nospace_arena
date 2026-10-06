@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
 [ext_resource type="Script" path="res://scripts/ui/hearts_hud.gd" id="3_hearts"]
 [ext_resource type="Script" path="res://scripts/ui/result_territory_art.gd" id="4_result_art"]
 [ext_resource type="Script" path="res://scripts/ui/mission_status_icon.gd" id="5_mission_icon"]
+[ext_resource type="Script" path="res://scripts/ui/results_rewarded_bonus.gd" id="6_rewarded"]
 
 [node name="HUD" type="CanvasLayer"]
 layer = 2
@@ -239,3 +240,11 @@ theme_type_variation = &"Secondary"
 text = "Menu"
 theme_override_font_sizes/font_size = 26
 script = ExtResource("2_juicy")
+
+[node name="RewardedBonusButton" type="Button" parent="ResultPanel/VBox"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(0, 56)
+theme_type_variation = &"Secondary"
+theme_override_font_sizes/font_size = 20
+script = ExtResource("6_rewarded")

@@ -79,6 +79,11 @@ func _ready() -> void:
 	_next_button.pressed.connect(func() -> void: next_pressed.emit())
 
 
+## Enables the optional ad offer only after the game's run-end bookkeeping is complete.
+func finalize_result_rewards() -> void:
+	$ResultPanel/VBox/RewardedBonusButton.present()
+
+
 ## Shows/hides the daily-mode badge. Full daily UI (countdown etc.) is Step 14.
 func set_daily(active: bool, seed: int) -> void:
 	if active:

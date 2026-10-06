@@ -526,6 +526,7 @@ func _on_run_ended(score: int) -> void:
 		var next_i: int = SeedManager.campaign_level + 1
 		var has_next: bool = next_i < ContentCatalog.LEVELS.size() and Economy.is_level_unlocked(next_i)
 		_hud.show_campaign_stars(stars, improved, has_next)
+	_hud.finalize_result_rewards()
 
 
 ## Presents the active zero-based stage as the one-based Endless stage reached.
