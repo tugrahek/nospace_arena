@@ -8,7 +8,7 @@ enum State { HIDDEN, READY, CLAIMING, CLAIMED, DISMISSING, INSPECTING }
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 @export var entrance_duration: float = 0.20
 @export var claim_pulse_duration: float = 0.22
-@export var claimed_hold_duration: float = 1.0
+@export var claimed_hold_duration: float = 0.7
 @export var dismissal_duration: float = 0.16
 @export var pulse_scale: float = 1.12
 var state: State = State.HIDDEN

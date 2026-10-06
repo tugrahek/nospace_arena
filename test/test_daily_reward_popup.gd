@@ -77,7 +77,7 @@ func test_repeated_pressed_claims_once_and_keeps_actual_result_visible() -> void
 	assert_true(button.disabled)
 	assert_eq(popup.get_node("Box/RewardAmount").text, "+50")
 	assert_eq(button.text, "✓ Received")
-	assert_between(popup.claimed_hold_duration, 0.8, 1.2)
+	assert_almost_eq(popup.claimed_hold_duration, 0.7, 0.001)
 	assert_false(LoginStreak.evaluate(100, data.last_claim_epoch_day, data.streak_day, TABLE)["claimable"])
 
 
