@@ -22,6 +22,7 @@ func _ready() -> void:
 		economy = Economy
 	visible = false
 	pressed.connect(_on_pressed)
+	visibility_changed.connect(_on_visibility_changed)
 	GameState.game_started.connect(_reset_offer)
 	ads_service.rewarded_ready.connect(_refresh)
 	ads_service.ads_unavailable.connect(_on_unavailable)
@@ -64,7 +65,7 @@ func _refresh() -> void:
 
 
 func _on_pressed() -> void:
-	if not _finalized or _attempted or not is_visible_in_tree():
+	if not _finalized or _attempted or not _results_active():
 		return
 	var status: Dictionary = economy.rewarded_mission_bonus_status()
 	if not status["eligible"] or not ads_service.is_rewarded_available():
@@ -79,8 +80,28 @@ func _on_pressed() -> void:
 
 
 func _matches(context: String, token: int) -> bool:
-	return is_inside_tree() and _finalized and _attempted and not _handled \
+	return _results_active() and _finalized and _attempted and not _handled \
 		and _request_token > 0 and token == _request_token and context == _ad_context
+
+
+## queue_free is deferred: reject a pending deletion anywhere in the Results hierarchy.
+func _results_active() -> bool:
+	if not is_inside_tree() or not is_visible_in_tree():
+		return false
+	var ancestor: Node = self
+	while ancestor != null:
+		if ancestor.is_queued_for_deletion():
+			return false
+		ancestor = ancestor.get_parent()
+	return true
+
+
+## Disappearing Results permanently retires its active request, even if shown again.
+func _on_visibility_changed() -> void:
+	if _finalized and _attempted and not is_visible_in_tree():
+		_finalized = false
+		_handled = true
+		_request_token = 0
 
 
 ## Trust boundary: this handler alone authorizes the existing durable claim API.

@@ -256,3 +256,109 @@ func test_synchronous_show_failure_leaves_no_offer_or_claim() -> void:
 	await get_tree().process_frame
 	assert_eq(Economy.balance(), 100)
 	assert_false(button.visible)
+
+
+func test_results_hidden_then_restored_cannot_accept_old_reward() -> void:
+	_ready_ad()
+	_finish()
+	var token: int = _tap()
+	var panel: Control = _hud.get_node("ResultPanel")
+	panel.hide()
+	panel.show()
+	_fake.earn_reward(token)
+	_fake.close(token)
+	await get_tree().process_frame
+	assert_eq(Economy.balance(), 100)
+	assert_false(_button.visible)
+
+
+func test_hud_queued_for_deletion_rejects_callback_before_actual_free() -> void:
+	_ready_ad()
+	_finish()
+	var token: int = _tap()
+	_hud.queue_free()
+	_fake.earn_reward(token)
+	_fake.close(token)
+	await get_tree().process_frame
+	assert_eq(Economy.balance(), 100)
+	assert_eq(Store.load_from(PATH).rewarded_mission_bonus_epoch_day, -1)
+
+
+func test_background_foreground_while_loading_preserves_single_request() -> void:
+	_finish()
+	var token: int = _fake.load_tokens.back()
+	_hud.propagate_notification(NOTIFICATION_APPLICATION_PAUSED)
+	_service.notification(NOTIFICATION_APPLICATION_PAUSED)
+	_hud.finalize_result_rewards()
+	assert_eq(_service.state, Service.State.LOADING)
+	assert_eq(_fake.load_tokens.size(), 1)
+	assert_false(_button.visible)
+	_fake.complete_load(token)
+	_hud.propagate_notification(NOTIFICATION_APPLICATION_RESUMED)
+	_service.notification(NOTIFICATION_APPLICATION_RESUMED)
+	assert_true(_button.visible)
+	assert_eq(_fake.load_tokens.size(), 1)
+	assert_eq(Economy.balance(), 100)
+
+
+func test_background_reward_close_then_foreground_claims_once() -> void:
+	_ready_ad()
+	_finish()
+	var token: int = _tap()
+	_hud.propagate_notification(NOTIFICATION_APPLICATION_FOCUS_OUT)
+	_hud.propagate_notification(NOTIFICATION_APPLICATION_PAUSED)
+	_service.notification(NOTIFICATION_APPLICATION_PAUSED)
+	_button.pressed.emit()
+	_hud.finalize_result_rewards()
+	_fake.earn_reward(token)
+	_fake.close(token)
+	_fake.close(token)
+	_hud.propagate_notification(NOTIFICATION_APPLICATION_RESUMED)
+	_hud.propagate_notification(NOTIFICATION_APPLICATION_FOCUS_IN)
+	_service.notification(NOTIFICATION_APPLICATION_RESUMED)
+	await get_tree().process_frame
+	assert_eq(Economy.balance(), 150)
+	assert_eq(_fake.show_tokens.size(), 1)
+	assert_eq(_fake.load_tokens.size(), 1)
+	assert_false(_button.visible)
+
+
+func test_old_callbacks_do_not_reward_new_results_or_end_new_show() -> void:
+	_ready_ad()
+	_finish()
+	var old_token: int = _tap()
+	_fake.close(old_token)
+	await get_tree().process_frame
+	_finish(60)
+	_ready_ad()
+	var token: int = _tap()
+	_fake.earn_reward(old_token)
+	_fake.close(old_token)
+	_fake.fail(old_token)
+	await get_tree().process_frame
+	assert_eq(Economy.balance(), 160)
+	assert_eq(_service.state, Service.State.SHOWING)
+	assert_true(_button.disabled)
+	_fake.earn_reward(token)
+	_fake.close(token)
+	await get_tree().process_frame
+	assert_eq(Store.load_from(PATH).currency, 190)
+
+
+func test_new_results_scene_during_old_show_cannot_take_old_reward() -> void:
+	_ready_ad()
+	_finish()
+	var token: int = _tap()
+	_hud.queue_free()
+	await get_tree().process_frame
+	_hud = HUD_SCENE.instantiate()
+	_button = _hud.get_node("ResultPanel/VBox/RewardedBonusButton")
+	_button.ads_service = _service
+	add_child_autofree(_hud)
+	_finish(60)
+	assert_false(_button.visible)
+	_fake.earn_reward(token)
+	_fake.close(token)
+	await get_tree().process_frame
+	assert_eq(Economy.balance(), 160)
+	assert_eq(Store.load_from(PATH).rewarded_mission_bonus_epoch_day, -1)
