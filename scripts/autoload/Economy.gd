@@ -28,6 +28,28 @@ var _bonus_context_id: int = 0
 var _bonus_base_payout: int = 0
 var _bonus_epoch_day: int = -1
 var _bonus_context_prepared: bool = false
+var _supply_boxes: SupplyBoxCore
+
+
+## Shared core for trusted acquisition services; UI consumes read-only status/results.
+func supply_boxes() -> SupplyBoxCore:
+	if _supply_boxes == null:
+		_supply_boxes = SupplyBoxCore.new(func() -> SaveData: return _data, _commit_supply_data)
+	return _supply_boxes
+
+
+## Checked supply commit publishes only a successfully persisted profile/reward mutation.
+func _commit_supply_data(data: SaveData) -> bool:
+	if not SaveStore.save_to(_save_path, data):
+		return false
+	var coins_changed: bool = data.currency != _data.currency
+	var charges_changed: bool = data.boost_charges != _data.boost_charges
+	_data = data
+	if coins_changed:
+		currency_changed.emit(_data.currency)
+	if charges_changed:
+		boosts_changed.emit()
+	return true
 
 
 func _ready() -> void:

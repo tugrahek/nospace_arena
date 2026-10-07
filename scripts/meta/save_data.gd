@@ -18,6 +18,7 @@ var armed_boosts: Array = []  # boost ids:String armed for the next run
 var campaign_stars: Dictionary = {}  # campaign level id:String -> best stars:int (0-3)
 var iap_transactions: Dictionary = {}  # transaction id -> {product_id, kind, status}
 var iap_entitlements: Array = []  # owned non-consumable product ids:String
+var supply_boxes: Dictionary = {}  # box id -> frozen reward, acquisition context and lifecycle
 
 
 ## Fresh profile: no currency, default content unlocked + selected (free baseline).
@@ -119,6 +120,7 @@ func to_dict() -> Dictionary:
 		"campaign_stars": campaign_stars.duplicate(true),
 		"iap_transactions": iap_transactions.duplicate(true),
 		"iap_entitlements": iap_entitlements.duplicate(),
+		"supply_boxes": supply_boxes.duplicate(true),
 	}
 
 
@@ -170,4 +172,8 @@ static func from_dict(d: Dictionary) -> SaveData:
 			var id: String = String(product_id)
 			if not id.is_empty() and not data.iap_entitlements.has(id):
 				data.iap_entitlements.append(id)
+	var boxes: Variant = d.get("supply_boxes", {})
+	if boxes is Dictionary:
+		# Retain even invalid records: never free an existing identity for a reroll.
+		data.supply_boxes = boxes.duplicate(true)
 	return data
