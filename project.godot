@@ -28,6 +28,7 @@ Economy="*res://scripts/autoload/Economy.gd"
 AudioManager="*res://scripts/autoload/AudioManager.gd"
 SeedManager="*res://scripts/autoload/SeedManager.gd"
 AdsService="*res://scripts/monetization/ads_service.gd"
+PurchaseService="*res://scripts/monetization/purchase_service.gd"
 
 [display]
 
