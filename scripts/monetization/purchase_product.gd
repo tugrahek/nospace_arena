@@ -7,6 +7,10 @@ enum Kind { CONSUMABLE, NON_CONSUMABLE }
 var id: StringName
 var kind: Kind
 var price_label: String
+var title: String = ""
+var description: String = ""
+var currency_code: String = ""
+var price_amount_micros: int = 0
 
 
 ## Creates metadata; the backend supplies its localized display price.
@@ -18,4 +22,9 @@ func _init(product_id: StringName = &"", product_kind: Kind = Kind.CONSUMABLE, p
 
 ## Returns independent metadata so callers cannot mutate the service catalog.
 func copy() -> PurchaseProduct:
-	return PurchaseProduct.new(id, kind, price_label)
+	var result: PurchaseProduct = PurchaseProduct.new(id, kind, price_label)
+	result.title = title
+	result.description = description
+	result.currency_code = currency_code
+	result.price_amount_micros = price_amount_micros
+	return result

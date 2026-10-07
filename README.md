@@ -38,6 +38,17 @@ the existing Android Gradle export; it does not initialize a billing client or
 connect to PurchaseService. No products or purchase flow are configured.
 Vendor GDScript trailing whitespace is normalized; behavior is unchanged.
 
+**Android purchase backend (Step 24D.2):** PurchaseService selects the Google Play
+adapter only when the Android native singleton is available; desktop remains no-op.
+Approved product definitions can be supplied to the adapter; its default catalog
+is empty. Native v1 behavior supports non-consumables with one purchase offer.
+Google supplies localized metadata/prices. Immutable request callbacks and opaque
+flow-attribution markers correlate live updates; purchase tokens identify durable
+transactions. Economy's existing checked delivery completes before acknowledgement.
+Connection/reconnection and restore query owned purchases through the same dedupe
+path. A failed acknowledgement is retried on a later owned query, without a timer.
+No product definitions, consumable rewards, subscriptions or server validation are configured.
+
 ---
 
 *Source code is publicly visible for portfolio and reference purposes only.*  

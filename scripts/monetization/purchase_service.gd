@@ -1,7 +1,6 @@
 extends Node
 
-## Platform-independent IAP boundary. No Economy, UI, persistence or native SDK calls.
-## Transactions are deduplicated in memory only; success is NOT delivery authorization.
+## Authoritative IAP boundary; Economy owns checked persistence and native code stays in a backend.
 const Backend = preload("res://scripts/monetization/purchase_backend.gd")
 const NoopBackend = preload("res://scripts/monetization/noop_purchase_backend.gd")
 
@@ -28,13 +27,22 @@ var _operation: StringName = &""
 var _product_id: StringName = &""
 var _seen_transactions: Dictionary = {}
 var _delivery_handler: Callable
+var _recovery_requested: bool = false
+var _recovery_needs_query: bool = false
+var _recovery_query_token: int = 0
 
 
 func _ready() -> void:
-	_connect_backend()
 	if get_parent() == get_tree().root and name == "PurchaseService":
 		_delivery_handler = Callable(Economy, "_deliver_purchase_transaction")
+		if OS.get_name() == "Android" and Engine.has_singleton("GodotGooglePlayBilling"):
+			_backend = GooglePlayPurchaseBackend.new()
+	_connect_backend()
 	initialize()
+
+
+func _exit_tree() -> void:
+	_backend.shutdown()
 
 
 ## Injects a backend before service initialization; replacement later is rejected.
@@ -123,6 +131,8 @@ func _finish() -> void:
 	_operation = &""
 	_product_id = &""
 	state = State.IDLE if _available else State.UNAVAILABLE
+	if _recovery_requested:
+		_resume_recovery.call_deferred()
 
 
 func _connect_backend() -> void:
@@ -135,6 +145,8 @@ func _connect_backend() -> void:
 	_backend.purchase_cancelled.connect(_on_cancelled)
 	_backend.operation_failed.connect(_on_failed)
 	_backend.restore_completed.connect(_on_restore_completed)
+	_backend.recovery_requested.connect(_on_recovery_requested)
+	_backend.availability_changed.connect(_on_availability_changed)
 
 
 func _on_initialized(token: int, available: bool) -> void:
@@ -151,6 +163,9 @@ func _on_products(token: int, entries: Array) -> void:
 	if not _catalog.replace(entries):
 		_on_failed(token, &"invalid_catalog")
 		return
+	if token == _recovery_query_token:
+		_recovery_needs_query = false
+		_recovery_query_token = 0
 	_finish()
 	products_queried.emit(token)
 
@@ -167,10 +182,7 @@ func _on_transaction(token: int, product_id: StringName, transaction_id: String)
 		return
 	if not restoring and product_id != _product_id:
 		return
-	if _seen_transactions.has(transaction_id):
-		if not restoring:
-			_finish()
-			purchase_failed.emit(token, product_id, &"duplicate_transaction")
+	if _handle_seen_transaction(token, product, transaction_id, restoring):
 		return
 	if not _delivery_handler.is_valid():
 		return
@@ -184,11 +196,26 @@ func _on_transaction(token: int, product_id: StringName, transaction_id: String)
 		else:
 			purchase_failed.emit(token, product_id, &"delivery_not_persisted")
 		return
-	_seen_transactions[transaction_id] = true
+	_seen_transactions[transaction_id] = {"product_id": product_id, "kind": product.kind}
 	if not restoring:
 		_finish()
+	_backend.delivery_confirmed(token, product_id, transaction_id)
 	if not delivery.get("duplicate", false):
 		purchase_succeeded.emit(token, product_id, transaction_id, restoring)
+
+
+func _handle_seen_transaction(token: int, product: PurchaseProduct, identity: String, restoring: bool) -> bool:
+	if not _seen_transactions.has(identity):
+		return false
+	var seen: Dictionary = _seen_transactions[identity]
+	if seen["product_id"] != product.id or seen["kind"] != product.kind:
+		return true
+	if not restoring:
+		_finish()
+	_backend.delivery_confirmed(token, product.id, identity)
+	if not restoring:
+		purchase_failed.emit(token, product.id, &"duplicate_transaction")
+	return true
 
 
 func _on_pending(token: int) -> void:
@@ -211,6 +238,9 @@ func _on_failed(token: int, reason: StringName) -> void:
 		return
 	var operation: StringName = _operation
 	var id: StringName = _product_id
+	if token == _recovery_query_token:
+		_recovery_requested = false
+		_recovery_query_token = 0
 	_finish()
 	if operation == &"purchase":
 		purchase_failed.emit(token, id, reason)
@@ -223,3 +253,28 @@ func _on_restore_completed(token: int) -> void:
 		return
 	_finish()
 	restore_completed.emit(token)
+
+
+func _on_recovery_requested() -> void:
+	_recovery_requested = true
+	_recovery_needs_query = true
+	_resume_recovery.call_deferred()
+
+
+func _resume_recovery() -> void:
+	if not is_inside_tree() or not _recovery_requested or not _can_start():
+		return
+	if _recovery_needs_query:
+		_recovery_query_token = _next_token + 1
+		query_products()
+	else:
+		_recovery_requested = false
+		restore_purchases()
+
+
+func _on_availability_changed(available: bool) -> void:
+	_available = available
+	if not available and _active_token != 0:
+		_on_failed(_active_token, &"backend_disconnected")
+	elif _active_token == 0:
+		state = State.IDLE if available else State.UNAVAILABLE
