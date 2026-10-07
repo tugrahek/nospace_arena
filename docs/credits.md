@@ -6,6 +6,7 @@
 - Godot Engine 4.6 (MIT)
 - GUT — Godot Unit Test (MIT)
 - Poing Studios Godot AdMob Plugin 5.1.0 (MIT): https://github.com/poingstudios/godot-admob-plugin/releases/tag/v5.1.0
+- GodotGooglePlayBilling 3.3.0 (MIT): https://github.com/godot-sdk-integrations/godot-google-play-billing/releases/tag/3.3.0
 
 ## Assets
 Third-party font licenses and attribution are listed here (and surfaced in the in-game
@@ -29,6 +30,8 @@ reference games are inspiration only — no copied assets/IP.
 ## Runtime legal notices
 The Poing plugin MIT notice is embedded in `config/legal_notices.tres` and shown in
 Settings licenses when the plugin is bundled. The original addon license remains intact.
+The GodotGooglePlayBilling MIT notice is embedded in the same resource and included
+when its GDScript client is bundled; its original addon license remains intact.
 The legal reader sources the Godot Engine MIT text and engine third-party notices from
 `Engine.get_license_text()`, `Engine.get_copyright_info()` and `Engine.get_license_info()`.
 Exact bundled font OFL texts are embedded in `config/legal_notices.tres` so exports retain

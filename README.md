@@ -28,6 +28,16 @@ official test configuration; production rewarded ID is empty. Configure both App
 and rewarded unit before deliberately disabling test mode. Editor uses no-op ads.
 Results coin rewards and claim/save integration remain Step 23C.
 
+**Android billing foundation (Step 24D.1):** official
+[GodotGooglePlayBilling 3.3.0](https://github.com/godot-sdk-integrations/godot-google-play-billing/releases/tag/3.3.0),
+with Google Play Billing Library **9.1.0**, under `addons/GodotGooglePlayBilling/`.
+The required GDScript/export files, MIT notice and debug/release AARs are vendored.
+Release ZIP SHA-256: `20d75623d6f337f08d8283c83098b73678d5f575e39247af5a8eb80588b18568`.
+The editor plugin adds the variant-specific AAR and pinned Maven dependency to
+the existing Android Gradle export; it does not initialize a billing client or
+connect to PurchaseService. No products or purchase flow are configured.
+Vendor GDScript trailing whitespace is normalized; behavior is unchanged.
+
 ---
 
 *Source code is publicly visible for portfolio and reference purposes only.*  
