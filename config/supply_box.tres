@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="SupplyAcquisitionConfig" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/supply_acquisition_config.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/supply/supply_rewards_v1.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+reward_table = ExtResource("2")
+coin_cost = 150
+coin_daily_limit = 3
+rewarded_daily_limit = 1

@@ -19,6 +19,7 @@ var campaign_stars: Dictionary = {}  # campaign level id:String -> best stars:in
 var iap_transactions: Dictionary = {}  # transaction id -> {product_id, kind, status}
 var iap_entitlements: Array = []  # owned non-consumable product ids:String
 var supply_boxes: Dictionary = {}  # box id -> frozen reward, acquisition context and lifecycle
+var supply_acquisition_days: Dictionary = {}  # epoch day -> durable acquisition counters
 
 
 ## Fresh profile: no currency, default content unlocked + selected (free baseline).
@@ -121,6 +122,7 @@ func to_dict() -> Dictionary:
 		"iap_transactions": iap_transactions.duplicate(true),
 		"iap_entitlements": iap_entitlements.duplicate(),
 		"supply_boxes": supply_boxes.duplicate(true),
+		"supply_acquisition_days": supply_acquisition_days.duplicate(true),
 	}
 
 
@@ -176,4 +178,7 @@ static func from_dict(d: Dictionary) -> SaveData:
 	if boxes is Dictionary:
 		# Retain even invalid records: never free an existing identity for a reroll.
 		data.supply_boxes = boxes.duplicate(true)
+	var days: Variant = d.get("supply_acquisition_days", {})
+	if days is Dictionary:
+		data.supply_acquisition_days = days.duplicate(true)
 	return data

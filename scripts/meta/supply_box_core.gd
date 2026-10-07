@@ -29,20 +29,29 @@ func _init(profile: Callable, commit: Callable, rng: RandomNumberGenerator = nul
 ## Freezes and saves the selected outcome. Existing IDs cannot reserve or reroll again.
 ## Caller supplies a stable unique ID and opaque acquisition context for later correlation.
 func reserve(box_id: String, source: String, context: String, table: SupplyRewardTable) -> bool:
+	var record: Dictionary = _prepare_reservation(box_id, source, context, table)
+	if record.is_empty():
+		return false
+	var data: SaveData = _profile.call()
+	var next: SaveData = SaveData.from_dict(data.to_dict())
+	next.supply_boxes[box_id] = record
+	return _commit.call(next)
+
+
+## Internal staging seam for acquisition's single atomic charge/reservation save.
+func _prepare_reservation(box_id: String, source: String, context: String, table: SupplyRewardTable) -> Dictionary:
 	var data: SaveData = _profile.call()
 	if box_id.strip_edges().is_empty() or source.strip_edges().is_empty() \
 			or context.strip_edges().is_empty() or table == null or data.supply_boxes.has(box_id):
-		return false
+		return {}
 	var reward: Dictionary = table.select_reward(float(_rng.randi()) / RNG_UNIT_SCALE)
 	if reward.is_empty():
-		return false
-	var next: SaveData = SaveData.from_dict(data.to_dict())
-	next.supply_boxes[box_id] = {
+		return {}
+	return {
 		"box_id": box_id, "source": source, "context": context,
 		"table_key": String(table.table_key), "table_version": table.version,
 		"reward_type": reward["reward_type"], "amount": reward["amount"], "state": RESERVED,
 	}
-	return _commit.call(next)
 
 
 ## Detached read-only record. Malformed records remain reserved identities but are unusable.

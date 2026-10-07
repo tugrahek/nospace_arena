@@ -29,6 +29,16 @@ var _bonus_base_payout: int = 0
 var _bonus_epoch_day: int = -1
 var _bonus_context_prepared: bool = false
 var _supply_boxes: SupplyBoxCore
+var _supply_acquisition: SupplyBoxAcquisition
+
+
+## Acquisition coordinator remains owned by Economy, independent of any UI lifetime.
+func supply_acquisition() -> SupplyBoxAcquisition:
+	if not is_instance_valid(_supply_acquisition):
+		_supply_acquisition = SupplyBoxAcquisition.new(func() -> SaveData: return _data,
+			_commit_supply_data, supply_boxes(), AdsService, SeedManager.today_epoch)
+		add_child(_supply_acquisition)
+	return _supply_acquisition
 
 
 ## Shared core for trusted acquisition services; UI consumes read-only status/results.
@@ -40,6 +50,8 @@ func supply_boxes() -> SupplyBoxCore:
 
 ## Checked supply commit publishes only a successfully persisted profile/reward mutation.
 func _commit_supply_data(data: SaveData) -> bool:
+	if not SupplyBoxAcquisition.mark_deliveries(_data, data):
+		return false
 	if not SaveStore.save_to(_save_path, data):
 		return false
 	var coins_changed: bool = data.currency != _data.currency
