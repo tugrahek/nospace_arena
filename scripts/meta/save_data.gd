@@ -16,6 +16,8 @@ var tutorial_seen: bool = false  # how-to-play shown once (first launch)
 var boost_charges: Dictionary = {}  # boost id:String -> owned count:int (consumables)
 var armed_boosts: Array = []  # boost ids:String armed for the next run
 var campaign_stars: Dictionary = {}  # campaign level id:String -> best stars:int (0-3)
+var iap_transactions: Dictionary = {}  # transaction id -> {product_id, kind, status}
+var iap_entitlements: Array = []  # owned non-consumable product ids:String
 
 
 ## Fresh profile: no currency, default content unlocked + selected (free baseline).
@@ -115,6 +117,8 @@ func to_dict() -> Dictionary:
 		"boost_charges": boost_charges.duplicate(true),
 		"armed_boosts": armed_boosts.duplicate(),
 		"campaign_stars": campaign_stars.duplicate(true),
+		"iap_transactions": iap_transactions.duplicate(true),
+		"iap_entitlements": iap_entitlements.duplicate(),
 	}
 
 
@@ -145,4 +149,25 @@ static func from_dict(d: Dictionary) -> SaveData:
 	if typeof(cs) == TYPE_DICTIONARY:
 		for id in cs:
 			data.campaign_stars[String(id)] = int(cs[id])
+	var transactions: Variant = d.get("iap_transactions", {})
+	if typeof(transactions) == TYPE_DICTIONARY:
+		for transaction_id in transactions:
+			var record: Variant = transactions[transaction_id]
+			if typeof(record) != TYPE_DICTIONARY or String(transaction_id).is_empty():
+				continue
+			var product_id: String = String(record.get("product_id", ""))
+			var kind: String = String(record.get("kind", ""))
+			var status: String = String(record.get("status", ""))
+			if product_id.is_empty() or kind not in ["consumable", "non_consumable"] \
+					or status not in ["pending", "delivered"]:
+				continue
+			data.iap_transactions[String(transaction_id)] = {
+				"product_id": product_id, "kind": kind, "status": status,
+			}
+	var entitlements: Variant = d.get("iap_entitlements", [])
+	if typeof(entitlements) == TYPE_ARRAY:
+		for product_id in entitlements:
+			var id: String = String(product_id)
+			if not id.is_empty() and not data.iap_entitlements.has(id):
+				data.iap_entitlements.append(id)
 	return data

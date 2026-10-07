@@ -6,6 +6,7 @@ extends Node
 
 const SaveStore = preload("res://scripts/meta/save_store.gd")
 const LoginStreak = preload("res://scripts/meta/login_streak.gd")
+const PurchaseProduct = preload("res://scripts/monetization/purchase_product.gd")
 const SAVE_PATH: String = "user://save.json"
 const REWARDED_MISSION_BONUS_RATE: float = 0.50
 ## Approved day 1..7 awards; boost-only days intentionally grant no coins.
@@ -17,6 +18,8 @@ signal unlocks_changed()
 signal login_reward_claimed(day: int, amount: int)
 signal boosts_changed()
 signal campaign_changed()
+signal iap_entitlement_granted(product_id: StringName)
+signal iap_transaction_delivered(transaction_id: String, product_id: StringName)
 
 var _data  # SaveData
 var _pending_unlock: int = -1  # level index awaiting its map celebration (in-memory only)
@@ -278,6 +281,83 @@ func _apply_login_reward(data: SaveData, spec: Dictionary) -> void:
 	data.earn(int(spec.get("coins", 0)))
 	for boost_id in spec.get("boost_ids", []):
 		data.add_boost(StringName(boost_id), 1)
+
+
+## Persists a backend transaction as pending, then atomically marks it delivered with its entitlement.
+## This internal entry point is called only by the trusted PurchaseService autoload.
+func _deliver_purchase_transaction(transaction_id: String, product_id: StringName, kind: int) -> Dictionary:
+	if transaction_id.strip_edges().is_empty() or product_id == &"":
+		return {"durable": false, "pending": false, "duplicate": false}
+	if kind not in [PurchaseProduct.Kind.CONSUMABLE, PurchaseProduct.Kind.NON_CONSUMABLE]:
+		return {"durable": false, "pending": false, "duplicate": false}
+	var kind_name: String = "non_consumable" if kind == PurchaseProduct.Kind.NON_CONSUMABLE else "consumable"
+	var id: String = String(product_id)
+	var existing: Variant = _data.iap_transactions.get(transaction_id)
+	if existing != null:
+		if existing.get("product_id", "") != id or existing.get("kind", "") != kind_name:
+			return {"durable": false, "pending": false, "duplicate": false}
+		if existing.get("status", "") == "delivered":
+			return {"durable": true, "pending": false, "duplicate": true}
+	else:
+		var pending_data: SaveData = SaveData.from_dict(_data.to_dict())
+		pending_data.iap_transactions[transaction_id] = {
+			"product_id": id, "kind": kind_name, "status": "pending",
+		}
+		if not _persist_iap_data(pending_data):
+			return {"durable": false, "pending": false, "duplicate": false}
+		_data = pending_data
+	return _complete_iap_delivery(transaction_id)
+
+
+## Completes every persisted pending transaction in stable transaction-ID order.
+func recover_pending_iap_deliveries() -> Array[String]:
+	var pending_ids: Array[String] = []
+	for transaction_id in _data.iap_transactions:
+		if _data.iap_transactions[transaction_id].get("status", "") == "pending":
+			pending_ids.append(String(transaction_id))
+	pending_ids.sort()
+	var completed: Array[String] = []
+	for transaction_id in pending_ids:
+		var result: Dictionary = _complete_iap_delivery(transaction_id)
+		if result.get("durable", false):
+			completed.append(transaction_id)
+	return completed
+
+
+## Read-only entitlement query for trusted game services.
+func owns_iap_entitlement(product_id: StringName) -> bool:
+	return _data.iap_entitlements.has(String(product_id))
+
+
+## Read-only transaction state used by service recovery and tests.
+func iap_transaction_status(transaction_id: String) -> StringName:
+	return StringName(_data.iap_transactions.get(transaction_id, {}).get("status", ""))
+
+
+func _complete_iap_delivery(transaction_id: String) -> Dictionary:
+	var record: Dictionary = _data.iap_transactions.get(transaction_id, {})
+	if record.is_empty() or record.get("status", "") != "pending":
+		return {"durable": false, "pending": false, "duplicate": false}
+	var next_data: SaveData = SaveData.from_dict(_data.to_dict())
+	var next_record: Dictionary = next_data.iap_transactions[transaction_id].duplicate(true)
+	var entitlement_added: bool = false
+	if next_record["kind"] == "non_consumable" and not next_data.iap_entitlements.has(next_record["product_id"]):
+		next_data.iap_entitlements.append(next_record["product_id"])
+		entitlement_added = true
+	next_record["status"] = "delivered"
+	next_data.iap_transactions[transaction_id] = next_record
+	if not _persist_iap_data(next_data):
+		return {"durable": false, "pending": true, "duplicate": false}
+	_data = next_data
+	if entitlement_added:
+		iap_entitlement_granted.emit(StringName(next_record["product_id"]))
+	iap_transaction_delivered.emit(transaction_id, StringName(next_record["product_id"]))
+	return {"durable": true, "pending": false, "duplicate": false}
+
+
+## Isolated persistence seam; the canonical SaveStore path remains authoritative.
+func _persist_iap_data(data: SaveData) -> bool:
+	return SaveStore.save_to(_save_path, data)
 
 
 func _flush() -> void:

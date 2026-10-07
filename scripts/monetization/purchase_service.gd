@@ -8,6 +8,7 @@ const NoopBackend = preload("res://scripts/monetization/noop_purchase_backend.gd
 signal initialization_completed(available: bool)
 signal products_queried(token: int)
 signal purchase_succeeded(token: int, product_id: StringName, transaction_id: String, restored: bool)
+signal purchase_delivery_pending(token: int, product_id: StringName, transaction_id: String)
 signal purchase_failed(token: int, product_id: StringName, reason: StringName)
 signal purchase_cancelled(token: int, product_id: StringName)
 signal purchase_pending(token: int, product_id: StringName)
@@ -26,10 +27,13 @@ var _active_token: int = 0
 var _operation: StringName = &""
 var _product_id: StringName = &""
 var _seen_transactions: Dictionary = {}
+var _delivery_handler: Callable
 
 
 func _ready() -> void:
 	_connect_backend()
+	if get_parent() == get_tree().root and name == "PurchaseService":
+		_delivery_handler = Callable(Economy, "_deliver_purchase_transaction")
 	initialize()
 
 
@@ -38,6 +42,14 @@ func configure_backend(backend: Backend) -> bool:
 	if backend == null or _backend_locked:
 		return false
 	_backend = backend
+	return true
+
+
+## Installs a durable delivery handler before initialization; production autoload binds Economy.
+func configure_delivery_handler(handler: Callable) -> bool:
+	if handler.is_null() or _backend_locked:
+		return false
+	_delivery_handler = handler
 	return true
 
 
@@ -155,14 +167,27 @@ func _on_transaction(token: int, product_id: StringName, transaction_id: String)
 		return
 	if not restoring and product_id != _product_id:
 		return
-	var duplicate: bool = _seen_transactions.has(transaction_id)
+	if _seen_transactions.has(transaction_id):
+		if not restoring:
+			_finish()
+			purchase_failed.emit(token, product_id, &"duplicate_transaction")
+		return
+	if not _delivery_handler.is_valid():
+		return
+	var delivery: Dictionary = _delivery_handler.call(transaction_id, product_id, product.kind)
+	if not delivery.get("durable", false):
+		if restoring:
+			return
+		_finish()
+		if delivery.get("pending", false):
+			purchase_delivery_pending.emit(token, product_id, transaction_id)
+		else:
+			purchase_failed.emit(token, product_id, &"delivery_not_persisted")
+		return
 	_seen_transactions[transaction_id] = true
 	if not restoring:
 		_finish()
-		if duplicate:
-			purchase_failed.emit(token, product_id, &"duplicate_transaction")
-			return
-	if not duplicate:
+	if not delivery.get("duplicate", false):
 		purchase_succeeded.emit(token, product_id, transaction_id, restoring)
 
 

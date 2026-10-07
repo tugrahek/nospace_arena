@@ -18,15 +18,25 @@ class ImmediateBackend:
 
 var _service: Service
 var _fake: Fake
+var _test_transactions: Dictionary = {}
 
 
 func before_each() -> void:
 	_service = Service.new()
 	_fake = Fake.new()
+	_test_transactions.clear()
 	assert_true(_service.configure_backend(_fake))
+	assert_true(_service.configure_delivery_handler(Callable(self, "_accept_delivery")))
 	add_child_autofree(_service)
 	_fake.complete_initialization(_fake.initialization_tokens.back())
 	watch_signals(_service)
+
+
+func _accept_delivery(transaction_id: String, product_id: StringName, _kind: int) -> Dictionary:
+	if _test_transactions.has(transaction_id):
+		return {"durable": true, "pending": false, "duplicate": true}
+	_test_transactions[transaction_id] = product_id
+	return {"durable": true, "pending": false, "duplicate": false}
 
 
 func _query() -> int:
@@ -53,6 +63,7 @@ func test_initialization_serializes_retries_and_rejects_stale_callbacks() -> voi
 	var service: Service = Service.new()
 	var fake: Fake = Fake.new()
 	service.configure_backend(fake)
+	service.configure_delivery_handler(Callable(self, "_accept_delivery"))
 	add_child_autofree(service)
 	var first: int = fake.initialization_tokens.back()
 	assert_eq(service.state, Service.State.INITIALIZING)
@@ -226,6 +237,7 @@ func test_transaction_replay_on_new_purchase_cannot_emit_second_success() -> voi
 func test_synchronous_backend_callbacks_preserve_tokens_and_idle_state() -> void:
 	var service: Service = Service.new()
 	service.configure_backend(ImmediateBackend.new())
+	service.configure_delivery_handler(Callable(self, "_accept_delivery"))
 	watch_signals(service)
 	add_child_autofree(service)
 	assert_true(service.is_available())
