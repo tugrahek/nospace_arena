@@ -12,8 +12,9 @@ var _old_day_offset: int
 func before_each() -> void:
 	_old_day_offset = SeedManager.day_offset
 	GameState.reset()
-	if FileAccess.file_exists(PATH):
-		DirAccess.remove_absolute(PATH)
+	for suffix: String in ["", SaveStoreScript.TEMP_SUFFIX, SaveStoreScript.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(PATH + suffix):
+			DirAccess.remove_absolute(PATH + suffix)
 	_economy = EconomyScript.new()
 	_economy._save_path = PATH
 	add_child_autofree(_economy)
@@ -22,8 +23,9 @@ func before_each() -> void:
 func after_each() -> void:
 	SeedManager.day_offset = _old_day_offset
 	GameState.reset()
-	if FileAccess.file_exists(PATH):
-		DirAccess.remove_absolute(PATH)
+	for suffix: String in ["", SaveStoreScript.TEMP_SUFFIX, SaveStoreScript.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(PATH + suffix):
+			DirAccess.remove_absolute(PATH + suffix)
 
 
 func _finish(base: int, multiplier: float = 1.0, won: bool = true) -> int:

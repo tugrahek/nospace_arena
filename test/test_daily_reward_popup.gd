@@ -14,8 +14,9 @@ class FixtureEconomy:
 
 func after_each() -> void:
 	TranslationServer.set_locale("en")
-	if FileAccess.file_exists(FIXTURE_PATH):
-		DirAccess.remove_absolute(FIXTURE_PATH)
+	for suffix: String in ["", SaveStore.TEMP_SUFFIX, SaveStore.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(FIXTURE_PATH + suffix):
+			DirAccess.remove_absolute(FIXTURE_PATH + suffix)
 
 
 func _popup(action: Callable = Callable()) -> DailyRewardPopup:

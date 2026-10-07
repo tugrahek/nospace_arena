@@ -58,8 +58,9 @@ func after_each() -> void:
 	Economy._bonus_epoch_day = _old_bonus[2]
 	Economy._bonus_context_prepared = _old_bonus[3]
 	TranslationServer.set_locale("en")
-	if FileAccess.file_exists(PATH):
-		DirAccess.remove_absolute(PATH)
+	for suffix: String in ["", Store.TEMP_SUFFIX, Store.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(PATH + suffix):
+			DirAccess.remove_absolute(PATH + suffix)
 
 
 func _finish(base: int = 100, finalize: bool = true) -> void:

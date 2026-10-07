@@ -23,16 +23,18 @@ var _economy: EconomyScript
 
 
 func before_each() -> void:
-	if FileAccess.file_exists(PATH):
-		DirAccess.remove_absolute(PATH)
+	for suffix: String in ["", SaveStoreScript.TEMP_SUFFIX, SaveStoreScript.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(PATH + suffix):
+			DirAccess.remove_absolute(PATH + suffix)
 	_economy = EconomyScript.new()
 	_economy._save_path = PATH
 	add_child_autofree(_economy)
 
 
 func after_each() -> void:
-	if FileAccess.file_exists(PATH):
-		DirAccess.remove_absolute(PATH)
+	for suffix: String in ["", SaveStoreScript.TEMP_SUFFIX, SaveStoreScript.BACKUP_SUFFIX]:
+		if FileAccess.file_exists(PATH + suffix):
+			DirAccess.remove_absolute(PATH + suffix)
 
 
 func test_old_save_defaults_and_round_trip_iap_fields() -> void:
