@@ -7,6 +7,7 @@ const Backend = preload("res://scripts/monetization/ads_backend.gd")
 const NoopBackend = preload("res://scripts/monetization/noop_ads_backend.gd")
 
 signal rewarded_ready()
+signal rewarded_availability_changed(available: bool)
 signal ads_unavailable(reason: StringName)
 signal ad_failed(context_id: String, request_token: int, reason: StringName)
 signal reward_earned(context_id: String, request_token: int)
@@ -91,6 +92,7 @@ func set_requests_allowed(allowed: bool) -> void:
 	_initialization_token = 0
 	_load_token = 0
 	state = State.UNAVAILABLE
+	rewarded_availability_changed.emit(false)
 	ads_unavailable.emit(&"privacy_blocked")
 
 
@@ -134,6 +136,7 @@ func show_rewarded(context_id: String) -> int:
 	_context_id = context_id
 	_reward_emitted = false
 	state = State.SHOWING
+	rewarded_availability_changed.emit(false)
 	var token: int = _show_token
 	_backend.show_rewarded(token)
 	return token
@@ -182,6 +185,7 @@ func _on_loaded(token: int) -> void:
 		return
 	_load_token = 0
 	state = State.READY
+	rewarded_availability_changed.emit(true)
 	rewarded_ready.emit()
 
 
@@ -220,6 +224,7 @@ func _on_failed(token: int, reason: StringName) -> void:
 	else:
 		return
 	state = State.FAILED
+	rewarded_availability_changed.emit(false)
 	ad_failed.emit(context, token, reason)
 
 

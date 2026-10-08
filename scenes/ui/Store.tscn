@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://cjqjcc4qykbcb"]
+[gd_scene load_steps=4 format=3 uid="uid://cjqjcc4qykbcb"]
 
 [ext_resource type="Script" path="res://scripts/ui/store.gd" id="1_store"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
+[ext_resource type="Script" path="res://scripts/ui/supply_store_badge.gd" id="3_badge"]
 
 [node name="Store" type="Control"]
 layout_mode = 3
@@ -85,6 +86,23 @@ theme_type_variation = &"Heading"
 theme_override_font_sizes/font_size = 18
 flat = true
 text = "Boosts"
+
+[node name="Supply" type="Button" parent="CategoryStrip/Tabs"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 18
+flat = true
+
+[node name="SupplyBadge" type="Control" parent="CategoryStrip/Tabs/Supply"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -16.0
+offset_right = -6.0
+offset_top = 2.0
+offset_bottom = 12.0
+mouse_filter = 2
+script = ExtResource("3_badge")
 
 [node name="Frontier" type="ColorRect" parent="CategoryStrip"]
 layout_mode = 0

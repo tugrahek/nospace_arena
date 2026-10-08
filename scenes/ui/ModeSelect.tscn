@@ -261,8 +261,9 @@ theme_type_variation = &"Muted"
 horizontal_alignment = 1
 
 [node name="BoostStrip" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(620, 0)
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
 [node name="BackButton" type="Button" parent="Center"]

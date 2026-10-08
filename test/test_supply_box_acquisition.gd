@@ -4,14 +4,14 @@ func test_production_balance_resources() -> void:
 	var config: SupplyAcquisitionConfig = SupplyBoxAcquisition.CONFIG
 	assert_true(config.is_valid())
 	assert_eq(config.coin_cost, 150)
-	assert_eq(config.coin_daily_limit, 3)
+	assert_eq(config.coin_daily_limit, 2)
 	assert_eq(config.rewarded_daily_limit, 1)
 	var entries: Array[SupplyRewardEntry] = config.reward_table.entries
-	assert_eq(entries.size(), 4)
+	assert_eq(entries.size(), 6)
 	assert_eq(entries.map(func(e: SupplyRewardEntry) -> StringName: return e.reward_type),
-		[&"coins", &"slow_start", &"coin_bonus", &"extra_life"])
-	assert_eq(entries.map(func(e: SupplyRewardEntry) -> int: return e.amount), [100, 1, 1, 1])
-	assert_eq(entries.map(func(e: SupplyRewardEntry) -> float: return e.weight), [35.0, 30.0, 20.0, 15.0])
+		[&"coins", &"coins", &"coins", &"slow_start", &"coin_bonus", &"extra_life"])
+	assert_eq(entries.map(func(e: SupplyRewardEntry) -> int: return e.amount), [100, 200, 500, 1, 1, 1])
+	assert_eq(entries.map(func(e: SupplyRewardEntry) -> float: return e.weight), [35.0, 35.0, 35.0, 90.0, 60.0, 45.0])
 
 
 func test_first_daily_reservation_precedes_ad_show() -> void:
@@ -140,6 +140,7 @@ func test_results_bonus_allowance_is_independent_in_both_directions() -> void:
 
 
 func test_coin_acceptance_single_save_contains_charge_counter_frozen_authorized_reward() -> void:
+	_ads.set_requests_allowed(false)
 	var result: Dictionary = _acquisition.purchase_coin_box("request", _day[0])
 	assert_true(result["accepted"])
 	assert_true(result["delivered"])
@@ -156,6 +157,7 @@ func test_coin_acceptance_single_save_contains_charge_counter_frozen_authorized_
 
 
 func test_insufficient_coins_changes_nothing() -> void:
+	_ads.set_requests_allowed(false)
 	_economy._data.currency = 149
 	var before: Dictionary = _economy._data.to_dict()
 	assert_false(_acquisition.purchase_coin_box("poor", _day[0])["accepted"])
@@ -163,10 +165,11 @@ func test_insufficient_coins_changes_nothing() -> void:
 	assert_eq(_economy.writes, 0)
 
 
-func test_three_coin_purchases_fourth_rejected_next_day_and_backwards_limit() -> void:
-	for index: int in range(3):
+func test_two_coin_purchases_third_rejected_next_day_and_backwards_limit() -> void:
+	_ads.set_requests_allowed(false)
+	for index: int in range(2):
 		assert_true(_acquisition.purchase_coin_box(str(index), _day[0])["accepted"])
-	assert_eq(_economy.balance(), 50)
+	assert_eq(_economy.balance(), 200)
 	_economy._data.currency = 500
 	var before: Dictionary = _economy._data.to_dict()
 	assert_false(_acquisition.purchase_coin_box("fourth", _day[0])["accepted"])
@@ -179,6 +182,7 @@ func test_three_coin_purchases_fourth_rejected_next_day_and_backwards_limit() ->
 
 
 func test_coin_duplicate_request_rejected_across_reload_and_days() -> void:
+	_ads.set_requests_allowed(false)
 	assert_true(_acquisition.purchase_coin_box("same", _day[0])["accepted"])
 	assert_false(_acquisition.purchase_coin_box("same", _day[0])["accepted"])
 	_day[0] += 1
@@ -197,6 +201,7 @@ func test_stale_day_and_empty_request_do_not_mutate() -> void:
 
 
 func test_coin_delivery_failure_recovery_never_recharges() -> void:
+	_ads.set_requests_allowed(false)
 	_economy.fail_at = 2
 	var result: Dictionary = _acquisition.purchase_coin_box("pending", _day[0])
 	assert_true(result["accepted"])
@@ -215,6 +220,7 @@ func test_coin_delivery_failure_recovery_never_recharges() -> void:
 
 
 func test_coin_acceptance_save_failure_changes_nothing() -> void:
+	_ads.set_requests_allowed(false)
 	_economy.fail_at = 1
 	var before: Dictionary = _economy._data.to_dict()
 	assert_false(_acquisition.purchase_coin_box("failed", _day[0])["accepted"])
@@ -325,6 +331,7 @@ func test_lost_unpersisted_proof_after_restart_cannot_authorize_reserved_box() -
 
 
 func test_coin_limits_and_duplicate_identity_survive_reload() -> void:
+	_ads.set_requests_allowed(false)
 	assert_true(_acquisition.purchase_coin_box("persisted", _day[0])["accepted"])
 	var reloaded: EconomyScript = EconomyScript.new()
 	reloaded._save_path = PATH
@@ -345,6 +352,7 @@ func test_failed_reservation_never_launches_ad() -> void:
 
 
 func test_coin_reward_nets_cost_without_refunding_acquisition_count() -> void:
+	_ads.set_requests_allowed(false)
 	_config.reward_table.entries[0].reward_type = &"coins"
 	_config.reward_table.entries[0].amount = 100
 	assert_true(_acquisition.purchase_coin_box("coin-reward", _day[0])["delivered"])
@@ -353,11 +361,12 @@ func test_coin_reward_nets_cost_without_refunding_acquisition_count() -> void:
 
 
 func test_pending_coin_acquisition_consumes_limit_before_final_delivery() -> void:
+	_ads.set_requests_allowed(false)
 	_economy.fail_at = 2
 	assert_true(_acquisition.purchase_coin_box("pending", _day[0])["accepted"])
 	assert_true(_acquisition.purchase_coin_box("second", _day[0])["accepted"])
-	assert_true(_acquisition.purchase_coin_box("third", _day[0])["accepted"])
+	assert_false(_acquisition.purchase_coin_box("third", _day[0])["accepted"])
 	_economy._data.currency = 500
 	assert_false(_acquisition.purchase_coin_box("fourth", _day[0])["accepted"])
 	assert_eq(_acquisition.recover(), ["supply/coin/pending"])
-	assert_eq(_economy.boost_count(&"slow_start"), 3)
+	assert_eq(_economy.boost_count(&"slow_start"), 2)

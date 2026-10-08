@@ -11,7 +11,6 @@ const PAGE_COUNT: int = 4
 var _index: int = 0
 
 @onready var _close: Button = $CloseButton
-@onready var _context: Label = $SafeMargin/MainVBox/ContextLabel
 @onready var _title: Label = $SafeMargin/MainVBox/PageTitle
 @onready var _art: HowToPageArt = $SafeMargin/MainVBox/DemoCenter/PageArt
 @onready var _body: Label = $SafeMargin/MainVBox/BodyCenter/BodyText
@@ -22,7 +21,6 @@ var _index: int = 0
 
 func _ready() -> void:
 	Economy.mark_tutorial_seen()
-	_context.text = tr("HOWTO_TITLE")
 	_prev.text = tr("SETTINGS_BACK")
 	_close.pressed.connect(_exit)
 	_prev.pressed.connect(_on_prev)

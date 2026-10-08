@@ -69,15 +69,15 @@ STORE_SELECTED,Selected,Seçili
 STORE_BACK,Back,Geri
 CREDITS_TITLE,Credits,Künye
 DAILY_REWARD_TITLE,Daily Reward,Günlük Ödül
-DAILY_REWARD_BODY,Day %d/7  +%d,Gün %d/7  +%d
+DAILY_REWARD_BODY,Day %d/10  +%d,Gün %d/10  +%d
 DAILY_REWARD_CLAIM,Claim,Al
 DAILY_REWARD_RECEIVED,Received,Alındı
-DAILY_REWARD_DAY,Day %d/7,Gün %d/7
-DAILY_REWARD_TODAY,Today's reward · Day %d/7,Bugünün ödülü · Gün %d/7
-DAILY_REWARD_PREVIEW,Preview · Day %d/7,Önizleme · Gün %d/7
+DAILY_REWARD_DAY,Day %d/10,Gün %d/10
+DAILY_REWARD_TODAY,Today's reward · Day %d/10,Bugünün ödülü · Gün %d/10
+DAILY_REWARD_PREVIEW,Preview · Day %d/10,Önizleme · Gün %d/10
 DAILY_REWARD_CLAIM_TODAY,Claim Today,Bugün Al
-DAILY_REWARD_DAY_TODAY,Today · Day %d/7,Bugün · Gün %d/7
-DAILY_REWARD_DAY_CLAIMED,Claimed · Day %d/7,Alındı · Gün %d/7
+DAILY_REWARD_DAY_TODAY,Today · Day %d/10,Bugün · Gün %d/10
+DAILY_REWARD_DAY_CLAIMED,Claimed · Day %d/10,Alındı · Gün %d/10
 PAUSE_RESUME,Resume,Devam
 PAUSE_TITLE,Paused,Duraklatıldı
 PAUSE_SETTINGS,Settings,Ayarlar
@@ -150,3 +150,31 @@ SETTINGS_COPYRIGHT,© 2026 Tuğra Hekimoğlu. All rights reserved.,© 2026 Tuğr
 SETTINGS_LICENSES,Open-source licenses,Açık kaynak lisansları
 LEGAL_TITLE,Licenses,Lisanslar
 RESULT_REWARDED_BONUS,Watch Ad +%d,Reklam İzle +%d
+SUPPLY_ENTRY,Supply,İkmal
+SUPPLY_ODDS,Rewards,Olasılıklar
+SUPPLY_TOMORROW,Tomorrow,Yarın
+SUPPLY_DAILY_COMPACT,%d/day,%d/gün
+SUPPLY_ENTRY_AVAILABLE,Supply ·,İkmal ·
+SUPPLY_DAILY_AVAILABLE,Daily rewarded box available,Günlük reklam kutusu alınabilir
+SUPPLY_TITLE,Supply Box,İkmal Kutusu
+SUPPLY_RECEIVED,Supply received,İkmal alındı
+SUPPLY_CONTENTS,100 coins or one boost,100 coin veya bir güçlendirme
+SUPPLY_AD,Watch Ad,Reklam İzle
+SUPPLY_WAITING,Ad in progress,Reklam sürüyor
+SUPPLY_DAILY_USED,Daily box claimed,Günlük kutu alındı
+SUPPLY_AD_UNAVAILABLE,Ad unavailable right now,Reklam şu anda kullanılamıyor
+SUPPLY_AD_FAILED,Ad did not complete. No reward granted.,Reklam tamamlanmadı. Ödül verilmedi.
+SUPPLY_COST,%d Coins,%d Coin
+SUPPLY_NOT_ENOUGH,Need %d coins,%d coin gerekli
+SUPPLY_COIN_LIMIT,Daily coin-box limit reached,Günlük coin kutusu limiti doldu
+SUPPLY_REMAINING,%d/%d coin boxes remaining today,Bugün %d/%d coin kutusu hakkı kaldı
+SUPPLY_INVENTORY,%d Coins · Slow Start ×%d · Coin Bonus ×%d · Extra Life ×%d,%d Coin · Yavaş Başlangıç ×%d · Coin Bonusu ×%d · Ekstra Can ×%d
+SUPPLY_REWARD_COINS,%d Coins,%d Coin
+SUPPLY_REWARD_SLOW,Slow Start ×%d,Yavaş Başlangıç ×%d
+SUPPLY_REWARD_BONUS,Coin Bonus ×%d,Coin Bonusu ×%d
+SUPPLY_REWARD_LIFE,Extra Life ×%d,Ekstra Can ×%d
+SUPPLY_CONTINUE,Continue,Devam
+SUPPLY_CLOSE,Close,Kapat
+SUPPLY_PENDING,Acquired. Delivery will resume safely.,Alındı. Teslimat güvenle devam edecek.
+SUPPLY_REJECTED,Acquisition unavailable. Please try again.,Kutu alınamadı. Tekrar deneyin.
+SUPPLY_SAVE_RETRY,Could not save. Please try Continue again.,Kayıt yapılamadı. Devam'a tekrar basın.

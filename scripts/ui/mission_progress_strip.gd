@@ -119,7 +119,7 @@ func _build_reward_cluster() -> void:
 	_reward_cluster.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_header.add_child(_reward_cluster)
 	var coin := BoostIcon.new()
-	coin.set("effect", BoostData.Effect.COIN_BONUS)
+	coin.set("effect", BoostIcon.COIN_BONUS_ICON)
 	coin.custom_minimum_size = Vector2(34.0, 34.0)
 	coin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_reward_cluster.add_child(coin)

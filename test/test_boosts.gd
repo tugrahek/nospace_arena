@@ -90,12 +90,29 @@ func test_savedata_charges_add_consume() -> void:
 
 func test_savedata_arm_disarm() -> void:
 	var d := SaveData.new()
+	d.add_boost(&"extra_life", 1)
 	d.set_boost_armed(&"extra_life", true)
 	assert_true(d.is_boost_armed(&"extra_life"))
 	d.set_boost_armed(&"extra_life", true)  # idempotent
 	assert_eq(d.armed_boosts.size(), 1)
 	d.set_boost_armed(&"extra_life", false)
 	assert_false(d.is_boost_armed(&"extra_life"))
+
+
+func test_last_charge_and_reload_clear_invalid_arming() -> void:
+	var d := SaveData.new()
+	d.add_boost(&"extra_life", 1)
+	d.set_boost_armed(&"extra_life", true)
+	assert_true(d.consume_boost(&"extra_life"))
+	assert_false(d.is_boost_armed(&"extra_life"))
+	assert_true(d.armed_boosts.is_empty())
+	d.set_boost_armed(&"extra_life", true)
+	assert_true(d.armed_boosts.is_empty())
+	d.armed_boosts.append("extra_life")
+	d.set_boost_armed(&"extra_life", true)
+	assert_true(d.armed_boosts.is_empty())
+	var loaded := SaveData.from_dict({"boost_charges": {"extra_life": 0}, "armed_boosts": ["extra_life"]})
+	assert_true(loaded.armed_boosts.is_empty())
 
 
 ## Smoke: the boost-touching UI scenes instantiate + run _ready without runtime errors (build the

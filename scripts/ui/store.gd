@@ -7,7 +7,7 @@ const StoreOfferTile = preload("res://scripts/ui/store_offer_tile.gd")
 const StoreShowcase = preload("res://scripts/ui/store_showcase.gd")
 const PALETTE = preload("res://config/palette.tres")
 
-enum Category { CHARACTERS, ARENAS, BOOSTS }
+enum Category { CHARACTERS, ARENAS, BOOSTS, SUPPLY }
 
 @onready var _scroll: ScrollContainer = $Scroll
 @onready var _list: VBoxContainer = $Scroll/List
@@ -16,10 +16,11 @@ enum Category { CHARACTERS, ARENAS, BOOSTS }
 @onready var _title: Label = $Title
 @onready var _strip: Control = $CategoryStrip
 @onready var _frontier: ColorRect = $CategoryStrip/Frontier
-@onready var _tabs: Array[Button] = [$CategoryStrip/Tabs/Characters, $CategoryStrip/Tabs/Arenas, $CategoryStrip/Tabs/Boosts]
+@onready var _tabs: Array[Button] = [$CategoryStrip/Tabs/Characters, $CategoryStrip/Tabs/Arenas, $CategoryStrip/Tabs/Boosts, $CategoryStrip/Tabs/Supply]
 
 var _active_category: int = Category.CHARACTERS
-var _focused_indices: Array[int] = [0, 0, 0]
+var _focused_indices: Array[int] = [0, 0, 0, 0]
+var _supply: SupplyPopup
 var _refresh_pending: bool = false
 var _selector: HBoxContainer
 
@@ -31,6 +32,7 @@ func _ready() -> void:
 	_tabs[Category.CHARACTERS].pressed.connect(set_category.bind(Category.CHARACTERS))
 	_tabs[Category.ARENAS].pressed.connect(set_category.bind(Category.ARENAS))
 	_tabs[Category.BOOSTS].pressed.connect(set_category.bind(Category.BOOSTS))
+	_tabs[Category.SUPPLY].pressed.connect(set_category.bind(Category.SUPPLY))
 	_strip.resized.connect(_layout_frontier)
 	Economy.currency_changed.connect(func(_balance: int) -> void: _request_refresh())
 	Economy.unlocks_changed.connect(_request_refresh)
@@ -40,10 +42,10 @@ func _ready() -> void:
 
 ## Local view state only; changing categories never changes Economy or persisted data.
 func set_category(category: int) -> void:
-	if category < Category.CHARACTERS or category > Category.BOOSTS:
+	if category < Category.CHARACTERS or category > Category.SUPPLY:
 		return
 	_active_category = category
-	_request_refresh()
+	_request_refresh(true)
 
 
 func active_category() -> int:
@@ -63,6 +65,8 @@ func _refresh() -> void:
 	_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
 	for child in _list.get_children():
 		child.free()
+	_selector = null
+	_supply = null
 	match _active_category:
 		Category.CHARACTERS:
 			_build_characters()
@@ -70,13 +74,22 @@ func _refresh() -> void:
 			_build_arenas()
 		Category.BOOSTS:
 			_build_boosts()
+		Category.SUPPLY:
+			_supply = preload("res://scenes/ui/SupplyPopup.tscn").instantiate()
+			_supply.embedded = true
+			_list.add_child(_supply)
+			_supply.present()
 	_scroll.scroll_vertical = 0
 	_update_tab_labels()
 	call_deferred("_layout_frontier")
 
 
 ## Rebuild only after the current button/signal stack returns; never free an emitting control.
-func _request_refresh() -> void:
+func _request_refresh(force: bool = false) -> void:
+	if not force and _active_category == Category.SUPPLY and is_instance_valid(_supply):
+		_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
+		_supply.refresh()
+		return
 	if _refresh_pending:
 		return
 	_refresh_pending = true
@@ -167,7 +180,7 @@ func _valid_focus(count: int) -> int:
 
 
 func _update_tab_labels() -> void:
-	var keys: Array[String] = ["STORE_CHARACTERS", "STORE_ARENAS", "STORE_BOOSTS"]
+	var keys: Array[String] = ["STORE_CHARACTERS", "STORE_ARENAS", "STORE_BOOSTS", "SUPPLY_ENTRY"]
 	for index in _tabs.size():
 		var tab: Button = _tabs[index]
 		tab.text = tr(keys[index])

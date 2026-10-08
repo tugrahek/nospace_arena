@@ -56,7 +56,7 @@ func test_all_four_pages_have_large_nonoverlapping_layout_at_720x1280() -> void:
 		var page: Control = await _make_tutorial()
 		var art_positions: Array[float] = []
 		var progress_positions: Array[float] = []
-		var context: Control = page.get_node(BASE + "ContextLabel")
+		assert_false(page.has_node(BASE + "ContextLabel"))
 		var title: Control = page.get_node(BASE + "PageTitle")
 		var art: Control = page.get_node(BASE + "DemoCenter/PageArt")
 		var body: Control = page.get_node(BASE + "BodyCenter/BodyText")
@@ -75,7 +75,6 @@ func test_all_four_pages_have_large_nonoverlapping_layout_at_720x1280() -> void:
 			progress_positions.append(progress.global_position.y)
 			assert_eq(progress.get_step_positions().size(), 4, "four track positions " + label)
 			assert_true(progress.get_step_positions()[3].x - progress.get_step_positions()[0].x >= 170.0, "spread track " + label)
-			assert_true(context.get_global_rect().end.y <= title.get_global_rect().position.y, "context before title " + label)
 			assert_true(title.get_global_rect().end.y <= art.get_global_rect().position.y, "title before art " + label)
 			assert_true(art.get_global_rect().end.y <= body.get_global_rect().position.y, "art before body " + label)
 			assert_true(body.get_global_rect().end.y <= progress.get_global_rect().position.y, "body before progress " + label)
@@ -127,10 +126,9 @@ func test_turkish_and_english_content_resolve_in_shared_page() -> void:
 	for locale in ["tr", "en"]:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _make_tutorial()
-		var context: Label = page.get_node(BASE + "ContextLabel")
 		var title: Label = page.get_node(BASE + "PageTitle")
 		var body: Label = page.get_node(BASE + "BodyCenter/BodyText")
-		assert_eq(context.text, tr("HOWTO_TITLE"), "context %s" % locale)
+		assert_false(page.has_node(BASE + "ContextLabel"))
 		for index in 4:
 			page.call("_show", index)
 			assert_eq(title.text, tr(TITLES[index]), "title %s/%d" % [locale, index])

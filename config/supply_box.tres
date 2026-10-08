@@ -7,5 +7,5 @@
 script = ExtResource("1")
 reward_table = ExtResource("2")
 coin_cost = 150
-coin_daily_limit = 3
+coin_daily_limit = 2
 rewarded_daily_limit = 1

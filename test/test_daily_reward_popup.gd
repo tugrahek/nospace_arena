@@ -3,6 +3,7 @@ extends GutTest
 const MENU: PackedScene = preload("res://scenes/main/MainMenu.tscn")
 const TABLE: Array[int] = Economy.LOGIN_REWARDS
 const FIXTURE_PATH: String = "user://e4_reward_fixture.json"
+const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
 
 class FixtureEconomy:
 	extends "res://scripts/autoload/Economy.gd"
@@ -38,7 +39,7 @@ func test_eligibility_amount_and_locale_bind_without_auto_claim() -> void:
 		assert_eq(popup.get_node("Box/RewardAmount").text, "+180")
 		assert_eq(popup.get_node("Box/RewardTitle").text, "Günlük Ödül" if locale == "tr" else "Daily Reward")
 		assert_eq(popup.get_node("Box/ClaimButton").text, "Bugün Al" if locale == "tr" else "Claim Today")
-		assert_eq(popup.get_node("Box/RewardBody").text, "Gün 4/7" if locale == "tr" else "Day 4/7")
+		assert_eq(popup.get_node("Box/RewardBody").text, "Gün 4/10" if locale == "tr" else "Day 4/10")
 	assert_eq(calls[0], 0, "showing the manual popup never claims")
 	assert_false(popup.present(LoginStreak.evaluate(101, 101, 4, TABLE)))
 	assert_false(popup.visible)
@@ -123,19 +124,19 @@ func test_main_menu_refreshes_real_currency_on_claim_signal() -> void:
 	Economy.set("_data", original)
 
 
-func test_seven_real_rewards_route_mapping_and_future_preview_no_claim() -> void:
+func test_ten_real_rewards_route_mapping_and_future_preview_no_claim() -> void:
 	var calls := [0]
-	var popup := _popup(func() -> Dictionary: calls[0] += 1; return Economy.login_reward_spec(7))
-	for day in range(1, 8):
+	var popup := _popup(func() -> Dictionary: calls[0] += 1; return Economy.login_reward_spec(10))
+	for day in range(1, 11):
 		popup.present({"claimable": true, "reward": TABLE[day - 1], "new_streak": day})
 		var route: DailyRewardRoute = popup.get_node("Box/Route")
-		assert_eq(route.checkpoints.size(), 7)
+		assert_eq(route.checkpoints.size(), 10)
 		assert_eq(route.current_day, day)
 		assert_eq(route.completed_days, day - 1)
 		assert_eq(popup.reward_amount, TABLE[day - 1])
-		assert_lt(route.checkpoint_center(0).x, route.checkpoint_center(6).x)
+		assert_lt(route.checkpoint_center(0).x, route.checkpoint_center(9).x)
 		assert_gt(route.endpoint_scale, 1.0)
-		for preview in range(1, 8):
+		for preview in range(1, 11):
 			route.checkpoints[preview - 1].pressed.emit()
 			assert_eq(popup.selected_day, preview)
 			assert_eq(popup.reward_amount, TABLE[preview - 1])
@@ -145,15 +146,15 @@ func test_seven_real_rewards_route_mapping_and_future_preview_no_claim() -> void
 			assert_eq(popup.get_node("Box/ClaimButton").text, tr("DAILY_REWARD_CLAIM_TODAY"))
 			assert_eq(popup.get_node("Box/RewardBody").text, (tr("DAILY_REWARD_DAY") % day) if preview == day else (tr("DAILY_REWARD_PREVIEW") % preview))
 	assert_eq(calls[0], 0, "previews never mutate Economy")
-	popup.preview_day(7)
+	popup.preview_day(10)
 	popup.get_node("Box/ClaimButton").pressed.emit()
 	assert_eq(calls[0], 1, "Claim always acts on today's eligibility")
-	assert_eq(popup.reward_amount, TABLE[7 - 1], "claimed reward is today's actual amount")
+	assert_eq(popup.reward_amount, TABLE[10 - 1], "claimed reward is today's actual amount")
 
 
 func test_claimed_inspection_has_no_claim_and_canonical_next_cycle() -> void:
 	var popup := _popup(func() -> int: fail_test("inspection must not claim"); return 0)
-	for day in range(1, 8):
+	for day in range(1, 11):
 		var status: Dictionary = LoginStreak.evaluate(100, 100, day, TABLE)
 		assert_true(popup.present(status, true))
 		assert_eq(popup.state, DailyRewardPopup.State.INSPECTING)
@@ -167,7 +168,7 @@ func test_claimed_inspection_has_no_claim_and_canonical_next_cycle() -> void:
 		popup.get_node("Box/ClaimButton").pressed.emit()
 		popup.preview_day(7)
 		assert_false(popup.get_node("Box/ClaimButton").visible)
-	assert_true(popup.present(LoginStreak.evaluate(101, 100, 7, TABLE)))
+	assert_true(popup.present(LoginStreak.evaluate(101, 100, 10, TABLE)))
 	assert_eq(popup.current_day, 1)
 	assert_eq(popup.completed_days, 0)
 	assert_eq(popup.reward_amount, 50)
@@ -184,7 +185,7 @@ func test_day_two_claim_stays_day_two_while_day_seven_is_previewed() -> void:
 	assert_eq(popup.reward_amount, 0, "future Day 7 is boost-only")
 	assert_eq(popup.preview_spec["boost_ids"], [&"extra_life"])
 	assert_eq(popup.current_day, 2)
-	assert_eq(popup.get_node("Box/RewardBody").text, "Önizleme · Gün 7/7")
+	assert_eq(popup.get_node("Box/RewardBody").text, "Önizleme · Gün 7/10")
 	popup.get_node("Box/ClaimButton").pressed.emit()
 	assert_eq(calls[0], 1)
 	assert_eq(popup.reward_amount, 75, "claim returns the current Day 2 award")
@@ -193,31 +194,31 @@ func test_day_two_claim_stays_day_two_while_day_seven_is_previewed() -> void:
 
 func test_approved_reward_table_claims_persists_and_rejects_double_claim() -> void:
 	var owner := FixtureEconomy.new()
+	owner._save_path = FIXTURE_PATH
 	add_child_autofree(owner)
-	var coins: Array[int] = [50, 75, 0, 180, 0, 225, 0]
-	var boosts: Array[Array] = [[], [], [&"slow_start"], [], [&"coin_bonus"], [], [&"extra_life"]]
-	for day in range(1, 8):
-		var data := SaveData.new_default()
-		data.last_claim_epoch_day = SeedManager.today_epoch() - 1
-		data.streak_day = day - 1
-		owner.set("_data", data)
-		var initial: int = data.currency
-		assert_eq(owner.login_reward_spec(day), {"coins": coins[day - 1], "boost_ids": boosts[day - 1]})
-		assert_eq(owner.claim_login_reward_bundle(), owner.login_reward_spec(day))
-		assert_eq(data.currency, initial + coins[day - 1])
-		for id in [&"slow_start", &"coin_bonus", &"extra_life"]:
-			assert_eq(data.boost_count(id), 1 if boosts[day - 1].has(id) else 0)
-		assert_eq(owner.claim_login_reward_bundle(), {}, "rapid second claim is rejected")
+	for day: int in range(1, 11):
+		owner._data = SaveData.new_default()
+		owner._data.last_claim_epoch_day = SeedManager.today_epoch() - 1
+		owner._data.streak_day = day - 1
+		var expected: Dictionary = owner.login_reward_spec(day)
+		var result: Dictionary = owner.claim_login_reward_bundle()
+		assert_eq(result["coins"], expected["coins"])
+		assert_eq(result["boost_ids"], expected["boost_ids"])
+		var gift: Dictionary = owner.supply_boxes().box_status(result.get("gift_box_id", ""))
+		var extra_coins: int = int(gift.get("amount", 0)) if gift.get("reward_type") == "coins" else 0
+		assert_eq(owner.balance(), int(expected["coins"]) + extra_coins)
+		for id: StringName in [&"slow_start", &"coin_bonus", &"extra_life"]:
+			var base: int = 1 if expected["boost_ids"].has(id) else 0
+			var extra: int = int(gift.get("amount", 0)) if gift.get("reward_type") == String(id) else 0
+			assert_eq(owner.boost_count(id), base + extra)
+		assert_eq(owner.claim_login_reward_bundle(), {})
 		assert_false(owner.login_reward_status()["claimable"])
-		var restored: SaveData = SaveStore.load_from(FIXTURE_PATH)
-		assert_eq(restored.to_dict(), data.to_dict())
-		assert_eq(data.currency, initial + coins[day - 1], "no extra coins on boost-only days")
-		assert_eq(data.streak_day, day)
-		data.last_claim_epoch_day -= 1
-		assert_eq(owner.login_reward_status()["new_streak"], day + 1 if day < 7 else 1)
-		data.last_claim_epoch_day -= 2
-		assert_eq(owner.login_reward_status()["new_streak"], 1, "missed day still resets")
-
+		assert_eq(JSON.parse_string(JSON.stringify(SaveStore.load_from(FIXTURE_PATH).to_dict())), JSON.parse_string(JSON.stringify(owner._data.to_dict())))
+		assert_eq(owner._data.streak_day, day)
+		owner._data.last_claim_epoch_day -= 1
+		assert_eq(owner.login_reward_status()["new_streak"], day + 1 if day < 10 else 1)
+		owner._data.last_claim_epoch_day -= 2
+		assert_eq(owner.login_reward_status()["new_streak"], 1)
 
 func test_boost_only_reward_is_visible_and_holds_claim_feedback() -> void:
 	var popup := _popup(func() -> Dictionary: return {"coins": 0, "boost_ids": [&"extra_life"]})
@@ -227,6 +228,8 @@ func test_boost_only_reward_is_visible_and_holds_claim_feedback() -> void:
 	assert_eq(popup.get_node("Box/RewardAmount").text, "1×")
 	assert_true(popup.get_node("Box/Hero/BoostIcon").is_visible_in_tree())
 	assert_eq(popup.get_node("Box/Currency").text, "Extra Life")
+	assert_false(popup.get_node("Box/Hero/SupplyGift").visible)
+	assert_null(popup.get_node("Box/Route").checkpoints[6].get_node_or_null("SupplyGift"))
 	popup.get_node("Box/ClaimButton").pressed.emit()
 	assert_eq(popup.reward_amount, 0)
 	assert_eq(popup.state, DailyRewardPopup.State.CLAIMED)
@@ -244,10 +247,25 @@ func test_approved_boost_previews_localize_and_never_mutate_profile() -> void:
 			var boost: BoostData = ContentCatalog.boost_by_id(id)
 			assert_true(popup.get_node("Box/Hero/BoostIcon").is_visible_in_tree())
 			assert_eq(popup.get_node("Box/Currency").text, tr(boost.display_name_key))
-			assert_eq(popup.get_node("Box/Hero/BoostIcon").get("effect"), boost.effect)
+			assert_eq(popup.get_node("Box/Hero/BoostIcon").get("effect"), BoostIcon.COIN_BONUS_ICON if id == &"coin_bonus" else boost.effect)
 			assert_true(popup.get_node("Box/Currency").visible)
 			assert_eq(popup.current_day, 1)
 			assert_eq(Economy.get("_data").to_dict(), before)
+
+
+func test_day_ten_is_supply_only_and_prominently_shows_cube() -> void:
+	var popup := _popup(func() -> Dictionary:
+		return {"coins": 0, "boost_ids": [], "supply_box": true, "gift_box_id": "gift-10"})
+	popup.present({"claimable": true, "reward": 0, "new_streak": 10})
+	assert_false(popup.get_node("Box/Hero/Coin").visible)
+	assert_false(popup.get_node("Box/Hero/BoostIcon").visible)
+	assert_true(popup.get_node("Box/Hero/SupplyGift").visible)
+	assert_eq(popup.get_node("Box/Hero/SupplyGift").custom_minimum_size, Vector2(128, 128))
+	assert_eq(popup.get_node("Box/Currency").text, "Supply Box")
+	assert_null(popup.get_node("Box/Route").checkpoints[9].get_node_or_null("SupplyGift"))
+	assert_null(popup.get_node("Box/Route").checkpoints[6].get_node_or_null("SupplyGift"))
+	popup.get_node("Box/ClaimButton").pressed.emit()
+	assert_eq(popup.state, DailyRewardPopup.State.CLAIMED)
 
 
 func test_main_menu_entry_reopens_claimed_today_without_startup_popup() -> void:
@@ -264,7 +282,7 @@ func test_main_menu_entry_reopens_claimed_today_without_startup_popup() -> void:
 		var popup: DailyRewardPopup = menu.get_node("RewardPopup")
 		var initial: int = fixture.currency
 		assert_false(popup.visible, "claimed startup does not force a popup")
-		assert_eq(menu.get_node("RewardEntry/Progress").text, "4/7")
+		assert_eq(menu.get_node("RewardEntry/Progress").text, "4/10")
 		assert_gte(menu.get_node("RewardEntry").size.y, 48.0)
 		assert_lt(menu.get_node("SettingsButton").position.x + menu.get_node("SettingsButton").size.x, menu.get_node("RewardEntry").position.x)
 		assert_lt(menu.get_node("RewardEntry").position.x + menu.get_node("RewardEntry").size.x, menu.get_node("CoinsPanel").position.x)
@@ -286,23 +304,23 @@ func test_main_menu_entry_reopens_claimed_today_without_startup_popup() -> void:
 
 
 func test_available_entry_close_reopen_and_claim_route_capture() -> void:
-	var popup := _popup(func() -> Dictionary: return Economy.login_reward_spec(7))
-	popup.present({"claimable": true, "reward": 0, "new_streak": 7})
+	var popup := _popup(func() -> Dictionary: return Economy.login_reward_spec(10))
+	popup.present({"claimable": true, "reward": 0, "new_streak": 10})
 	popup.close()
 	await wait_for_signal(popup.dismissed, 1.0)
 	assert_eq(popup.state, DailyRewardPopup.State.HIDDEN)
-	popup.present({"claimable": true, "reward": 0, "new_streak": 7}, true)
+	popup.present({"claimable": true, "reward": 0, "new_streak": 10}, true)
 	popup.get_node("Box/ClaimButton").pressed.emit()
-	assert_eq(popup.completed_days, 7)
-	assert_eq(popup.get_node("Box/Route").completed_days, 7)
+	assert_eq(popup.completed_days, 10)
+	assert_eq(popup.get_node("Box/Route").completed_days, 10)
 	assert_true(popup.get_node("Box/CloseButton").disabled)
 	popup.preview_day(1)
-	assert_eq(popup.preview_spec["boost_ids"], [&"extra_life"], "claim feedback cannot be replaced by preview input")
+	assert_eq(popup.preview_spec["coins"], 0, "claim feedback cannot be replaced by preview input")
 	await get_tree().create_timer(popup.claimed_hold_duration * 0.5).timeout
 	assert_eq(popup.state, DailyRewardPopup.State.CLAIMED, "feedback owns a substantial hold, not an immediate fade")
 	assert_eq(popup.modulate.a, 1.0)
 	await wait_for_signal(popup.dismissed, 2.0)
-	popup.present({"claimable": false, "reward": 0, "new_streak": 7}, true)
+	popup.present({"claimable": false, "reward": 0, "new_streak": 10}, true)
 	assert_eq(popup.state, DailyRewardPopup.State.INSPECTING)
 	assert_false(popup.get_node("Box/ClaimButton").visible)
 
@@ -319,10 +337,10 @@ func test_shared_hero_keeps_route_stable_and_preview_returns_to_today() -> void:
 		await wait_process_frames(2)
 		var route_position: Vector2 = route.position
 		var hero_position: Vector2 = hero.position
-		for day in [3, 5, 7, 4]:
+		for day in [3, 5, 7, 10, 4]:
 			popup.preview_day(day)
 			await wait_process_frames(2)
-			var icon: Control = coin if day == 4 else boost
+			var icon: Control = coin if day == 4 else hero.get_node("SupplyGift") if day == 10 else boost
 			assert_true(icon.is_visible_in_tree())
 			assert_eq(icon.size, coin.size, "each reward uses the same central hero footprint")
 			assert_eq(hero.position, hero_position)

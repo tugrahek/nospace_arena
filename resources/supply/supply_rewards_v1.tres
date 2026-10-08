@@ -1,4 +1,7 @@
-[gd_resource type="Resource" script_class="SupplyRewardTable" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="SupplyRewardTable" load_steps=9 format=3]
+
+; PROVISIONAL: preserve aggregate coins 35%, boosts 30/20/15%; split coin share equally.
+; Relative weights total 300. Final tier probabilities await the economy audit.
 
 [ext_resource type="Script" path="res://scripts/meta/supply_reward_table.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/meta/supply_reward_entry.gd" id="2"]
@@ -9,26 +12,38 @@ reward_type = &"coins"
 amount = 100
 weight = 35.0
 
+[sub_resource type="Resource" id="coins_200"]
+script = ExtResource("2")
+reward_type = &"coins"
+amount = 200
+weight = 35.0
+
+[sub_resource type="Resource" id="coins_500"]
+script = ExtResource("2")
+reward_type = &"coins"
+amount = 500
+weight = 35.0
+
 [sub_resource type="Resource" id="slow"]
 script = ExtResource("2")
 reward_type = &"slow_start"
 amount = 1
-weight = 30.0
+weight = 90.0
 
 [sub_resource type="Resource" id="bonus"]
 script = ExtResource("2")
 reward_type = &"coin_bonus"
 amount = 1
-weight = 20.0
+weight = 60.0
 
 [sub_resource type="Resource" id="life"]
 script = ExtResource("2")
 reward_type = &"extra_life"
 amount = 1
-weight = 15.0
+weight = 45.0
 
 [resource]
 script = ExtResource("1")
-table_key = &"supply_v1"
-version = 1
-entries = Array[ExtResource("2")]([SubResource("coins"), SubResource("slow"), SubResource("bonus"), SubResource("life")])
+table_key = &"supply_v2_provisional_tiers"
+version = 2
+entries = Array[ExtResource("2")]([SubResource("coins"), SubResource("coins_200"), SubResource("coins_500"), SubResource("slow"), SubResource("bonus"), SubResource("life")])

@@ -9,7 +9,7 @@ extends RefCounted
 
 ## Returns { claimable: bool, reward: int, new_streak: int }.
 ## first ever (last < 0) -> streak 1; same day -> not claimable; consecutive -> streak+1
-## (loops 7->1); missed (gap > 1, or clock back) -> streak resets to 1.
+## (loops table.size()->1); missed (gap > 1, or clock back) -> streak resets to 1.
 static func evaluate(today_epoch: int, last_epoch: int, streak: int, table: Array) -> Dictionary:
 	var n: int = table.size()
 	if last_epoch < 0:

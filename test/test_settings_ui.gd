@@ -48,7 +48,7 @@ func test_main_menu_and_standalone_back_keep_settings_route() -> void:
 	var panel: Control = SETTINGS_SCENE.instantiate()
 	assert_eq(panel.get_script().get_script_constant_map()["MENU_SCENE"], "res://scenes/main/MainMenu.tscn")
 	assert_false(panel.embedded)
-	assert_not_null(panel.get_node("Center/BackButton"))
+	assert_not_null(panel.get_node("Bottom/BackButton"))
 	panel.free()
 
 
@@ -72,10 +72,26 @@ func test_settings_locale_keys() -> void:
 	assert_eq(tr("SETTINGS_LANGUAGE"), "Language")
 
 
+func test_legal_footer_is_separate_bottom_safe_region() -> void:
+	var panel: Control = SETTINGS_SCENE.instantiate()
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.size = Vector2(720, 1280)
+	add_child_autofree(panel)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var footer: Control = panel.get_node("Bottom/LegalFooter")
+	assert_false(panel.has_node("Center/LegalFooter"))
+	assert_eq(panel.get_node("Bottom").anchor_bottom, 1.0)
+	assert_eq(panel.get_node("Bottom").offset_bottom, -24.0)
+	assert_almost_eq(footer.get_global_rect().position.y - panel.get_node("Bottom/BackButton").get_global_rect().end.y, 40.0, 0.5)
+	assert_not_null(footer.get_node("Copyright"))
+	assert_not_null(footer.get_node("LicensesButton"))
+
+
 func test_privacy_choices_follow_ump_availability_busy_state_and_locale() -> void:
 	var panel: Control = SETTINGS_SCENE.instantiate()
 	add_child_autofree(panel)
-	var button: Button = panel.get_node("Center/LegalFooter/PrivacyButton")
+	var button: Button = panel.get_node("Bottom/LegalFooter/PrivacyButton")
 	assert_false(button.visible, "desktop/no UMP requirement has no misleading action")
 	assert_eq(button.text, "Privacy choices")
 	AdsService.privacy_options_changed.emit(true, true)
@@ -190,7 +206,7 @@ func test_sections_and_language_labels_fit_720_by_1280() -> void:
 		TranslationServer.set_locale(locale)
 		panel.call("_apply_texts")
 		await get_tree().process_frame
-		for path in ["Center/Title", "Center/Rows", "Center/ControlsRow", "Center/LanguageRow", "Center/BackButton"]:
+		for path in ["Center/Title", "Center/Rows", "Center/ControlsRow", "Center/LanguageRow", "Bottom/BackButton"]:
 			var section: Control = panel.get_node(path)
 			assert_gte(section.get_global_rect().position.y, 0.0)
 			assert_lte(section.get_global_rect().end.y, 1280.0)

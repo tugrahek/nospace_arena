@@ -1,12 +1,12 @@
 class_name DailyRewardRoute
 extends Control
 
-## Seven presentation-only checkpoints; no reward mutation or date logic.
+## Ten presentation-only checkpoints; no reward mutation or date logic.
 signal day_selected(day: int)
 const PALETTE: PaletteData = preload("res://config/palette.tres")
-const DAYS: int = 7
-@export var checkpoint_radius: float = 11.0
-@export var endpoint_scale: float = 1.25
+const DAYS: int = 10
+@export var checkpoint_radius: float = 8.5
+@export var endpoint_scale: float = 1.4
 var current_day: int = 1
 var completed_days: int = 0
 var selected_day: int = 1
@@ -55,13 +55,15 @@ func _draw() -> void:
 		var center: Vector2 = checkpoint_center(index)
 		var radius: float = checkpoint_radius * (endpoint_scale if day == DAYS else 1.0)
 		var points := PackedVector2Array([center + Vector2(0, -radius), center + Vector2(radius, 0), center + Vector2(0, radius), center + Vector2(-radius, 0)])
-		var color: Color = PALETTE.coin.darkened(0.5) if day == DAYS else PALETTE.text_secondary.darkened(0.45)
+		var final_accent: Color = PALETTE.coin.lerp(PALETTE.accent, 0.2)
+		var color: Color = final_accent.darkened(0.5) if day == DAYS else PALETTE.text_secondary.darkened(0.45)
 		if day <= completed_days:
-			draw_colored_polygon(points, PALETTE.accent.darkened(0.35))
-			color = PALETTE.accent
+			var completed_color: Color = PALETTE.accent.lerp(PALETTE.coin, 0.2) if day == DAYS else PALETTE.accent
+			draw_colored_polygon(points, completed_color.darkened(0.35))
+			color = completed_color
 		elif day == current_day:
 			draw_colored_polygon(points, PALETTE.coin.darkened(0.15))
-			color = PALETTE.coin
+			color = final_accent if day == DAYS else PALETTE.coin
 		else:
 			draw_colored_polygon(points, PALETTE.void_bg)
 		points.append(points[0])

@@ -7,11 +7,12 @@ extends Node
 const SaveStore = preload("res://scripts/meta/save_store.gd")
 const LoginStreak = preload("res://scripts/meta/login_streak.gd")
 const PurchaseProduct = preload("res://scripts/monetization/purchase_product.gd")
+const DailyClaim = preload("res://scripts/meta/daily_reward_claim.gd")
 const SAVE_PATH: String = "user://save.json"
 const REWARDED_MISSION_BONUS_RATE: float = 0.50
-## Approved day 1..7 awards; boost-only days intentionally grant no coins.
-const LOGIN_REWARDS: Array[int] = [50, 75, 0, 180, 0, 225, 0]
-const LOGIN_REWARD_BOOSTS: Array[Array] = [[], [], [&"slow_start"], [], [&"coin_bonus"], [], [&"extra_life"]]
+## Day-indexed Daily Reward coin portions; zero means a boost or Supply Box award.
+const LOGIN_REWARDS: Array[int] = [50, 75, 0, 180, 0, 225, 0, 250, 275, 0]
+const LOGIN_REWARD_BOOSTS: Array[Array] = [[], [], [&"slow_start"], [], [&"coin_bonus"], [], [&"extra_life"], [], [], []]
 
 signal currency_changed(new_balance: int)
 signal unlocks_changed()
@@ -276,13 +277,18 @@ func login_reward_status() -> Dictionary:
 	var status: Dictionary = LoginStreak.evaluate(SeedManager.today_epoch(), _data.last_claim_epoch_day, _data.streak_day, LOGIN_REWARDS)
 	var day: int = clampi(int(status["new_streak"]), 1, LOGIN_REWARDS.size())
 	status["boost_ids"] = LOGIN_REWARD_BOOSTS[day - 1].duplicate()
+	if day == 10:
+		status["supply_box"] = true
 	return status
 
 
 ## Returns a day's coin/boost award definition for read-only reward previews.
 func login_reward_spec(day: int) -> Dictionary:
 	var index: int = clampi(day, 1, LOGIN_REWARDS.size()) - 1
-	return {"coins": LOGIN_REWARDS[index], "boost_ids": LOGIN_REWARD_BOOSTS[index].duplicate()}
+	var spec: Dictionary = {"coins": LOGIN_REWARDS[index], "boost_ids": LOGIN_REWARD_BOOSTS[index].duplicate()}
+	if day == 10:
+		spec["supply_box"] = true
+	return spec
 
 
 ## Claims today's login reward if claimable: earns + advances the streak + persists.
@@ -293,28 +299,7 @@ func claim_login_reward() -> int:
 
 ## Atomically applies a canonical day's coin/boost bundle and persists once.
 func claim_login_reward_bundle() -> Dictionary:
-	var today: int = SeedManager.today_epoch()
-	var r: Dictionary = LoginStreak.evaluate(today, _data.last_claim_epoch_day, _data.streak_day, LOGIN_REWARDS)
-	if not r["claimable"]:
-		return {}
-	var spec: Dictionary = login_reward_spec(int(r["new_streak"]))
-	_apply_login_reward(_data, spec)
-	_data.last_claim_epoch_day = today
-	_data.streak_day = r["new_streak"]
-	_flush()
-	if int(spec["coins"]) > 0:
-		currency_changed.emit(_data.currency)
-	if not spec["boost_ids"].is_empty():
-		boosts_changed.emit()
-	login_reward_claimed.emit(r["new_streak"], spec["coins"])
-	return spec
-
-
-## Applies the approved award using existing currency and boost-charge fields.
-func _apply_login_reward(data: SaveData, spec: Dictionary) -> void:
-	data.earn(int(spec.get("coins", 0)))
-	for boost_id in spec.get("boost_ids", []):
-		data.add_boost(StringName(boost_id), 1)
+	return DailyClaim.claim(self)
 
 
 ## Persists a backend transaction as pending, then atomically marks it delivered with its entitlement.

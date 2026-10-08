@@ -61,6 +61,33 @@ func box_status(box_id: String) -> Dictionary:
 	return record.duplicate(true) if _valid_record(box_id, record) else {}
 
 
+## Stable presentation queue; reading never grants or reselects a reward.
+func unpresented_deliveries() -> Array[String]:
+	var data: SaveData = _profile.call()
+	var ids: Array[String] = []
+	for id: Variant in data.supply_boxes:
+		if not id is String:
+			continue
+		var record: Dictionary = box_status(id)
+		if record.get("state") == DELIVERED and record.get("presented", false) != true:
+			ids.append(id)
+	ids.sort()
+	return ids
+
+
+## Acknowledges presentation only. Failed persistence leaves the result available after reload.
+func mark_presented(box_id: String) -> bool:
+	var record: Dictionary = box_status(box_id)
+	if record.get("state") != DELIVERED:
+		return false
+	if record.get("presented", false) == true:
+		return true
+	var data: SaveData = _profile.call()
+	var next: SaveData = SaveData.from_dict(data.to_dict())
+	next.supply_boxes[box_id]["presented"] = true
+	return _commit.call(next)
+
+
 ## INTERNAL: trusted acquisition service calls only after proving this exact source/context.
 ## No verification flag or public authorize API is offered to UI. Repeated proof is harmless.
 func _authorize(box_id: String, source: String, context: String) -> bool:

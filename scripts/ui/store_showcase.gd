@@ -38,7 +38,7 @@ func configure_boost(id: StringName, boost: BoostData, count: int, affordable: b
 	kind = Kind.BOOST
 	item_id = id
 	var icon := BoostIcon.new()
-	icon.set("effect", boost.effect)
+	icon.set("effect", BoostIcon.COIN_BONUS_ICON if id == &"coin_bonus" else boost.effect)
 	icon.custom_minimum_size = Vector2(142.0, 142.0)
 	_preview = icon
 	_build(tr(boost.display_name_key), tr(boost.description_key), false, false, affordable, boost.cost, count)

@@ -35,10 +35,10 @@ var _language_overlay: SettingsLanguageSelector
 @onready var _dpad: Button = $Center/ControlsRow/Segment/DpadButton
 @onready var _language_label: Label = $Center/LanguageRow/NameLabel
 @onready var _language_button: Button = $Center/LanguageRow/LanguageButton
-@onready var _copyright: Label = $Center/LegalFooter/Copyright
-@onready var _licenses: Button = $Center/LegalFooter/LicensesButton
-@onready var _privacy: Button = $Center/LegalFooter/PrivacyButton
-@onready var _back: Button = $Center/BackButton
+@onready var _copyright: Label = $Bottom/LegalFooter/Copyright
+@onready var _licenses: Button = $Bottom/LegalFooter/LicensesButton
+@onready var _privacy: Button = $Bottom/LegalFooter/PrivacyButton
+@onready var _back: Button = $Bottom/BackButton
 
 
 func _ready() -> void:

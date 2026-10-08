@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://baqdpb1y08q86"]
+[gd_scene load_steps=15 format=3 uid="uid://baqdpb1y08q86"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 [ext_resource type="Script" path="res://scripts/ui/logo.gd" id="2_logo"]
@@ -11,6 +11,8 @@
 [ext_resource type="Script" path="res://scripts/ui/boost_icon.gd" id="9_coinicon"]
 [ext_resource type="Script" path="res://scripts/ui/daily_reward_popup.gd" id="10_reward"]
 [ext_resource type="Script" path="res://scripts/ui/daily_reward_route.gd" id="11_route"]
+[ext_resource type="Script" path="res://scripts/ui/supply_box_icon.gd" id="12_gift"]
+[ext_resource type="PackedScene" path="res://scenes/ui/SupplyPopup.tscn" id="13_reveal"]
 
 [sub_resource type="FontVariation" id="FontVariation_dynapuff"]
 base_font = ExtResource("6_dynapuff")
@@ -99,7 +101,7 @@ mouse_filter = 2
 theme_type_variation = &"Coins"
 theme_override_font_sizes/font_size = 22
 vertical_alignment = 1
-text = "1/7"
+text = "1/10"
 
 [node name="Center" type="VBoxContainer" parent="."]
 anchors_preset = 15
@@ -374,6 +376,13 @@ layout_mode = 2
 mouse_filter = 2
 script = ExtResource("9_coinicon")
 
+[node name="SupplyGift" type="Control" parent="RewardPopup/Box/Hero"]
+visible = false
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("12_gift")
+
 [node name="RewardAmount" type="Label" parent="RewardPopup/Box"]
 layout_mode = 2
 theme_type_variation = &"Coins"
@@ -398,7 +407,7 @@ theme_type_variation = &"Muted"
 theme_override_font_sizes/font_size = 18
 layout_mode = 2
 horizontal_alignment = 1
-text = "Day 1/7"
+text = "Day 1/10"
 
 [node name="ClaimButton" type="Button" parent="RewardPopup/Box"]
 layout_mode = 2
@@ -424,3 +433,23 @@ size_flags_horizontal = 4
 theme_type_variation = &"Passive"
 theme_override_font_sizes/font_size = 20
 flat = true
+
+[node name="GiftOverlay" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 0
+[node name="Dim" type="ColorRect" parent="GiftOverlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.02, 0.015, 0.05, 0.85)
+[node name="Reveal" parent="GiftOverlay" instance=ExtResource("13_reveal")]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -300.0
+offset_right = 320.0
+offset_bottom = 300.0

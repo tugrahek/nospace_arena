@@ -6,6 +6,7 @@ signal reward_claimed(amount: int)
 signal dismissed
 enum State { HIDDEN, READY, CLAIMING, CLAIMED, DISMISSING, INSPECTING }
 const PALETTE: PaletteData = preload("res://config/palette.tres")
+const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
 @export var entrance_duration: float = 0.20
 @export var claim_pulse_duration: float = 0.22
 @export var claimed_hold_duration: float = 0.7
@@ -29,6 +30,7 @@ var _motion: Tween
 @onready var _title: Label = $Box/RewardTitle
 @onready var _coin: Control = $Box/Hero/Coin
 @onready var _bonus_icon: Control = $Box/Hero/BoostIcon
+@onready var _gift_icon: Control = $Box/Hero/SupplyGift
 @onready var _amount: Label = $Box/RewardAmount
 @onready var _currency: Label = $Box/Currency
 @onready var _day: Label = $Box/RewardBody
@@ -124,10 +126,11 @@ func _update_selection() -> void:
 
 
 func _show_reward_spec(spec: Dictionary) -> void:
+	_gift_icon.visible = bool(spec.get("supply_box", false))
 	var coins: int = int(spec.get("coins", 0))
 	var boost_ids: Array = spec.get("boost_ids", [])
 	_coin.visible = coins > 0
-	_amount.visible = coins > 0 or not boost_ids.is_empty()
+	_amount.visible = coins > 0 or not boost_ids.is_empty() or bool(spec.get("supply_box", false))
 	_currency.visible = _amount.visible
 	_amount.text = "+%d" % coins if coins > 0 else "1×"
 	_currency.text = tr("HUD_CURRENCY")
@@ -136,7 +139,7 @@ func _show_reward_spec(spec: Dictionary) -> void:
 	if not boost_ids.is_empty():
 		var data: BoostData = ContentCatalog.boost_by_id(StringName(boost_ids[0]))
 		if data != null:
-			_bonus_icon.set("effect", data.effect)
+			_bonus_icon.set("effect", BoostIcon.COIN_BONUS_ICON if StringName(boost_ids[0]) == &"coin_bonus" else data.effect)
 			_bonus_icon.queue_redraw()
 		for boost_id in boost_ids:
 			var boost: BoostData = ContentCatalog.boost_by_id(StringName(boost_id))
@@ -144,6 +147,10 @@ func _show_reward_spec(spec: Dictionary) -> void:
 				names.append(tr(boost.display_name_key))
 	if not boost_ids.is_empty():
 		_currency.text = ", ".join(names)
+	if spec.get("supply_box", false):
+		_gift_icon.visible = true
+		if boost_ids.is_empty() and coins == 0:
+			_currency.text = tr("SUPPLY_TITLE")
 
 
 func _on_claim() -> void:
@@ -157,13 +164,16 @@ func _on_claim() -> void:
 	var claim_result: Variant = claim_action.call()
 	var actual_coins: int = int(claim_result.get("coins", 0)) if claim_result is Dictionary else int(claim_result)
 	var actual_boosts: Array = claim_result.get("boost_ids", []) if claim_result is Dictionary else []
-	if actual_coins <= 0 and actual_boosts.is_empty():
+	var actual_gift: bool = claim_result is Dictionary and bool(claim_result.get("supply_box", false))
+	if actual_coins <= 0 and actual_boosts.is_empty() and not actual_gift:
 		_dismiss.call_deferred()
 		return
 	reward_amount = actual_coins
 	preview_spec = {"coins": actual_coins, "boost_ids": actual_boosts}
+	if claim_result is Dictionary and claim_result.get("supply_box", false):
+		preview_spec["supply_box"] = true
 	_show_reward_spec(preview_spec)
-	_active_reward_icon = _coin if _coin.visible else _bonus_icon
+	_active_reward_icon = _coin if _coin.visible else _bonus_icon if _bonus_icon.visible else _gift_icon
 	_claim.text = "✓ " + tr("DAILY_REWARD_RECEIVED")
 	_eligible = false
 	completed_days = current_day

@@ -29,6 +29,8 @@ const HOWTO_SCENE: String = "res://scenes/ui/HowToPlay.tscn"
 @onready var _menu_buttons: VBoxContainer = $Center/Buttons
 @onready var _brand_title: Label = $Center/Title
 @onready var _brand_subtitle: Label = $Center/Subtitle
+@onready var _gift_overlay: Control = $GiftOverlay
+@onready var _gift_reveal: SupplyPopup = $GiftOverlay/Reveal
 
 
 func _ready() -> void:
@@ -46,10 +48,13 @@ func _ready() -> void:
 	_settings_button.pressed.connect(func() -> void: get_tree().change_scene_to_file(SETTINGS_SCENE))
 	_reward_popup.reward_claimed.connect(func(_amount: int) -> void: _refresh())
 	_reward_popup.dismissed.connect(_on_reward_dismissed)
+	_gift_reveal.dismissed.connect(_on_gift_dismissed)
 	_reward_entry.pressed.connect(_open_reward)
+	Economy.currency_changed.connect(_on_currency_changed)
 	_refresh()
 	if not _maybe_show_reward():
 		_emblem.play_intro()
+		_show_daily_gift.call_deferred()
 	AudioManager.play_music("menu")  # menu track
 	# First launch: show how-to-play once (HowToPlay marks it seen on entry).
 	if not Economy.tutorial_seen():
@@ -73,6 +78,28 @@ func _set_reward_context(active: bool) -> void:
 
 
 func _on_reward_dismissed() -> void:
+	if _show_daily_gift():
+		return
+	_set_reward_context(false)
+	_emblem.play_intro()
+
+
+## Reconciles accepted gifts, then presents only their persisted result through the shared reveal.
+func _show_daily_gift() -> bool:
+	Economy.supply_acquisition().recover()
+	for id: String in Economy.supply_boxes().unpresented_deliveries():
+		if Economy.supply_boxes().box_status(id).get("source") != DailyRewardClaim.GIFT_SOURCE:
+			continue
+		_gift_overlay.visible = true
+		if _gift_reveal.present_delivery(id):
+			_set_reward_context(true)
+			return true
+	_gift_overlay.visible = false
+	return false
+
+
+func _on_gift_dismissed() -> void:
+	_gift_overlay.visible = false
 	_set_reward_context(false)
 	_emblem.play_intro()
 
@@ -80,6 +107,10 @@ func _on_reward_dismissed() -> void:
 func _open_reward() -> void:
 	_refresh()
 	_set_reward_context(_reward_popup.present(Economy.login_reward_status(), true))
+
+
+func _on_currency_changed(_balance: int) -> void:
+	_refresh()
 
 
 func _on_play() -> void:
@@ -98,6 +129,6 @@ func _refresh() -> void:
 	# Missions + loadout/selection have their own panels (Missions/Store) — not here.
 	_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
 	var status: Dictionary = Economy.login_reward_status()
-	_reward_progress.text = "%d/7" % clampi(int(status["new_streak"]), 1, 7)
+	_reward_progress.text = "%d/10" % clampi(int(status["new_streak"]), 1, 10)
 	_reward_entry.tooltip_text = tr("DAILY_REWARD_TITLE")
 	_reward_entry.modulate = Color.WHITE if status["claimable"] else Color(1, 1, 1, 0.55)

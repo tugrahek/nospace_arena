@@ -1,10 +1,9 @@
 extends Control
 
-## Distinct procedural icon per boost effect so the three boosts read apart at a glance:
-## Extra Life -> heart (red), Coin Bonus -> coin (gold), Slow Start -> clock (blue). Data-driven
-## by BoostData.Effect; no image assets.
+## Distinct procedural icon per boost effect; no image assets.
 
-@export var effect: int = 0  # BoostData.Effect (0 EXTRA_LIFE, 1 SLOW_START, 2 COIN_BONUS)
+const COIN_BONUS_ICON: int = 3
+@export var effect: int = 0  # BoostData.Effect or COIN_BONUS_ICON.
 
 
 func _ready() -> void:
@@ -18,6 +17,8 @@ func _draw() -> void:
 	match effect:
 		BoostData.Effect.SLOW_START:
 			_draw_clock(c, r)
+		COIN_BONUS_ICON:
+			_draw_coin_bonus(c, r)
 		BoostData.Effect.COIN_BONUS:
 			_draw_coin(c, r)
 		_:
@@ -42,6 +43,17 @@ func _draw_coin(c: Vector2, r: float) -> void:
 	draw_circle(c, r, gold)
 	draw_arc(c, r * 0.94, 0.0, TAU, 32, dark, maxf(2.0, r * 0.12), true)
 	draw_arc(c, r * 0.5, 0.0, TAU, 24, dark, maxf(1.5, r * 0.08), true)
+
+
+func _draw_coin_bonus(c: Vector2, r: float) -> void:
+	_draw_coin(c, r * 0.78)
+	var accent := Color(0.35, 0.98, 0.88)
+	var badge := c + Vector2(r * 0.62, -r * 0.62)
+	var badge_radius: float = maxf(4.0, r * 0.38)
+	draw_circle(badge, badge_radius, Color(0.035, 0.055, 0.13))
+	draw_arc(badge, badge_radius, 0.0, TAU, 20, accent, maxf(1.5, r * 0.1), true)
+	draw_line(badge - Vector2(badge_radius * 0.48, 0.0), badge + Vector2(badge_radius * 0.48, 0.0), accent, maxf(1.5, r * 0.1), true)
+	draw_line(badge - Vector2(0.0, badge_radius * 0.48), badge + Vector2(0.0, badge_radius * 0.48), accent, maxf(1.5, r * 0.1), true)
 
 
 func _draw_clock(c: Vector2, r: float) -> void:

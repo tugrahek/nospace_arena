@@ -74,7 +74,7 @@ func _make_preview(effect_kind: int, arena_size: Vector2i, void_color: Color, bo
 		return preview
 	if kind == Kind.BOOST:
 		var icon := BoostIcon.new()
-		icon.set("effect", effect_kind)
+		icon.set("effect", BoostIcon.COIN_BONUS_ICON if item_id == &"coin_bonus" else effect_kind)
 		icon.custom_minimum_size = Vector2(66.0, 66.0)
 		return icon
 	var preview := ArenaSelectorPreview.new()

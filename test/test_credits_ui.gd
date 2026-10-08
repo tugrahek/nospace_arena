@@ -31,8 +31,8 @@ func test_settings_legal_footer_localizes_and_returns_to_same_instance() -> void
 		settings._apply_texts()
 		await get_tree().process_frame
 		var copyright: String = "© 2026 Tuğra Hekimoğlu. All rights reserved." if locale == "en" else "© 2026 Tuğra Hekimoğlu. Tüm hakları saklıdır."
-		assert_eq(settings.get_node("Center/LegalFooter/Copyright").text, copyright)
-		var entry: Button = settings.get_node("Center/LegalFooter/LicensesButton") as Button
+		assert_eq(settings.get_node("Bottom/LegalFooter/Copyright").text, copyright)
+		var entry: Button = settings.get_node("Bottom/LegalFooter/LicensesButton") as Button
 		assert_eq(entry.text, "Open-source licenses" if locale == "en" else "Açık kaynak lisansları")
 		entry.pressed.emit()
 		await get_tree().process_frame

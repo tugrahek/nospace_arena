@@ -10,7 +10,7 @@ var unlocked: Dictionary = {}  # kind:String -> Array[String] of ids
 var selected_character_id: String = "pulse"  # persisted loadout (free-play)
 var selected_arena_id: String = "void"
 var last_claim_epoch_day: int = -1  # daily login reward; -1 = never claimed
-var streak_day: int = 0  # 1..7 login streak
+var streak_day: int = 0  # 1..10 login reward cycle
 var rewarded_mission_bonus_epoch_day: int = -1  # -1 = never claimed
 var tutorial_seen: bool = false  # how-to-play shown once (first launch)
 var boost_charges: Dictionary = {}  # boost id:String -> owned count:int (consumables)
@@ -76,6 +76,8 @@ func consume_boost(id: StringName) -> bool:
 	if c <= 0:
 		return false
 	boost_charges[String(id)] = c - 1
+	if c == 1:
+		set_boost_armed(id, false)
 	return true
 
 
@@ -94,12 +96,13 @@ func set_campaign_star(id: StringName, stars: int) -> bool:
 
 
 func is_boost_armed(id: StringName) -> bool:
-	return armed_boosts.has(String(id))
+	return boost_count(id) > 0 and armed_boosts.has(String(id))
 
 
 ## Arms / disarms a boost for the next run (idempotent).
 func set_boost_armed(id: StringName, armed: bool) -> void:
 	var s: String = String(id)
+	armed = armed and boost_count(id) > 0
 	if armed and not armed_boosts.has(s):
 		armed_boosts.append(s)
 	elif not armed and armed_boosts.has(s):
@@ -148,7 +151,8 @@ static func from_dict(d: Dictionary) -> SaveData:
 	var ab: Variant = d.get("armed_boosts", [])
 	if typeof(ab) == TYPE_ARRAY:
 		for id in ab:
-			data.armed_boosts.append(String(id))
+			if data.boost_count(StringName(id)) > 0 and not data.armed_boosts.has(String(id)):
+				data.armed_boosts.append(String(id))
 	var cs: Variant = d.get("campaign_stars", {})
 	if typeof(cs) == TYPE_DICTIONARY:
 		for id in cs:

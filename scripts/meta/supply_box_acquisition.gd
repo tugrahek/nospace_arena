@@ -57,6 +57,9 @@ func purchase_coin_box(request_id: String, day_context: int) -> Dictionary:
 	if counters.is_empty() or counters["coin_count"] >= _config.coin_daily_limit \
 			or not data.can_afford(_config.coin_cost):
 		return {"accepted": false}
+	# Ready daily rewarded acquisition takes priority; unavailability never consumes a coin right.
+	if not _coin_priority_allows(counters):
+		return {"accepted": false}
 	var id: String = "supply/coin/" + request_id
 	var record: Dictionary = _core._prepare_reservation(id, COIN_SOURCE, request_id, _config.reward_table)
 	if record.is_empty():
@@ -73,6 +76,19 @@ func purchase_coin_box(request_id: String, day_context: int) -> Dictionary:
 	var delivered: bool = accepted and _core.deliver(id)
 	_busy = false
 	return {"accepted": accepted, "delivered": delivered, "box_id": id if accepted else ""}
+
+
+## Canonical coin availability, including rewarded-first priority; no mutation.
+func coin_available() -> bool:
+	var data: SaveData = _profile.call()
+	var counters: Dictionary = _counters(data, int(_today.call()))
+	return _config.is_valid() and not counters.is_empty() and _coin_priority_allows(counters) \
+		and counters["coin_count"] < _config.coin_daily_limit and data.can_afford(_config.coin_cost)
+
+
+func _coin_priority_allows(counters: Dictionary) -> bool:
+	return _active.is_empty() and (counters["rewarded_count"] >= _config.rewarded_daily_limit \
+		or not _ads.is_rewarded_available())
 
 
 ## Reserves before presenting an ad; failures/close reuse this exact daily slot and reward.
