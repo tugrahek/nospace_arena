@@ -13,14 +13,14 @@ const MISSION_ROW: Script = preload("res://scripts/ui/pause_mission_row.gd")
 
 @onready var _pause_button: Button = $PauseButton
 @onready var _overlay: Control = $Overlay
-@onready var _title: Label = $Overlay/Box/Title
-@onready var _resume_button: Button = $Overlay/Box/ResumeButton
-@onready var _mission_section: VBoxContainer = $Overlay/Box/MissionSection
-@onready var _mission_heading: Label = $Overlay/Box/MissionSection/Heading
-@onready var _mission_rows: VBoxContainer = $Overlay/Box/MissionSection/Rows
-@onready var _settings_button: Button = $Overlay/Box/SecondaryActions/SettingsButton
-@onready var _restart_button: Button = $Overlay/Box/SecondaryActions/RestartButton
-@onready var _menu_button: Button = $Overlay/Box/MenuButton
+@onready var _title: Label = $Overlay/SafeArea/Bounds/Box/Title
+@onready var _resume_button: Button = $Overlay/SafeArea/Bounds/Box/ResumeButton
+@onready var _mission_section: VBoxContainer = $Overlay/SafeArea/Bounds/Box/MissionSection
+@onready var _mission_heading: Label = $Overlay/SafeArea/Bounds/Box/MissionSection/Heading
+@onready var _mission_rows: VBoxContainer = $Overlay/SafeArea/Bounds/Box/MissionSection/MissionScroll/Rows
+@onready var _settings_button: Button = $Overlay/SafeArea/Bounds/Box/SecondaryActions/SettingsButton
+@onready var _restart_button: Button = $Overlay/SafeArea/Bounds/Box/SecondaryActions/RestartButton
+@onready var _menu_button: Button = $Overlay/SafeArea/Bounds/Box/MenuButton
 
 var _settings_panel: Control = null  # active in-pause Settings overlay, if open
 var _missions: Array = []

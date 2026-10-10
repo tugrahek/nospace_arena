@@ -341,8 +341,8 @@ func test_hud_leaves_room_for_the_pause_button() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var button: Control = pause.get_node("PauseButton")
-	var score: Control = hud.get_node("TopBar/ScoreLabel")
-	var daily: Control = hud.get_node("DailyLabel")
+	var score: Control = hud.get_node("TopSafeArea/InfoStack/TopBar/ScoreLabel")
+	var daily: Control = hud.get_node("TopSafeArea/InfoStack/MetaRow/DailyLabel")
 	assert_false(button.get_global_rect().intersects(score.get_global_rect()),
 		"pause button no longer covers the score")
 	assert_false(button.get_global_rect().intersects(daily.get_global_rect()),

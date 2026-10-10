@@ -26,19 +26,19 @@ func _hud() -> HUD:
 func test_loss_result_binds_real_score_and_capture_state() -> void:
 	var hud: HUD = await _hud()
 	hud.call("_on_game_over", 1234)
-	var art: Control = hud.get_node("ResultPanel/VBox/ResultArt")
+	var art: Control = hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ResultArt")
 	assert_true(hud.get_node("ResultPanel").visible, "loss shows results")
-	assert_eq(hud.get_node("ResultPanel/VBox/TitleLabel").text, tr("RESULT_LOSE"))
-	assert_eq(hud.get_node("ResultPanel/VBox/ScoreCaption").text, tr("HUD_SCORE"))
-	assert_eq(hud.get_node("ResultPanel/VBox/ResultScore").text, "1234")
-	assert_eq(hud.get_node("ResultPanel/VBox/ProgressLabel").text, "62 / 75%")
-	assert_true(hud.get_node("ResultPanel/VBox/ProgressLabel").visible, "real target progress is shown on loss")
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/TitleLabel").text, tr("RESULT_LOSE"))
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ScoreCaption").text, tr("HUD_SCORE"))
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ResultScore").text, "1234")
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ProgressLabel").text, "62 / 75%")
+	assert_true(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ProgressLabel").visible, "real target progress is shown on loss")
 	assert_lte(art.custom_minimum_size.y, 70.0, "loss uses a compact progress motif")
 	assert_almost_eq(float(art.get("completion_percent")), 62.0, 0.01, "result art uses real capture percent")
 	assert_almost_eq(float(art.get("target_percent")), 75.0, 0.01, "result art uses real target percent")
 	assert_false(bool(art.get("won")), "loss retains its result state")
-	assert_false(hud.get_node("ResultPanel/VBox/NextButton").visible, "loss has no next action")
-	assert_eq(hud.get_node("ResultPanel/VBox/ButtonRow/RetryButton").theme_type_variation,
+	assert_false(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/NextButton").visible, "loss has no next action")
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/RetryButton").theme_type_variation,
 		&"HeroButton", "retry is primary on loss")
 
 
@@ -47,30 +47,30 @@ func test_win_result_keeps_completion_and_campaign_star_binding() -> void:
 	hud.set_target(70.0)
 	hud.update_percent(74.0)
 	hud.call("_on_run_won", 2600)
-	var art: Control = hud.get_node("ResultPanel/VBox/ResultArt")
-	assert_eq(hud.get_node("ResultPanel/VBox/TitleLabel").text, tr("RESULT_WIN"))
-	assert_eq(hud.get_node("ResultPanel/VBox/ResultScore").text, "2600")
+	var art: Control = hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ResultArt")
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/TitleLabel").text, tr("RESULT_WIN"))
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ResultScore").text, "2600")
 	assert_true(bool(art.get("won")), "win retains its result state")
 	assert_almost_eq(float(art.get("completion_percent")), 74.0, 0.01, "win never invents 100 percent")
 	assert_almost_eq(float(art.get("target_percent")), 70.0, 0.01, "win retains the independent target")
-	assert_eq(hud.get_node("ResultPanel/VBox/ProgressLabel").text, "74 / 70%")
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ProgressLabel").text, "74 / 70%")
 	assert_lte(art.custom_minimum_size.y, 70.0, "win keeps the progress motif compact")
 	hud.star_stagger = 0.01
 	hud.show_campaign_stars(2, false, true)
 	await get_tree().create_timer(0.08).timeout
-	assert_eq(hud.get_node("ResultPanel/VBox/StarsLabel").text, "★★☆", "campaign stars keep their earned value")
-	assert_true(hud.get_node("ResultPanel/VBox/NextButton").visible, "campaign next remains available")
-	assert_eq(hud.get_node("ResultPanel/VBox/ButtonRow/RetryButton").theme_type_variation,
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/StarsLabel").text, "★★☆", "campaign stars keep their earned value")
+	assert_true(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/NextButton").visible, "campaign next remains available")
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/RetryButton").theme_type_variation,
 		&"Secondary", "campaign next keeps retry secondary")
 
 
 func test_win_without_next_keeps_retry_primary_and_optional_labels_collapsed() -> void:
 	var hud: HUD = await _hud()
 	hud.call("_on_run_won", 1700)
-	assert_false(hud.get_node("ResultPanel/VBox/NextButton").visible)
-	assert_false(hud.get_node("ResultPanel/VBox/StarsLabel").visible)
-	assert_false(hud.get_node("ResultPanel/VBox/NewBestLabel").visible)
-	assert_eq(hud.get_node("ResultPanel/VBox/ButtonRow/RetryButton").theme_type_variation,
+	assert_false(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/NextButton").visible)
+	assert_false(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/StarsLabel").visible)
+	assert_false(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/NewBestLabel").visible)
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/RetryButton").theme_type_variation,
 		&"HeroButton", "retry becomes primary when there is no next level")
 
 
@@ -80,9 +80,9 @@ func test_result_actions_keep_retry_menu_and_next_signals() -> void:
 	hud.retry_pressed.connect(func() -> void: counts["retry"] += 1)
 	hud.menu_pressed.connect(func() -> void: counts["menu"] += 1)
 	hud.next_pressed.connect(func() -> void: counts["next"] += 1)
-	hud.get_node("ResultPanel/VBox/ButtonRow/RetryButton").emit_signal("pressed")
-	hud.get_node("ResultPanel/VBox/ButtonRow/MenuButton").emit_signal("pressed")
-	hud.get_node("ResultPanel/VBox/NextButton").emit_signal("pressed")
+	hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/RetryButton").emit_signal("pressed")
+	hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/MenuButton").emit_signal("pressed")
+	hud.get_node("ResultPanel/SafeArea/Bounds/VBox/NextButton").emit_signal("pressed")
 	assert_eq(counts["retry"], 1, "retry signal is unchanged")
 	assert_eq(counts["menu"], 1, "menu signal is unchanged")
 	assert_eq(counts["next"], 1, "next signal is unchanged")
@@ -92,11 +92,11 @@ func test_results_localize_in_english_and_turkish() -> void:
 	for locale in ["en", "tr"]:
 		TranslationServer.set_locale(locale)
 		var hud: HUD = await _hud()
-		assert_eq(hud.get_node("ResultPanel/VBox/ButtonRow/RetryButton").text, tr("RESULT_RETRY"))
-		assert_eq(hud.get_node("ResultPanel/VBox/ButtonRow/MenuButton").text, tr("RESULT_MENU"))
-		assert_eq(hud.get_node("ResultPanel/VBox/NextButton").text, tr("RESULT_NEXT"))
+		assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/RetryButton").text, tr("RESULT_RETRY"))
+		assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/MenuButton").text, tr("RESULT_MENU"))
+		assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/NextButton").text, tr("RESULT_NEXT"))
 		hud.show_endless_stage_reached(8)
-		assert_eq(hud.get_node("ResultPanel/VBox/StageReachedLabel").text,
+		assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/StageReachedLabel").text,
 			tr("RESULT_STAGE_REACHED") % 8, "stage label follows the active locale")
 
 
@@ -106,7 +106,7 @@ func test_endless_first_stage_loss_reports_stage_one() -> void:
 	add_child_autofree(game)
 	await get_tree().process_frame
 	game.call("_show_endless_result_stage")
-	var stage_label: Label = game.get_node("HUD/ResultPanel/VBox/StageReachedLabel")
+	var stage_label: Label = game.get_node("HUD/ResultPanel/SafeArea/Bounds/VBox/StageReachedLabel")
 	assert_true(stage_label.visible)
 	assert_eq(stage_label.text, tr("RESULT_STAGE_REACHED") % 1)
 	SeedManager.enter_free()
@@ -120,17 +120,17 @@ func test_endless_stage_transition_result_uses_stage_just_started() -> void:
 	await get_tree().process_frame
 	game.call("_show_endless_result_stage")
 	var hud: HUD = game.get_node("HUD")
-	assert_eq(hud.get_node("ResultPanel/VBox/StageReachedLabel").text, tr("RESULT_STAGE_REACHED") % 1,
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/StageReachedLabel").text, tr("RESULT_STAGE_REACHED") % 1,
 		"before transition the current stage is reported")
 	game.call("_advance_stage")
 	hud.setup(3)
 	game.call("_show_endless_result_stage")
-	assert_eq(hud.get_node("ResultPanel/VBox/StageReachedLabel").text, tr("RESULT_STAGE_REACHED") % 2,
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/StageReachedLabel").text, tr("RESULT_STAGE_REACHED") % 2,
 		"after transition the newly started stage is reported")
 	game.call("_start_stage", 7)
 	hud.setup(3)
 	game.call("_show_endless_result_stage")
-	assert_eq(hud.get_node("ResultPanel/VBox/StageReachedLabel").text, tr("RESULT_STAGE_REACHED") % 8,
+	assert_eq(hud.get_node("ResultPanel/SafeArea/Bounds/VBox/StageReachedLabel").text, tr("RESULT_STAGE_REACHED") % 8,
 		"later stage uses one-based display numbering")
 	SeedManager.enter_free()
 	GameState.reset()
@@ -141,7 +141,7 @@ func test_non_endless_result_modes_hide_stage_reached_label() -> void:
 	var game: Node = GAME_SCENE.instantiate()
 	add_child_autofree(game)
 	await get_tree().process_frame
-	var stage_label: Label = game.get_node("HUD/ResultPanel/VBox/StageReachedLabel")
+	var stage_label: Label = game.get_node("HUD/ResultPanel/SafeArea/Bounds/VBox/StageReachedLabel")
 	for mode in [SeedManager.Mode.FREE, SeedManager.Mode.DAILY, SeedManager.Mode.CAMPAIGN]:
 		game.set("_mode", mode)
 		game.call("_show_endless_result_stage")

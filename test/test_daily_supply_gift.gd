@@ -163,6 +163,17 @@ func test_main_menu_reveals_persisted_gift_without_granting_again() -> void:
 	assert_eq(reveal.revealed_box_id, result["gift_box_id"])
 	assert_eq(Economy.balance(), balance)
 	assert_eq(Economy._data.boost_charges, boosts)
+	var viewport: Viewport = get_viewport()
+	var original_viewport_size: Vector2i = viewport.size
+	var continue_button: Control = reveal.get_node("SafeArea/Bounds/Frame/RevealView/Footer/Continue")
+	for screen_size: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600)]:
+		viewport.size = screen_size
+		await wait_process_frames(2)
+		var usable_rect: Rect2 = reveal.get_node("SafeArea/Bounds").get_global_rect()
+		assert_true(usable_rect.encloses(reveal.get_node("SafeArea/Bounds/Frame").get_global_rect()))
+		assert_true(usable_rect.encloses(continue_button.get_global_rect()))
+	viewport.size = original_viewport_size
+	await wait_process_frames(2)
 	reveal._continue.pressed.emit()
 	assert_false(menu.get_node("GiftOverlay").visible)
 	assert_true(Economy.supply_boxes().box_status(result["gift_box_id"])["presented"])

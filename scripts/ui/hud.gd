@@ -24,6 +24,7 @@ signal missions_changed(missions: Array)
 @export var combo_heat_full: int = 5         # multiplier that is fully gold
 
 const PALETTE: PaletteData = preload("res://config/palette.tres")
+const MAX_RESULTS_WIDTH: float = 720.0
 
 var _score_tween: Tween = null
 var _target: float = 75.0                    # stage/level capture target (display only)
@@ -33,31 +34,35 @@ var _near_target_hot: bool = false
 var _combo_tween: Tween = null
 var _last_combo: int = 0                     # punch only when the chain actually grows
 
-@onready var _hearts: HeartsHud = $TopBar/Hearts
+@onready var _hearts: HeartsHud = $TopSafeArea/InfoStack/TopBar/Hearts
 @onready var _stage_banner: Label = $StageBanner
-@onready var _score_label: Label = $TopBar/ScoreLabel
-@onready var _percent_label: Label = $TopBar/PercentLabel
-@onready var _combo_label: Label = $ComboLabel
-@onready var _daily_label: Label = $DailyLabel
-@onready var _best_label: Label = $BestLabel
+@onready var _score_label: Label = $TopSafeArea/InfoStack/TopBar/ScoreLabel
+@onready var _percent_label: Label = $TopSafeArea/InfoStack/TopBar/PercentLabel
+@onready var _combo_label: Label = $TopSafeArea/InfoStack/ActivityRow/ComboLabel
+@onready var _daily_label: Label = $TopSafeArea/InfoStack/MetaRow/DailyLabel
+@onready var _best_label: Label = $TopSafeArea/InfoStack/MetaRow/BestLabel
 @onready var _currency_label: Label = $CurrencyLabel
-@onready var _mission_status: HBoxContainer = $MissionStatus
-@onready var _mission_count: Label = $MissionStatus/Count
+@onready var _mission_status: HBoxContainer = $TopSafeArea/InfoStack/ActivityRow/MissionStatus
+@onready var _mission_count: Label = $TopSafeArea/InfoStack/ActivityRow/MissionStatus/Count
 @onready var _result_panel: Control = $ResultPanel
-@onready var _result_title: Label = $ResultPanel/VBox/TitleLabel
-@onready var _result_art: Control = $ResultPanel/VBox/ResultArt
-@onready var _result_score_caption: Label = $ResultPanel/VBox/ScoreCaption
-@onready var _result_score: Label = $ResultPanel/VBox/ResultScore
-@onready var _stage_reached_label: Label = $ResultPanel/VBox/StageReachedLabel
-@onready var _result_progress: Label = $ResultPanel/VBox/ProgressLabel
-@onready var _stars_label: Label = $ResultPanel/VBox/StarsLabel
-@onready var _new_best_label: Label = $ResultPanel/VBox/NewBestLabel
-@onready var _next_button: Button = $ResultPanel/VBox/NextButton
-@onready var _retry_button: Button = $ResultPanel/VBox/ButtonRow/RetryButton
-@onready var _menu_button: Button = $ResultPanel/VBox/ButtonRow/MenuButton
+@onready var _result_bounds: Control = $ResultPanel/SafeArea/Bounds
+@onready var _result_content: VBoxContainer = $ResultPanel/SafeArea/Bounds/VBox
+@onready var _result_title: Label = $ResultPanel/SafeArea/Bounds/VBox/TitleLabel
+@onready var _result_art: Control = $ResultPanel/SafeArea/Bounds/VBox/ResultArt
+@onready var _result_score_caption: Label = $ResultPanel/SafeArea/Bounds/VBox/ScoreCaption
+@onready var _result_score: Label = $ResultPanel/SafeArea/Bounds/VBox/ResultScore
+@onready var _stage_reached_label: Label = $ResultPanel/SafeArea/Bounds/VBox/StageReachedLabel
+@onready var _result_progress: Label = $ResultPanel/SafeArea/Bounds/VBox/ProgressLabel
+@onready var _stars_label: Label = $ResultPanel/SafeArea/Bounds/VBox/StarsLabel
+@onready var _new_best_label: Label = $ResultPanel/SafeArea/Bounds/VBox/NewBestLabel
+@onready var _next_button: Button = $ResultPanel/SafeArea/Bounds/VBox/NextButton
+@onready var _retry_button: Button = $ResultPanel/SafeArea/Bounds/VBox/ButtonRow/RetryButton
+@onready var _menu_button: Button = $ResultPanel/SafeArea/Bounds/VBox/ButtonRow/MenuButton
 
 
 func _ready() -> void:
+	_result_bounds.resized.connect(_layout_results_content)
+	_layout_results_content.call_deferred()
 	GameState.game_started.connect(_on_game_started)
 	GameState.life_lost.connect(_on_life_lost)
 	GameState.score_changed.connect(_on_score_changed)
@@ -79,9 +84,18 @@ func _ready() -> void:
 	_next_button.pressed.connect(func() -> void: next_pressed.emit())
 
 
+## Centers result content in the safe area and caps its width on large screens.
+func _layout_results_content() -> void:
+	if not is_inside_tree():
+		return
+	var width: float = minf(_result_bounds.size.x, MAX_RESULTS_WIDTH)
+	_result_content.offset_left = -width * 0.5
+	_result_content.offset_right = width * 0.5
+
+
 ## Enables the optional ad offer only after the game's run-end bookkeeping is complete.
 func finalize_result_rewards() -> void:
-	$ResultPanel/VBox/RewardedBonusButton.present()
+	$ResultPanel/SafeArea/Bounds/VBox/RewardedBonusButton.present()
 
 
 ## Shows/hides the daily-mode badge. Full daily UI (countdown etc.) is Step 14.

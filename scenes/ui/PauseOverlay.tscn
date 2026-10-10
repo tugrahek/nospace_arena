@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://bjfil3mkhtfs0"]
+[gd_scene load_steps=4 format=3 uid="uid://bjfil3mkhtfs0"]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_overlay.gd" id="1_pause"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
+[ext_resource type="Script" path="res://scripts/ui/safe_area_margin.gd" id="3_safe_area"]
 
 [node name="PauseOverlay" type="CanvasLayer"]
 layer = 3
@@ -31,26 +32,40 @@ anchor_bottom = 1.0
 color = Color(0.02, 0.015, 0.05, 0.72)
 mouse_filter = 2
 
-[node name="Box" type="VBoxContainer" parent="Overlay"]
+[node name="SafeArea" type="MarginContainer" parent="Overlay"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+script = ExtResource("3_safe_area")
+content_padding = Vector4i(24, 24, 24, 24)
+
+[node name="Bounds" type="Control" parent="Overlay/SafeArea"]
+layout_mode = 2
+
+[node name="Box" type="VBoxContainer" parent="Overlay/SafeArea/Bounds"]
 anchor_left = 0.5
-anchor_top = 0.5
+anchor_top = 0.0
 anchor_right = 0.5
-anchor_bottom = 0.5
+anchor_bottom = 1.0
 offset_left = -260.0
-offset_top = -350.0
+offset_top = 0.0
 offset_right = 260.0
-offset_bottom = 350.0
+offset_bottom = 0.0
 alignment = 1
 theme_override_constants/separation = 20
 
-[node name="Title" type="Label" parent="Overlay/Box"]
+[node name="Title" type="Label" parent="Overlay/SafeArea/Bounds/Box"]
 layout_mode = 2
 horizontal_alignment = 1
 theme_type_variation = &"Title"
 theme_override_font_sizes/font_size = 42
 text = "Paused"
 
-[node name="ResumeButton" type="Button" parent="Overlay/Box"]
+[node name="ResumeButton" type="Button" parent="Overlay/SafeArea/Bounds/Box"]
 layout_mode = 2
 custom_minimum_size = Vector2(420, 68)
 size_flags_horizontal = 4
@@ -59,26 +74,32 @@ text = "Resume"
 theme_override_font_sizes/font_size = 26
 script = ExtResource("2_juicy")
 
-[node name="MissionSection" type="VBoxContainer" parent="Overlay/Box"]
+[node name="MissionSection" type="VBoxContainer" parent="Overlay/SafeArea/Bounds/Box"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 11
 
-[node name="Heading" type="Label" parent="Overlay/Box/MissionSection"]
+[node name="Heading" type="Label" parent="Overlay/SafeArea/Bounds/Box/MissionSection"]
 layout_mode = 2
 theme_type_variation = &"Heading"
 theme_override_font_sizes/font_size = 22
 text = "Missions"
 
-[node name="Rows" type="VBoxContainer" parent="Overlay/Box/MissionSection"]
+[node name="MissionScroll" type="ScrollContainer" parent="Overlay/SafeArea/Bounds/Box/MissionSection"]
+custom_minimum_size = Vector2(0, 234)
 layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Rows" type="VBoxContainer" parent="Overlay/SafeArea/Bounds/Box/MissionSection/MissionScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 9
 
-[node name="SecondaryActions" type="HBoxContainer" parent="Overlay/Box"]
+[node name="SecondaryActions" type="HBoxContainer" parent="Overlay/SafeArea/Bounds/Box"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="SettingsButton" type="Button" parent="Overlay/Box/SecondaryActions"]
+[node name="SettingsButton" type="Button" parent="Overlay/SafeArea/Bounds/Box/SecondaryActions"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 52)
 size_flags_horizontal = 3
@@ -87,7 +108,7 @@ text = "Settings"
 theme_override_font_sizes/font_size = 20
 script = ExtResource("2_juicy")
 
-[node name="RestartButton" type="Button" parent="Overlay/Box/SecondaryActions"]
+[node name="RestartButton" type="Button" parent="Overlay/SafeArea/Bounds/Box/SecondaryActions"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 52)
 size_flags_horizontal = 3
@@ -96,7 +117,7 @@ text = "Restart"
 theme_override_font_sizes/font_size = 20
 script = ExtResource("2_juicy")
 
-[node name="MenuButton" type="Button" parent="Overlay/Box"]
+[node name="MenuButton" type="Button" parent="Overlay/SafeArea/Bounds/Box"]
 layout_mode = 2
 custom_minimum_size = Vector2(220, 48)
 size_flags_horizontal = 4

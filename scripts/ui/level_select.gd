@@ -8,16 +8,23 @@ const MODE_SELECT_SCENE: String = "res://scenes/ui/ModeSelect.tscn"
 const JuicyButton = preload("res://scripts/ui/juicy_button.gd")
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 
-const DESIGN_W: float = 560.0
-const NODE_W: float = 84.0
-const NODE_H: float = 84.0
-const ROW_H: float = 140.0
-const TOP_MARGIN: float = 72.0
-const BOTTOM_PADDING: float = 96.0
-const X_OFFSET: float = 96.0
+const MAX_CONTENT_WIDTH: float = 800.0
+const NODE_W: float = 108.0
+const NODE_H: float = 108.0
+const ROW_H: float = 196.0
+const ROW_GAP: float = 28.0
+const TOP_MARGIN: float = 32.0
+const BOTTOM_PADDING: float = 48.0
+const X_OFFSET: float = 56.0
 const PATH_NODE_HALF_SIZE: Vector2 = Vector2(NODE_W * 0.5, NODE_H * 0.5)
-const META_W: float = 140.0
-const META_H: float = 126.0
+const META_MAX_W: float = 244.0
+const META_H: float = 112.0
+const META_FONT_SIZE: int = 24
+const EDGE_MARGIN: float = 24.0
+const META_GAP: float = 28.0
+const FOCUS_PADDING: float = 24.0
+const ANIMATION_SCALE_BOUND: float = 1.15
+const GLOW_TEXT_GAP: float = 8.0
 
 @export var unlock_delay: float = 0.25
 @export var unlock_start_scale: float = 0.6
@@ -29,11 +36,16 @@ const META_H: float = 126.0
 var _nodes: Array[Button] = []
 var _celebrate_index: int = -1
 var _celebrate_tween: Tween = null
+var _metadata: Array[Label] = []
+var _focus_regions: Array[Rect2] = []
+var _layout_pending: bool = false
 
-@onready var _title: Label = $Center/Title
-@onready var _scroll: ScrollContainer = $Center/Scroll
-@onready var _canvas: Control = $Center/Scroll/PathCanvas
-@onready var _back: Button = $Center/BackButton
+@onready var _bounds: Control = $SafeArea/Bounds
+@onready var _center: VBoxContainer = $SafeArea/Bounds/Center
+@onready var _title: Label = $SafeArea/Bounds/Center/Title
+@onready var _scroll: ScrollContainer = $SafeArea/Bounds/Center/Scroll
+@onready var _canvas: Control = $SafeArea/Bounds/Center/Scroll/PathCanvas
+@onready var _back: Button = $SafeArea/Bounds/Center/BackButton
 
 
 func _ready() -> void:
@@ -44,6 +56,8 @@ func _ready() -> void:
 	scrollbar.custom_minimum_size.x = 4.0
 	scrollbar.modulate.a = 0.3
 	Economy.campaign_changed.connect(_build)
+	_bounds.resized.connect(_queue_layout)
+	_canvas.resized.connect(_queue_layout)
 	_celebrate_index = Economy.consume_pending_unlock()
 	_build()
 	if _celebrate_index >= 0 and _celebrate_index < _nodes.size() and not _nodes[_celebrate_index].disabled:
@@ -53,22 +67,87 @@ func _ready() -> void:
 
 
 func _build() -> void:
+	if _celebrate_tween != null and _celebrate_tween.is_valid():
+		_celebrate_tween.kill()
 	for child in _canvas.get_children():
 		child.queue_free()
 	_nodes.clear()
+	_metadata.clear()
+	_focus_regions.clear()
 	var count: int = ContentCatalog.LEVELS.size()
-	var center_x: float = DESIGN_W * 0.5
-	var centers := PackedVector2Array()
 	for index in count:
-		var center := Vector2(center_x + (X_OFFSET if index % 2 == 1 else -X_OFFSET), TOP_MARGIN + float(index) * ROW_H)
-		centers.append(center)
 		var node: Button = _make_node(index)
-		node.position = center - Vector2(NODE_W, NODE_H) * 0.5
 		node.size = Vector2(NODE_W, NODE_H)
 		_canvas.add_child(node)
 		_nodes.append(node)
-	_canvas.custom_minimum_size = Vector2(DESIGN_W, TOP_MARGIN + float(count - 1) * ROW_H + NODE_H + BOTTOM_PADDING)
+	_canvas.custom_minimum_size = Vector2(0.0, TOP_MARGIN + float(count) * ROW_H + BOTTOM_PADDING)
+	_queue_layout()
+
+
+func _queue_layout() -> void:
+	if _layout_pending or not is_inside_tree():
+		return
+	_layout_pending = true
+	_refresh_layout.call_deferred()
+
+
+## Width follows the real scroll canvas; wrapped metadata determines each row's height.
+func _refresh_layout() -> void:
+	_layout_pending = false
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+	var width: float = minf(_bounds.size.x, MAX_CONTENT_WIDTH)
+	_center.offset_left = -width * 0.5
+	_center.offset_right = width * 0.5
+	if _canvas.size.x <= 0.0:
+		return
+	var middle: float = _canvas.size.x * 0.5
+	var gap: float = maxf(META_GAP, _animation_padding() + GLOW_TEXT_GAP)
+	var metadata_width: float = minf(META_MAX_W, maxf(0.0, middle - X_OFFSET - NODE_W * 0.5 - gap - EDGE_MARGIN))
+	var cursor: float = TOP_MARGIN
+	var centers := PackedVector2Array()
+	_focus_regions.clear()
+	for index: int in _nodes.size():
+		var metadata: Label = _metadata[index]
+		metadata.size.x = metadata_width
+		metadata.size.y = maxf(META_H, metadata.get_minimum_size().y)
+		var row_height: float = maxf(ROW_H, metadata.size.y)
+		var point := Vector2(middle + (X_OFFSET if index % 2 == 1 else -X_OFFSET), cursor + row_height * 0.5)
+		_layout_checkpoint(index, point, gap)
+		centers.append(point)
+		cursor += row_height + ROW_GAP
+	_canvas.custom_minimum_size.y = cursor - ROW_GAP + BOTTOM_PADDING
 	_canvas.call("set_points", centers, PATH_NODE_HALF_SIZE)
+	if _celebrate_tween != null and _celebrate_tween.is_running() and _celebrate_index >= 0:
+		_focus_checkpoint(_nodes[_celebrate_index])
+
+
+func _layout_checkpoint(index: int, point: Vector2, gap: float) -> void:
+	var node: Button = _nodes[index]
+	var metadata: Label = _metadata[index]
+	node.position = point - PATH_NODE_HALF_SIZE
+	metadata.position = Vector2(point.x - NODE_W * 0.5 - gap - metadata.size.x
+		if index % 2 == 0 else point.x + NODE_W * 0.5 + gap, point.y - metadata.size.y * 0.5)
+	_focus_regions.append(node.get_rect().grow(_animation_padding()).merge(metadata.get_rect()))
+
+
+func _animation_padding() -> float:
+	return maxf(FOCUS_PADDING, ceilf(float(unlock_glow_size) + NODE_W * 0.5 * (maxf(ANIMATION_SCALE_BOUND, unlock_start_scale) - 1.0)))
+
+
+## Reveal the whole checkpoint row including metadata and the maximum glow/pop envelope.
+func _focus_checkpoint(node: Button) -> void:
+	var index: int = _nodes.find(node)
+	if index < 0 or index >= _focus_regions.size():
+		return
+	var rect: Rect2 = _focus_regions[index]
+	var bar: VScrollBar = _scroll.get_v_scroll_bar()
+	var target: float = bar.value
+	if rect.position.y < target:
+		target = rect.position.y
+	elif rect.end.y > target + bar.page:
+		target = rect.end.y - bar.page
+	_scroll.scroll_vertical = ceili(clampf(target, 0.0, maxf(0.0, bar.max_value - bar.page)))
 
 
 func _make_node(index: int) -> Button:
@@ -79,16 +158,24 @@ func _make_node(index: int) -> Button:
 	node.custom_minimum_size = Vector2(NODE_W, NODE_H)
 	node.disabled = not unlocked
 	node.text = str(index + 1)
-	node.add_theme_font_size_override("font_size", 24)
+	node.add_theme_font_size_override("font_size", 30)
 	node.add_theme_color_override("font_color", PALETTE.text_primary if unlocked else PALETTE.text_secondary)
 	var current: bool = unlocked and stars == 0
 	var completed: bool = unlocked and stars > 0
-	node.add_theme_stylebox_override("normal", _checkpoint_style(unlocked, current, completed))
-	node.add_theme_stylebox_override("hover", _checkpoint_style(unlocked, current, completed))
+	var idle: StyleBoxFlat = _checkpoint_style(unlocked, current, completed)
+	node.set_meta("route_idle_style", idle)
+	node.add_theme_stylebox_override("normal", idle)
+	node.add_theme_stylebox_override("hover", idle)
 	node.add_theme_stylebox_override("disabled", _checkpoint_style(false, false, false))
+	var focus: StyleBoxFlat = idle.duplicate() as StyleBoxFlat
+	focus.draw_center = false
+	focus.border_color = PALETTE.accent
+	focus.set_border_width_all(3)
+	node.add_theme_stylebox_override("focus", focus)
 	var metadata: Label = _make_metadata(index, level, unlocked, stars)
-	metadata.position = _metadata_position(index)
 	_canvas.add_child(metadata)
+	_metadata.append(metadata)
+	metadata.minimum_size_changed.connect(_queue_layout)
 	if unlocked:
 		node.pressed.connect(_on_pick.bind(index))
 	return node
@@ -115,11 +202,11 @@ func _checkpoint_style(unlocked: bool, current: bool, completed: bool) -> StyleB
 func _make_metadata(index: int, level: LevelData, unlocked: bool, stars: int) -> Label:
 	var metadata := Label.new()
 	metadata.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	metadata.size = Vector2(META_W, META_H)
+	metadata.size = Vector2(META_MAX_W, META_H)
 	metadata.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT if index % 2 == 0 else HORIZONTAL_ALIGNMENT_RIGHT
 	metadata.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	metadata.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	metadata.add_theme_font_size_override("font_size", 21)
+	metadata.add_theme_font_size_override("font_size", META_FONT_SIZE)
 	metadata.add_theme_constant_override("line_spacing", 3)
 	metadata.add_theme_color_override("font_color", PALETTE.text_primary if unlocked else PALETTE.text_secondary)
 	metadata.add_theme_color_override("font_shadow_color", Color(PALETTE.void_bg, 0.8))
@@ -131,16 +218,9 @@ func _make_metadata(index: int, level: LevelData, unlocked: bool, stars: int) ->
 		metadata.modulate.a = 0.62
 		return metadata
 	var star_line := "★".repeat(stars) + "☆".repeat(3 - stars)
-	metadata.text = "%s   %s\n%s" % [title, star_line, tr(level.description_key)]
+	# Keep caption/stars separate; authored bullet groups become intentional objective lines.
+	metadata.text = "%s\n%s\n%s" % [title, star_line, tr(level.description_key).replace(" • ", "\n")]
 	return metadata
-
-
-func _metadata_position(index: int) -> Vector2:
-	var center_x: float = DESIGN_W * 0.5 + (X_OFFSET if index % 2 == 1 else -X_OFFSET)
-	var y: float = TOP_MARGIN + float(index) * ROW_H - META_H * 0.5
-	if index % 2 == 0:
-		return Vector2(maxf(0.0, center_x - NODE_W * 0.5 - META_W - 20.0), y)
-	return Vector2(minf(DESIGN_W - META_W, center_x + NODE_W * 0.5 + 20.0), y)
 
 
 func _celebrate(node: Button) -> void:
@@ -158,7 +238,7 @@ func _celebrate(node: Button) -> void:
 
 
 func _begin_pop(node: Button, glow: StyleBoxFlat) -> void:
-	_scroll.ensure_control_visible(node)
+	_focus_checkpoint(node)
 	AudioManager.play_sfx("unlock")
 	if glow != null:
 		node.add_theme_stylebox_override("normal", glow)
@@ -182,13 +262,15 @@ func _set_glow(strength: float, glow: StyleBoxFlat) -> void:
 
 func _clear_glow(node: Button) -> void:
 	if is_instance_valid(node):
-		node.remove_theme_stylebox_override("normal")
-		node.remove_theme_stylebox_override("hover")
+		var idle: StyleBox = node.get_meta("route_idle_style") as StyleBox
+		node.add_theme_stylebox_override("normal", idle)
+		node.add_theme_stylebox_override("hover", idle)
 
 
 func _stop_celebration(node: Button) -> void:
 	if _celebrate_tween != null and _celebrate_tween.is_valid():
 		_celebrate_tween.kill()
+	node.scale = Vector2.ONE
 	_clear_glow(node)
 
 

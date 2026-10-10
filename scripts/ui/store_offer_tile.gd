@@ -5,6 +5,10 @@ extends Control
 
 const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
 const PALETTE = preload("res://config/palette.tres")
+const TILE_HEIGHT: float = 188.0
+const SIDE_PADDING: float = 8.0
+const MARKER_PADDING: float = 28.0
+var _content: VBoxContainer
 
 signal focus_requested(index: int)
 
@@ -32,26 +36,49 @@ func configure_selector(offer_kind: int, id: StringName, index: int, item_name: 
 	source_size = arena_size
 	for child in get_children():
 		child.free()
-	custom_minimum_size = Vector2(0.0, 140.0)
+	custom_minimum_size = Vector2(0.0, TILE_HEIGHT)
+	_build_content(item_name, effect_kind, arena_size, void_color, border_color)
+	_add_hit_target(item_name)
+	queue_redraw()
+
+
+func _build_content(item_name: String, effect_kind: int, arena_size: Vector2i,
+		void_color: Color, border_color: Color) -> void:
+	_content = VBoxContainer.new()
+	_content.name = "Content"
+	_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_content.offset_left = SIDE_PADDING
+	_content.offset_top = SIDE_PADDING
+	_content.offset_right = -SIDE_PADDING
+	_content.offset_bottom = -MARKER_PADDING
+	_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_content.add_theme_constant_override("separation", 8)
+	_content.minimum_size_changed.connect(_refresh_minimum)
+	add_child(_content)
 	var visual := CenterContainer.new()
 	visual.name = "Visual"
-	visual.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	visual.offset_bottom = 92.0
+	visual.custom_minimum_size.y = 80.0
 	visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visual.add_child(_make_preview(effect_kind, arena_size, void_color, border_color))
-	add_child(visual)
+	_content.add_child(visual)
+	_content.add_child(_make_label(item_name))
+
+
+func _make_label(item_name: String) -> Label:
 	var label := Label.new()
 	label.name = "Label"
 	label.text = item_name
 	label.theme_type_variation = &"Body"
-	label.add_theme_font_size_override("font_size", 17)
-	label.add_theme_color_override("font_color", PALETTE.accent if focused else PALETTE.text_secondary)
+	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_color_override("font_color", PALETTE.accent if is_focused else PALETTE.text_secondary)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	label.offset_top = 94.0
-	label.offset_bottom = 120.0
+	label.custom_minimum_size.y = 56.0
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(label)
+	return label
+
+
+func _add_hit_target(item_name: String) -> void:
 	var target := Button.new()
 	target.name = "HitTarget"
 	target.flat = true
@@ -59,7 +86,10 @@ func configure_selector(offer_kind: int, id: StringName, index: int, item_name: 
 	target.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	target.pressed.connect(func() -> void: focus_requested.emit(selector_index))
 	add_child(target)
-	queue_redraw()
+
+
+func _refresh_minimum() -> void:
+	custom_minimum_size.y = maxf(TILE_HEIGHT, _content.get_combined_minimum_size().y + SIDE_PADDING + MARKER_PADDING)
 
 
 func preview_source_aspect() -> float:

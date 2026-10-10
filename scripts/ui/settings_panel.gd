@@ -8,6 +8,7 @@ const LEGAL_SCENE: PackedScene = preload("res://scenes/ui/Credits.tscn")
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const LANGUAGE_SELECTOR = preload("res://scripts/ui/settings_language_selector.gd")
+const MAX_CONTENT_WIDTH: float = 800.0
 
 ## When true the panel was opened as an overlay (e.g. from in-run Pause); Back closes it.
 ## When false (launched from MainMenu) Back returns to the main menu.
@@ -15,33 +16,38 @@ var embedded: bool = false
 var _legal_view: Control
 var _language_overlay: SettingsLanguageSelector
 
-@onready var _title: Label = $Center/Title
-@onready var _audio_label: Label = $Center/Rows/AudioHeading
-@onready var _master: HSlider = $Center/Rows/MasterRow/Slider
-@onready var _sfx: HSlider = $Center/Rows/SfxRow/Slider
-@onready var _music: HSlider = $Center/Rows/MusicRow/Slider
-@onready var _master_label: Label = $Center/Rows/MasterRow/Header/NameLabel
-@onready var _sfx_label: Label = $Center/Rows/SfxRow/Header/NameLabel
-@onready var _music_label: Label = $Center/Rows/MusicRow/Header/NameLabel
-@onready var _master_value: Label = $Center/Rows/MasterRow/Header/ValueLabel
-@onready var _sfx_value: Label = $Center/Rows/SfxRow/Header/ValueLabel
-@onready var _music_value: Label = $Center/Rows/MusicRow/Header/ValueLabel
-@onready var _mute_label: Label = $Center/Rows/MuteRow/Content/NameLabel
-@onready var _mute_state: Label = $Center/Rows/MuteRow/Content/StateLabel
-@onready var _mute: Button = $Center/Rows/MuteRow
-@onready var _controls_label: Label = $Center/ControlsRow/NameLabel
-@onready var _swipe: Button = $Center/ControlsRow/Segment/SwipeButton
-@onready var _tap: Button = $Center/ControlsRow/Segment/TapButton
-@onready var _dpad: Button = $Center/ControlsRow/Segment/DpadButton
-@onready var _language_label: Label = $Center/LanguageRow/NameLabel
-@onready var _language_button: Button = $Center/LanguageRow/LanguageButton
-@onready var _copyright: Label = $Bottom/LegalFooter/Copyright
-@onready var _licenses: Button = $Bottom/LegalFooter/LicensesButton
-@onready var _privacy: Button = $Bottom/LegalFooter/PrivacyButton
-@onready var _back: Button = $Bottom/BackButton
+@onready var _title: Label = $SafeArea/Bounds/Center/Title
+@onready var _bounds: Control = $SafeArea/Bounds
+@onready var _center: VBoxContainer = $SafeArea/Bounds/Center
+@onready var _bottom: VBoxContainer = $SafeArea/Bounds/Bottom
+@onready var _audio_label: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/AudioHeading
+@onready var _master: HSlider = $SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow/Slider
+@onready var _sfx: HSlider = $SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow/Slider
+@onready var _music: HSlider = $SafeArea/Bounds/Center/Scroll/Content/Rows/MusicRow/Slider
+@onready var _master_label: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow/Header/NameLabel
+@onready var _sfx_label: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow/Header/NameLabel
+@onready var _music_label: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/MusicRow/Header/NameLabel
+@onready var _master_value: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow/Header/ValueLabel
+@onready var _sfx_value: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow/Header/ValueLabel
+@onready var _music_value: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/MusicRow/Header/ValueLabel
+@onready var _mute_label: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow/Content/NameLabel
+@onready var _mute_state: Label = $SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow/Content/StateLabel
+@onready var _mute: Button = $SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow
+@onready var _controls_label: Label = $SafeArea/Bounds/Center/Scroll/Content/ControlsRow/NameLabel
+@onready var _swipe: Button = $SafeArea/Bounds/Center/Scroll/Content/ControlsRow/Segment/SwipeButton
+@onready var _tap: Button = $SafeArea/Bounds/Center/Scroll/Content/ControlsRow/Segment/TapButton
+@onready var _dpad: Button = $SafeArea/Bounds/Center/Scroll/Content/ControlsRow/Segment/DpadButton
+@onready var _language_label: Label = $SafeArea/Bounds/Center/Scroll/Content/LanguageRow/NameLabel
+@onready var _language_button: Button = $SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton
+@onready var _copyright: Label = $SafeArea/Bounds/Bottom/LegalFooter/Copyright
+@onready var _licenses: Button = $SafeArea/Bounds/Bottom/LegalFooter/LicensesButton
+@onready var _privacy: Button = $SafeArea/Bounds/Bottom/LegalFooter/PrivacyButton
+@onready var _back: Button = $SafeArea/Bounds/Bottom/BackButton
 
 
 func _ready() -> void:
+	_bounds.resized.connect(_refresh_layout)
+	_refresh_layout()
 	_style_mute()
 	_apply_texts()
 	# Fill controls from the persisted settings (round-trip).
@@ -74,6 +80,14 @@ func _connect_privacy_options() -> void:
 	_privacy.pressed.connect(_open_privacy_options)
 	AdsService.privacy_options_changed.connect(_on_privacy_options_changed)
 	_on_privacy_options_changed(AdsService.is_privacy_options_required(), AdsService.is_privacy_options_busy())
+
+
+func _refresh_layout() -> void:
+	var width: float = minf(_bounds.size.x, MAX_CONTENT_WIDTH)
+	_center.offset_left = -width * 0.5
+	_center.offset_right = width * 0.5
+	_bottom.offset_left = -width * 0.5
+	_bottom.offset_right = width * 0.5
 
 
 func _connect_audio() -> void:

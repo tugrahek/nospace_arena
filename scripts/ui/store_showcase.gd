@@ -5,6 +5,11 @@ extends VBoxContainer
 
 const PALETTE = preload("res://config/palette.tres")
 const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
+const HERO_HEIGHTS: Vector2 = Vector2(240.0, 400.0)
+const HERO_SHARE: float = 0.5
+const ICON_SHARE: float = 0.7
+const ICON_SIZES: Vector2 = Vector2(180.0, 260.0)
+const ACTION_SIZE: Vector2 = Vector2(180.0, 108.0)
 
 signal select_requested(kind: String, id: StringName)
 signal purchase_requested(kind: String, id: StringName, cost: int)
@@ -17,6 +22,7 @@ var source_size: Vector2i = Vector2i.ONE
 var _state: Label
 var _action: Button
 var _preview: Control
+var _visual: CenterContainer
 
 
 func _ready() -> void:
@@ -66,15 +72,24 @@ func action_disabled() -> bool:
 	return _action != null and _action.disabled
 
 
+## Fill spare Store height without squeezing text/actions; short pages scroll naturally.
+func fit_height(available_height: float) -> void:
+	custom_minimum_size.y = maxf(0.0, roundf(available_height))
+	_visual.custom_minimum_size.y = roundf(clampf(available_height * HERO_SHARE, HERO_HEIGHTS.x, HERO_HEIGHTS.y))
+	if kind != Kind.ARENA:
+		_preview.custom_minimum_size = Vector2.ONE * roundf(clampf(_visual.custom_minimum_size.y * ICON_SHARE, ICON_SIZES.x, ICON_SIZES.y))
+
+
 func _build(item_name: String, description: String, owned: bool, selected: bool, affordable: bool, cost: int,
 		owned_count: int) -> void:
 	for child in get_children():
 		child.free()
-	custom_minimum_size = Vector2(0.0, 700.0)
+	custom_minimum_size = Vector2.ZERO
 	alignment = BoxContainer.ALIGNMENT_CENTER
-	add_theme_constant_override("separation", 10)
+	add_theme_constant_override("separation", 16)
 	var visual := CenterContainer.new()
-	visual.custom_minimum_size = Vector2(0.0, 360.0)
+	_visual = visual
+	visual.custom_minimum_size = Vector2(0.0, HERO_HEIGHTS.x)
 	visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visual.add_child(_preview)
 	add_child(visual)
@@ -82,7 +97,8 @@ func _build(item_name: String, description: String, owned: bool, selected: bool,
 	name_label.name = "Name"
 	name_label.text = item_name
 	name_label.theme_type_variation = &"Heading"
-	name_label.add_theme_font_size_override("font_size", 30)
+	name_label.add_theme_font_size_override("font_size", 36)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(name_label)
 	var description_label := Label.new()
@@ -90,15 +106,19 @@ func _build(item_name: String, description: String, owned: bool, selected: bool,
 	description_label.text = description
 	description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	description_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	description_label.add_theme_font_size_override("font_size", 18)
+	description_label.add_theme_font_size_override("font_size", 24)
 	description_label.add_theme_color_override("font_color", PALETTE.text_secondary)
 	add_child(description_label)
+	_build_actions(owned, selected, affordable, cost, owned_count)
+
+
+func _build_actions(owned: bool, selected: bool, affordable: bool, cost: int, owned_count: int) -> void:
 	var action_row := HBoxContainer.new()
 	action_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	action_row.add_theme_constant_override("separation", 14)
 	_state = Label.new()
 	_state.name = "State"
-	_state.add_theme_font_size_override("font_size", 17)
+	_state.add_theme_font_size_override("font_size", 24)
 	action_row.add_child(_state)
 	if kind == Kind.BOOST:
 		_state.text = tr("STORE_OWNED") % owned_count
@@ -132,7 +152,8 @@ func _make_loadout_preview(effect_kind: int, arena_size: Vector2i, void_color: C
 func _add_select_action(row: HBoxContainer) -> void:
 	_action = Button.new()
 	_action.text = tr("STORE_SELECT")
-	_action.custom_minimum_size = Vector2(128.0, 42.0)
+	_action.custom_minimum_size = ACTION_SIZE
+	_action.add_theme_font_size_override("font_size", 28)
 	_action.pressed.connect(func() -> void: select_requested.emit(_kind_name(), item_id))
 	row.add_child(_action)
 
@@ -140,7 +161,8 @@ func _add_select_action(row: HBoxContainer) -> void:
 func _add_buy_action(row: HBoxContainer, affordable: bool, cost: int) -> void:
 	_action = Button.new()
 	_action.text = tr("STORE_BUY")
-	_action.custom_minimum_size = Vector2(128.0, 42.0)
+	_action.custom_minimum_size = ACTION_SIZE
+	_action.add_theme_font_size_override("font_size", 28)
 	_action.disabled = not affordable
 	_action.add_theme_color_override("font_color", PALETTE.coin if affordable else PALETTE.text_secondary)
 	_action.pressed.connect(func() -> void: purchase_requested.emit(_kind_name(), item_id, cost))

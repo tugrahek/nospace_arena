@@ -9,21 +9,21 @@ const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const LEVEL_SELECT_SCENE: String = "res://scenes/ui/LevelSelect.tscn"
 
 
-@onready var _title: Label = $Center/Title
-@onready var _daily: Button = $Center/ModeGrid/DailyRow/Button
-@onready var _daily_label: Label = $Center/ModeGrid/DailyRow/Button/ModeLabel
-@onready var _daily_desc: Label = $Center/ModeGrid/DailyRow/Button/Desc
-@onready var _free: Button = $Center/ModeGrid/FreeRow/Button
-@onready var _free_label: Label = $Center/ModeGrid/FreeRow/Button/ModeLabel
-@onready var _free_desc: Label = $Center/ModeGrid/FreeRow/Button/Desc
-@onready var _level: Button = $Center/ModeGrid/LevelRow/Button
-@onready var _level_label: Label = $Center/ModeGrid/LevelRow/Button/ModeLabel
-@onready var _level_desc: Label = $Center/ModeGrid/LevelRow/Button/Desc
-@onready var _campaign: Button = $Center/ModeGrid/CampaignRow/Button
-@onready var _campaign_label: Label = $Center/ModeGrid/CampaignRow/Button/ModeLabel
-@onready var _campaign_desc: Label = $Center/ModeGrid/CampaignRow/Button/Desc
-@onready var _back: Button = $Center/BackButton
-@onready var _boost_strip: VBoxContainer = $Center/BoostStrip
+@onready var _title: Label = $SafeArea/Bounds/Center/Title
+@onready var _daily: Button = $SafeArea/Bounds/Center/ModeGrid/DailyRow/Button
+@onready var _daily_label: Label = $SafeArea/Bounds/Center/ModeGrid/DailyRow/Button/Content/ModeLabel
+@onready var _daily_desc: Label = $SafeArea/Bounds/Center/ModeGrid/DailyRow/Button/Content/Desc
+@onready var _free: Button = $SafeArea/Bounds/Center/ModeGrid/FreeRow/Button
+@onready var _free_label: Label = $SafeArea/Bounds/Center/ModeGrid/FreeRow/Button/Content/ModeLabel
+@onready var _free_desc: Label = $SafeArea/Bounds/Center/ModeGrid/FreeRow/Button/Content/Desc
+@onready var _level: Button = $SafeArea/Bounds/Center/ModeGrid/LevelRow/Button
+@onready var _level_label: Label = $SafeArea/Bounds/Center/ModeGrid/LevelRow/Button/Content/ModeLabel
+@onready var _level_desc: Label = $SafeArea/Bounds/Center/ModeGrid/LevelRow/Button/Content/Desc
+@onready var _campaign: Button = $SafeArea/Bounds/Center/ModeGrid/CampaignRow/Button
+@onready var _campaign_label: Label = $SafeArea/Bounds/Center/ModeGrid/CampaignRow/Button/Content/ModeLabel
+@onready var _campaign_desc: Label = $SafeArea/Bounds/Center/ModeGrid/CampaignRow/Button/Content/Desc
+@onready var _back: Button = $SafeArea/Bounds/Center/BackButton
+@onready var _boost_strip: VBoxContainer = $SafeArea/Bounds/Center/BoostStrip
 
 
 func _ready() -> void:
@@ -54,7 +54,7 @@ func _build_boost_strip() -> void:
 	_build_boost_strip_for(boosts)
 
 
-## Compact whole-chip loadout; Daily hides it, zero charges remain dimmed and disabled.
+## Whole-chip loadout remains visible for every previous mode; zero charges disable arming.
 func _build_boost_strip_for(boosts: Array[BoostData]) -> void:
 	for child in _boost_strip.get_children():
 		_boost_strip.remove_child(child)

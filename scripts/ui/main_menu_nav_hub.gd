@@ -4,18 +4,10 @@ extends Control
 ## Shared arena-like surface behind the four MainMenu destination hit targets.
 
 const PALETTE = preload("res://config/palette.tres")
-const VERTICAL_OFFSET: float = 12.0
 
 
 func _ready() -> void:
 	resized.connect(queue_redraw)
-	_move_hub_down_after_layout.call_deferred()
-
-
-func _move_hub_down_after_layout() -> void:
-	await get_tree().process_frame
-	await get_tree().process_frame
-	position.y += VERTICAL_OFFSET
 
 
 func _draw() -> void:

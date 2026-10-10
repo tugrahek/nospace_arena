@@ -5,6 +5,7 @@ extends Control
 signal language_selected(code: String)
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const ROW_HEIGHT: float = 84.0
+const MAX_CONTENT_WIDTH: float = 800.0
 var options: Array[Dictionary] = [
 	{"code": "", "key": "LANG_AUTO"}, {"code": "en", "key": "LANG_EN"}, {"code": "tr", "key": "LANG_TR"}
 ]
@@ -12,6 +13,8 @@ var selected_code: String = ""
 var _title: Label
 var _back: Button
 var _list: VBoxContainer
+var _bounds: Control
+var _column: VBoxContainer
 var _buttons: Array[Button] = []
 var scroll: ScrollContainer
 
@@ -22,26 +25,42 @@ func _ready() -> void:
 	background.color = PALETTE.void_bg
 	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(background)
-	var column := VBoxContainer.new()
-	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	column.offset_left = 72.0
-	column.offset_right = -72.0
-	column.offset_top = 150.0
-	column.offset_bottom = -110.0
-	column.add_theme_constant_override("separation", 32)
-	add_child(column)
+	var safe_area := SafeAreaMargin.new()
+	safe_area.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	safe_area.content_padding = Vector4i(24, 24, 24, 24)
+	add_child(safe_area)
+	_bounds = Control.new()
+	_bounds.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_bounds.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	safe_area.add_child(_bounds)
+	_column = VBoxContainer.new()
+	_column.anchor_left = 0.5
+	_column.anchor_right = 0.5
+	_column.anchor_bottom = 1.0
+	_column.offset_top = 126.0
+	_column.offset_bottom = -86.0
+	_column.add_theme_constant_override("separation", 32)
+	_bounds.add_child(_column)
+	_bounds.resized.connect(_refresh_layout)
+	_refresh_layout()
 	_title = Label.new()
 	_title.theme_type_variation = &"Title"
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(_title)
-	_build_list(column)
+	_column.add_child(_title)
+	_build_list(_column)
 	_back = Button.new()
 	_back.custom_minimum_size = Vector2(220, 56)
 	_back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_back.theme_type_variation = &"Secondary"
 	_back.pressed.connect(queue_free)
-	column.add_child(_back)
+	_column.add_child(_back)
 	refresh()
+
+
+func _refresh_layout() -> void:
+	var width: float = minf(maxf(0.0, _bounds.size.x - 96.0), MAX_CONTENT_WIDTH)
+	_column.offset_left = -width * 0.5
+	_column.offset_right = width * 0.5
 
 
 func _build_list(column: VBoxContainer) -> void:

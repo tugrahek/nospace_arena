@@ -62,7 +62,7 @@ func test_cancel_returns_ready_without_grant_and_duplicate_tap_is_ignored() -> v
 	assert_eq(_popup.state, SupplyPopup.State.READY)
 	assert_eq(_economy.boost_count(&"slow_start"), 0)
 	assert_eq(_acquisition.status()["rewarded_count"], 0)
-	assert_false(_popup.get_node("RevealView").visible)
+	assert_false(_popup.get_node("SafeArea/Bounds/Frame/RevealView").visible)
 
 
 func test_ad_failure_and_no_fill_do_not_reveal_or_grant() -> void:
@@ -78,7 +78,7 @@ func test_ad_failure_and_no_fill_do_not_reveal_or_grant() -> void:
 	_fake.fail(_fake.load_tokens.back(), &"no_fill")
 	await wait_process_frames(2)
 	assert_true(_popup._ad.disabled)
-	assert_false(_popup.get_node("RevealView").visible)
+	assert_false(_popup.get_node("SafeArea/Bounds/Frame/RevealView").visible)
 
 
 func test_verified_reward_reveals_exact_durable_outcome() -> void:
@@ -96,7 +96,7 @@ func test_verified_reward_reveals_exact_durable_outcome() -> void:
 	assert_eq(_economy.boost_count(&"slow_start"), 1)
 	assert_false(_popup.daily_available())
 	assert_false(_popup._surface.visible)
-	assert_true(_popup.get_node("RevealView").visible)
+	assert_true(_popup.get_node("SafeArea/Bounds/Frame/RevealView").visible)
 	_popup._continue.pressed.emit()
 	_fake.complete_load(_fake.load_tokens.back())
 	_popup.present()
@@ -115,8 +115,8 @@ func test_coin_button_calls_canonical_atomic_path_and_shows_only_reward() -> voi
 	assert_eq(_acquisition.status()["coin_count"], 1)
 	assert_eq(_popup.state, SupplyPopup.State.REVEAL)
 	assert_eq(_popup._reward.text, "Slow Start ×1")
-	assert_false(_popup.has_node("Surface/Inventory"))
-	assert_true(_popup.get_node("RevealView").visible)
+	assert_false(_popup.has_node("SafeArea/Bounds/Frame/Surface/Inventory"))
+	assert_true(_popup.get_node("SafeArea/Bounds/Frame/RevealView").visible)
 	assert_eq(_economy._data.supply_boxes.size(), 1)
 
 
@@ -132,7 +132,7 @@ func test_insufficient_balance_and_daily_limit_have_clear_disabled_states() -> v
 	_popup.refresh()
 	assert_true(_popup._coin.disabled)
 	assert_true(_popup._coin.disabled)
-	assert_false(_popup.has_node("Surface/CoinRow/Remaining"))
+	assert_false(_popup.has_node("SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/CoinRow/Remaining"))
 	_popup._coin.pressed.emit()
 	assert_eq(_economy.writes, 0)
 
@@ -145,7 +145,7 @@ func test_external_economy_signals_refresh_affordability_without_inventory() -> 
 	assert_true(_popup._coin.disabled)
 	_economy._data.add_boost(&"extra_life", 2)
 	_economy.boosts_changed.emit()
-	assert_false(_popup.has_node("Surface/Inventory"))
+	assert_false(_popup.has_node("SafeArea/Bounds/Frame/Surface/Inventory"))
 
 
 func test_all_persisted_rewards_localize_without_selecting_in_ui() -> void:
@@ -186,7 +186,7 @@ func test_reveal_survives_reload_without_another_grant_and_continue_persists() -
 	assert_true(SaveStore.load_from(PATH).supply_boxes[result["box_id"]]["presented"])
 	popup.present()
 	assert_eq(popup.state, SupplyPopup.State.READY)
-	assert_false(popup.get_node("RevealView").visible)
+	assert_false(popup.get_node("SafeArea/Bounds/Frame/RevealView").visible)
 	assert_eq(reloaded.boost_count(&"slow_start"), 1)
 
 
@@ -212,7 +212,7 @@ func test_failed_delivery_is_not_revealed_until_recovery_succeeds() -> void:
 	_economy.fail_at = 2
 	_popup._coin.pressed.emit()
 	assert_eq(_popup.state, SupplyPopup.State.READY)
-	assert_false(_popup.get_node("RevealView").visible)
+	assert_false(_popup.get_node("SafeArea/Bounds/Frame/RevealView").visible)
 	assert_eq(_economy.balance(), 350)
 	assert_eq(_economy.boost_count(&"slow_start"), 0)
 	assert_false(_popup._feedback.text.is_empty())
@@ -229,7 +229,7 @@ func test_failed_presentation_save_retains_reveal_and_never_regrants() -> void:
 	_popup._continue.pressed.emit()
 	assert_true(_popup.visible)
 	assert_eq(_popup.state, SupplyPopup.State.REVEAL)
-	assert_false(_popup.get_node("RevealView/Feedback").text.is_empty())
+	assert_false(_popup.get_node("SafeArea/Bounds/Frame/RevealView/Scroll/Body/Content/Feedback").text.is_empty())
 	assert_eq(_economy.boost_count(&"slow_start"), 1)
 	assert_eq(_economy.supply_boxes().unpresented_deliveries().size(), 1)
 	_popup._continue.pressed.emit()
@@ -262,7 +262,7 @@ func test_reserved_or_unknown_reward_cannot_be_marked_presented_or_revealed() ->
 	_popup.present()
 	_popup._reveal("reserved")
 	assert_eq(_popup.state, SupplyPopup.State.READY)
-	assert_false(_popup.get_node("RevealView").visible)
+	assert_false(_popup.get_node("SafeArea/Bounds/Frame/RevealView").visible)
 	assert_eq(_economy.boost_count(&"slow_start"), 0)
 
 
@@ -270,14 +270,14 @@ func test_main_menu_has_no_supply_indicator_or_utility_entry() -> void:
 	var menu: Control = MENU.instantiate()
 	assert_false(menu.has_node("SupplyEntry"))
 	assert_false(menu.has_node("SupplyPopup"))
-	assert_false(menu.has_node("Center/Buttons/NavigationHub/StoreButton/Icon/SupplyBadge"))
-	assert_eq(menu.get_node("Center/Buttons/NavigationHub").get_child_count(), 4)
+	assert_false(menu.has_node("SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/StoreButton/Content/Icon/SupplyBadge"))
+	assert_eq(menu.get_node("SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub").get_child_count(), 4)
 	assert_eq(menu.STORE_SCENE, "res://scenes/ui/Store.tscn")
 	menu.free()
 
 func test_store_supply_category_is_reachable_without_changing_other_offers() -> void:
 	var store: Control = preload("res://scenes/ui/Store.tscn").instantiate()
-	var badge: SupplyStoreBadge = store.get_node("CategoryStrip/Tabs/Supply/SupplyBadge")
+	var badge: SupplyStoreBadge = store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Supply/SupplyBadge")
 	badge.acquisition = _acquisition
 	badge.ads = _ads
 	add_child_autofree(store)
@@ -296,20 +296,20 @@ func test_store_supply_category_is_reachable_without_changing_other_offers() -> 
 	assert_false(badge.visible, "badge stays hidden while no fresh ad is ready")
 	_load()
 	assert_true(badge.visible, "badge returns when an ad becomes ready again")
-	store.get_node("CategoryStrip/Tabs/Supply").pressed.emit()
+	store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Supply").pressed.emit()
 	await wait_process_frames(2)
 	assert_eq(store.active_category(), store.Category.SUPPLY)
-	assert_same(badge.get_parent(), store.get_node("CategoryStrip/Tabs/Supply"))
-	assert_true(store.get_node("CategoryStrip/Tabs/Supply").get_global_rect().encloses(badge.get_global_rect()))
-	var tab: Button = store.get_node("CategoryStrip/Tabs/Supply")
+	assert_same(badge.get_parent(), store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Supply"))
+	assert_true(store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Supply").get_global_rect().encloses(badge.get_global_rect()))
+	var tab: Button = store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Supply")
 	assert_gt(badge.position.x, tab.size.x * 0.75, "badge is anchored at the tab's top-right")
 	assert_lt(badge.position.y, tab.size.y * 0.3, "badge stays in the tab's upper edge")
-	var offering: SupplyPopup = store.get_node("Scroll/List/SupplyPopup")
+	var offering: SupplyPopup = store.get_node("SafeArea/Bounds/Frame/Scroll/List/SupplyPopup")
 	assert_true(offering.visible)
 	assert_true(offering.embedded)
 	assert_false(offering.has_node("Dim"))
-	assert_false(offering.has_node("Surface/Inventory"))
-	assert_false(offering.has_node("Surface/Hint"))
+	assert_false(offering.has_node("SafeArea/Bounds/Frame/Surface/Inventory"))
+	assert_false(offering.has_node("SafeArea/Bounds/Frame/Surface/Hint"))
 	store.set_category(store.Category.BOOSTS)
 	await wait_process_frames(2)
 	assert_eq(store.offer_count(), ContentCatalog.BOOSTS.size())
@@ -320,7 +320,7 @@ func test_coin_bonus_icons_are_distinct_in_store_selector_and_showcase() -> void
 	var tile := StoreOfferTile.new()
 	tile.configure_selector(StoreOfferTile.Kind.BOOST, &"coin_bonus", 0, "Coin Bonus", true,
 		BoostData.Effect.COIN_BONUS)
-	var tile_icon: Control = tile.get_node("Visual").get_child(0)
+	var tile_icon: Control = tile.get_node("Content/Visual").get_child(0)
 	assert_eq(tile_icon.get("effect"), BoostIcon.COIN_BONUS_ICON)
 	tile.free()
 	var showcase := StoreShowcase.new()
@@ -333,9 +333,9 @@ func test_coin_bonus_icons_are_distinct_in_store_selector_and_showcase() -> void
 
 func test_action_order_compact_limits_and_separate_ad_message() -> void:
 	_popup.present()
-	assert_lt(_popup.get_node("Surface/AdRow").get_index(), _popup.get_node("Surface/CoinRow").get_index())
-	assert_false(_popup.has_node("Surface/AdRow/Status/AdLimit"))
-	assert_false(_popup.has_node("Surface/CoinRow/Remaining"))
+	assert_lt(_popup.get_node("SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/AdRow").get_index(), _popup.get_node("SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/CoinRow").get_index())
+	assert_false(_popup.has_node("SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/AdRow/Status/AdLimit"))
+	assert_false(_popup.has_node("SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/CoinRow/Remaining"))
 	_ads.set_requests_allowed(false)
 	_popup.refresh()
 	assert_true(_popup._ad.disabled)
@@ -346,27 +346,27 @@ func test_action_order_compact_limits_and_separate_ad_message() -> void:
 func test_odds_info_displays_resource_percentages_only_when_opened() -> void:
 	_acquisition._config = SupplyBoxAcquisition.CONFIG
 	_popup.present()
-	assert_false(_popup.get_node("OddsView").visible)
+	assert_false(_popup.get_node("SafeArea/Bounds/Frame/OddsView").visible)
 	var before: Dictionary = _economy._data.to_dict()
 	_popup._odds.pressed.emit()
-	assert_true(_popup.get_node("OddsView").visible)
+	assert_true(_popup.get_node("SafeArea/Bounds/Frame/OddsView").visible)
 	assert_false(_popup._surface.visible)
-	assert_eq(_popup.get_node("OddsView/Rows").get_child_count(), 4)
-	assert_eq(_popup.get_node("OddsView/Rows").get_child(0).get_node("Name").text, "Coins")
-	assert_eq(_popup.get_node("OddsView/Rows").get_child(0).get_node("Probability").text, "35%")
-	var bonus_row: Control = _popup.get_node("OddsView/Rows").get_child(2)
+	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child_count(), 4)
+	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child(0).get_node("Name").text, "Coins")
+	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child(0).get_node("Probability").text, "35%")
+	var bonus_row: Control = _popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child(2)
 	assert_eq(bonus_row.get_node("Icon").get("effect"), BoostIcon.COIN_BONUS_ICON)
-	assert_false(_popup.has_node("OddsView/CoinValues"))
+	assert_false(_popup.has_node("SafeArea/Bounds/Frame/OddsView/CoinValues"))
 	assert_eq(_economy._data.to_dict(), before)
 	TranslationServer.set_locale("tr")
 	_popup.hide_odds()
 	_popup.show_odds()
-	assert_eq(_popup.get_node("OddsView/Rows").get_child(0).get_node("Name").text, tr("HUD_CURRENCY"))
-	assert_eq(_popup.get_node("OddsView/Title").text, "Olasılıklar")
-	assert_false(_popup.has_node("OddsView/CoinValues"))
-	_popup.get_node("OddsView/Back").pressed.emit()
+	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child(0).get_node("Name").text, tr("HUD_CURRENCY"))
+	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Title").text, "Olasılıklar")
+	assert_false(_popup.has_node("SafeArea/Bounds/Frame/OddsView/CoinValues"))
+	_popup.get_node("SafeArea/Bounds/Frame/OddsView/Footer/Back").pressed.emit()
 	assert_true(_popup._surface.visible)
-	assert_false(_popup.get_node("OddsView").visible)
+	assert_false(_popup.get_node("SafeArea/Bounds/Frame/OddsView").visible)
 
 
 func test_embedded_continue_returns_to_acquisition_without_inventory_or_regrant() -> void:
@@ -374,9 +374,9 @@ func test_embedded_continue_returns_to_acquisition_without_inventory_or_regrant(
 	_popup.embedded = true
 	_popup.present()
 	_popup._coin.pressed.emit()
-	assert_true(_popup.get_node("RevealView").visible)
+	assert_true(_popup.get_node("SafeArea/Bounds/Frame/RevealView").visible)
 	assert_false(_popup._surface.visible)
-	assert_false(_popup.get_node("OddsView").visible)
+	assert_false(_popup.get_node("SafeArea/Bounds/Frame/OddsView").visible)
 	_popup._continue.pressed.emit()
 	assert_true(_popup.visible)
 	assert_true(_popup._surface.visible)
@@ -389,7 +389,7 @@ func test_rewarded_ready_hides_coin_fallback_and_no_fill_restores_it() -> void:
 	assert_false(_popup._ad.disabled)
 	assert_false(_popup._coin.get_parent().visible)
 	assert_true(_popup._coin.disabled)
-	assert_false(_popup.has_node("Surface/Category"))
+	assert_false(_popup.has_node("SafeArea/Bounds/Frame/Surface/Category"))
 	_ads.set_requests_allowed(false)
 	_popup.refresh()
 	assert_true(_popup._ad.disabled)

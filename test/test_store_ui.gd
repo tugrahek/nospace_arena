@@ -25,9 +25,9 @@ func test_default_category_builds_one_showcase_and_three_focus_selectors() -> vo
 	await _refresh_frame()
 	assert_eq(store.active_category(), store.Category.CHARACTERS)
 	assert_eq(store.offer_count(), ContentCatalog.CHARACTERS.size())
-	assert_eq(store.get_node("Scroll/List").get_child_count(), 2)
-	assert_not_null(store.get_node_or_null("Scroll/List/Showcase"))
-	assert_eq(store.get_node("Scroll/List/Selector").get_child_count(), 3)
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/Scroll/List").get_child_count(), 2)
+	assert_not_null(store.get_node_or_null("SafeArea/Bounds/Frame/Scroll/List/Showcase"))
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/Scroll/List/Selector").get_child_count(), 3)
 
 
 func test_category_switch_keeps_three_items_and_valid_category_local_focus() -> void:
@@ -37,12 +37,12 @@ func test_category_switch_keeps_three_items_and_valid_category_local_focus() -> 
 	await _refresh_frame()
 	assert_eq(store.offer_count(), ContentCatalog.ARENAS.size())
 	assert_eq(store.focused_index(), 0)
-	assert_eq(store.get_node("Scroll/List/Selector").get_child_count(), 3)
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/Scroll/List/Selector").get_child_count(), 3)
 	store.set_category(store.Category.BOOSTS)
 	await _refresh_frame()
 	assert_eq(store.offer_count(), ContentCatalog.BOOSTS.size())
 	assert_eq(store.focused_index(), 0)
-	assert_eq(store.get_node("Scroll/List").get_child_count(), 2)
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/Scroll/List").get_child_count(), 2)
 
 
 func test_focus_only_changes_view_local_showcase_not_economy_state() -> void:
@@ -54,7 +54,7 @@ func test_focus_only_changes_view_local_showcase_not_economy_state() -> void:
 	store._on_focus_requested(2)
 	await _refresh_frame()
 	assert_eq(store.focused_index(), 2)
-	assert_eq(store.get_node("Scroll/List/Selector").get_child_count(), 3)
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/Scroll/List/Selector").get_child_count(), 3)
 	assert_eq(Economy.selected_character(), selected_character)
 	assert_eq(Economy.selected_arena(), selected_arena)
 	assert_eq(Economy.balance(), balance)
@@ -66,9 +66,9 @@ func test_selector_visual_and_label_share_one_full_cell_hit_target() -> void:
 	for category in [store.Category.CHARACTERS, store.Category.ARENAS, store.Category.BOOSTS]:
 		store.set_category(category)
 		await _refresh_frame()
-		var selector: StoreOfferTile = store.get_node("Scroll/List/Selector").get_child(1)
-		var visual: Control = selector.get_node("Visual")
-		var label: Label = selector.get_node("Label")
+		var selector: StoreOfferTile = store.get_node("SafeArea/Bounds/Frame/Scroll/List/Selector").get_child(1)
+		var visual: Control = selector.get_node("Content/Visual")
+		var label: Label = selector.get_node("Content/Label")
 		var target: Button = selector.get_node("HitTarget")
 		assert_eq(visual.mouse_filter, Control.MOUSE_FILTER_IGNORE)
 		assert_eq(label.mouse_filter, Control.MOUSE_FILTER_IGNORE)
@@ -81,11 +81,11 @@ func test_selector_visual_and_label_share_one_full_cell_hit_target() -> void:
 func test_character_selector_previews_keep_common_diamond_with_distinct_effect_modes() -> void:
 	var store := _store()
 	await _refresh_frame()
-	var rail: HBoxContainer = store.get_node("Scroll/List/Selector")
+	var rail: HBoxContainer = store.get_node("SafeArea/Bounds/Frame/Scroll/List/Selector")
 	var modes: Array[int] = []
 	for item in rail.get_children():
 		var tile: StoreOfferTile = item
-		var preview = tile.get_node("Visual").get_child(0)
+		var preview = tile.get_node("Content/Visual").get_child(0)
 		modes.append(preview.effect_kind)
 	assert_eq(modes, [0, 1, 2])
 
@@ -99,7 +99,7 @@ func test_arena_showcase_preserves_real_source_aspects() -> void:
 		store._on_focus_requested(index)
 		await _refresh_frame()
 		var arena: ArenaData = ContentCatalog.ARENAS[index]
-		var showcase: StoreShowcase = store.get_node("Scroll/List/Showcase")
+		var showcase: StoreShowcase = store.get_node("SafeArea/Bounds/Frame/Scroll/List/Showcase")
 		var expected := float(arena.cols) / float(arena.rows)
 		assert_almost_eq(showcase.preview_source_aspect(), expected, 0.001)
 		assert_almost_eq(showcase.preview_displayed_aspect(), expected, 0.001)
@@ -138,7 +138,7 @@ func test_purchase_signal_refresh_waits_until_emitting_button_stack_returns() ->
 	await _refresh_frame()
 	store.set_category(store.Category.BOOSTS)
 	await _refresh_frame()
-	var showcase: Control = store.get_node("Scroll/List/Showcase")
+	var showcase: Control = store.get_node("SafeArea/Bounds/Frame/Scroll/List/Showcase")
 	var emitting_button := Button.new()
 	showcase.add_child(emitting_button)
 	emitting_button.pressed.connect(func() -> void: Economy.currency_changed.emit(Economy.balance()))
@@ -146,9 +146,9 @@ func test_purchase_signal_refresh_waits_until_emitting_button_stack_returns() ->
 	assert_true(store._refresh_pending)
 	await _refresh_frame()
 	assert_false(store._refresh_pending)
-	assert_not_null(store.get_node_or_null("Scroll/List/Showcase"))
-	assert_eq(store.get_node("Scroll/List").get_child_count(), 2)
-	assert_eq(store.get_node("Scroll/List/Selector").get_child_count(), 3)
+	assert_not_null(store.get_node_or_null("SafeArea/Bounds/Frame/Scroll/List/Showcase"))
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/Scroll/List").get_child_count(), 2)
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/Scroll/List/Selector").get_child_count(), 3)
 
 
 func test_store_tabs_keep_existing_tr_and_en_localization() -> void:
@@ -157,10 +157,10 @@ func test_store_tabs_keep_existing_tr_and_en_localization() -> void:
 	TranslationServer.set_locale("tr")
 	store.set_category(store.Category.CHARACTERS)
 	await _refresh_frame()
-	assert_eq(store.get_node("CategoryStrip/Tabs/Characters").text, "Karakterler")
-	assert_eq(store.get_node("CategoryStrip/Tabs/Arenas").text, "Arenalar")
-	assert_eq(store.get_node("CategoryStrip/Tabs/Boosts").text, "Boost'lar")
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Characters").text, "Karakterler")
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Arenas").text, "Arenalar")
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Boosts").text, "Boost'lar")
 	TranslationServer.set_locale("en")
 	store.set_category(store.Category.CHARACTERS)
 	await _refresh_frame()
-	assert_eq(store.get_node("CategoryStrip/Tabs/Characters").text, "Characters")
+	assert_eq(store.get_node("SafeArea/Bounds/Frame/CategoryStrip/Tabs/Characters").text, "Characters")

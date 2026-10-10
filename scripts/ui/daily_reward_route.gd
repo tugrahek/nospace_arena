@@ -5,7 +5,9 @@ extends Control
 signal day_selected(day: int)
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const DAYS: int = 10
-@export var checkpoint_radius: float = 8.5
+const CELL_WIDTH: float = 108.0
+const ROUTE_HEIGHT: float = 144.0
+@export var checkpoint_radius: float = 14.0
 @export var endpoint_scale: float = 1.4
 var current_day: int = 1
 var completed_days: int = 0
@@ -14,6 +16,7 @@ var checkpoints: Array[Button] = []
 
 
 func _ready() -> void:
+	custom_minimum_size = Vector2(CELL_WIDTH * DAYS, ROUTE_HEIGHT)
 	for index in DAYS:
 		var button := Button.new()
 		button.flat = true
@@ -24,6 +27,15 @@ func _ready() -> void:
 		button.pressed.connect(func() -> void: day_selected.emit(index + 1))
 		add_child(button)
 		checkpoints.append(button)
+		var label := Label.new()
+		label.text = str(index + 1)
+		label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+		label.offset_top = -40.0
+		label.offset_bottom = -8.0
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 22)
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.add_child(label)
 	resized.connect(_layout)
 	_layout()
 

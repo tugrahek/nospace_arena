@@ -6,23 +6,30 @@ const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const StoreOfferTile = preload("res://scripts/ui/store_offer_tile.gd")
 const StoreShowcase = preload("res://scripts/ui/store_showcase.gd")
 const PALETTE = preload("res://config/palette.tres")
+const MAX_CONTENT_WIDTH: float = 800.0
+const FRONTIER_INSET: float = 18.0
+const FRONTIER_BOTTOM: float = 6.0
+const FRONTIER_HEIGHT: float = 2.0
 
 enum Category { CHARACTERS, ARENAS, BOOSTS, SUPPLY }
 
-@onready var _scroll: ScrollContainer = $Scroll
-@onready var _list: VBoxContainer = $Scroll/List
-@onready var _coins: Label = $Coins
-@onready var _back: Button = $BackButton
-@onready var _title: Label = $Title
-@onready var _strip: Control = $CategoryStrip
-@onready var _frontier: ColorRect = $CategoryStrip/Frontier
-@onready var _tabs: Array[Button] = [$CategoryStrip/Tabs/Characters, $CategoryStrip/Tabs/Arenas, $CategoryStrip/Tabs/Boosts, $CategoryStrip/Tabs/Supply]
+@onready var _bounds: Control = $SafeArea/Bounds
+@onready var _frame: VBoxContainer = $SafeArea/Bounds/Frame
+@onready var _scroll: ScrollContainer = $SafeArea/Bounds/Frame/Scroll
+@onready var _list: VBoxContainer = $SafeArea/Bounds/Frame/Scroll/List
+@onready var _coins: Label = $SafeArea/Bounds/Frame/Header/Coins
+@onready var _back: Button = $SafeArea/Bounds/Frame/BackButton
+@onready var _title: Label = $SafeArea/Bounds/Frame/Header/Title
+@onready var _strip: Control = $SafeArea/Bounds/Frame/CategoryStrip
+@onready var _frontier: ColorRect = $SafeArea/Bounds/Frame/CategoryStrip/Frontier
+@onready var _tabs: Array[Button] = [$SafeArea/Bounds/Frame/CategoryStrip/Tabs/Characters, $SafeArea/Bounds/Frame/CategoryStrip/Tabs/Arenas, $SafeArea/Bounds/Frame/CategoryStrip/Tabs/Boosts, $SafeArea/Bounds/Frame/CategoryStrip/Tabs/Supply]
 
 var _active_category: int = Category.CHARACTERS
 var _focused_indices: Array[int] = [0, 0, 0, 0]
 var _supply: SupplyPopup
 var _refresh_pending: bool = false
 var _selector: HBoxContainer
+var _layout_pending: bool = false
 
 
 func _ready() -> void:
@@ -34,6 +41,8 @@ func _ready() -> void:
 	_tabs[Category.BOOSTS].pressed.connect(set_category.bind(Category.BOOSTS))
 	_tabs[Category.SUPPLY].pressed.connect(set_category.bind(Category.SUPPLY))
 	_strip.resized.connect(_layout_frontier)
+	_bounds.resized.connect(_queue_layout)
+	_scroll.resized.connect(_queue_layout)
 	Economy.currency_changed.connect(func(_balance: int) -> void: _request_refresh())
 	Economy.unlocks_changed.connect(_request_refresh)
 	Economy.boosts_changed.connect(_request_refresh)
@@ -82,6 +91,30 @@ func _refresh() -> void:
 	_scroll.scroll_vertical = 0
 	_update_tab_labels()
 	call_deferred("_layout_frontier")
+	_queue_layout()
+
+
+func _queue_layout() -> void:
+	if _layout_pending or not is_inside_tree():
+		return
+	_layout_pending = true
+	_refresh_layout.call_deferred()
+
+
+## Only shared shell/showcase sizing; Supply keeps its existing native scroll/minimum bounds.
+func _refresh_layout() -> void:
+	_layout_pending = false
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+	var width: float = minf(_bounds.size.x, MAX_CONTENT_WIDTH)
+	_frame.offset_left = -width * 0.5
+	_frame.offset_right = width * 0.5
+	if _active_category != Category.SUPPLY and is_instance_valid(_selector):
+		var showcase: StoreShowcase = _list.get_node_or_null("Showcase") as StoreShowcase
+		if showcase != null:
+			showcase.fit_height(_scroll.size.y - _selector.get_combined_minimum_size().y
+				- float(_list.get_theme_constant("separation")))
+	_layout_frontier()
 
 
 ## Rebuild only after the current button/signal stack returns; never free an emitting control.
@@ -151,6 +184,7 @@ func _bind_showcase(showcase: StoreShowcase) -> void:
 	rail.alignment = BoxContainer.ALIGNMENT_CENTER
 	rail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rail.add_theme_constant_override("separation", 12)
+	rail.minimum_size_changed.connect(_queue_layout)
 	_list.add_child(rail)
 	_selector = rail
 
@@ -191,8 +225,8 @@ func _layout_frontier() -> void:
 	if _active_category >= _tabs.size():
 		return
 	var active: Button = _tabs[_active_category]
-	_frontier.position = Vector2(active.position.x + 18.0, 51.0)
-	_frontier.size = Vector2(maxf(active.size.x - 36.0, 20.0), 2.0)
+	_frontier.position = Vector2(active.position.x + FRONTIER_INSET, _strip.size.y - FRONTIER_BOTTOM)
+	_frontier.size = Vector2(maxf(active.size.x - FRONTIER_INSET * 2.0, 20.0), FRONTIER_HEIGHT)
 
 
 func _on_select(kind: String, id: StringName) -> void:

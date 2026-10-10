@@ -7,25 +7,36 @@ const PAGE_TITLE_KEYS := [
 	"HOWTO_GOAL_TITLE", "HOWTO_CONTROLS_TITLE", "HOWTO_ENEMIES_TITLE", "HOWTO_LIVES_TITLE",
 ]
 const PAGE_COUNT: int = 4
+const MAX_CONTENT_WIDTH: float = 800.0
 
 var _index: int = 0
 
-@onready var _close: Button = $CloseButton
-@onready var _title: Label = $SafeMargin/MainVBox/PageTitle
-@onready var _art: HowToPageArt = $SafeMargin/MainVBox/DemoCenter/PageArt
-@onready var _body: Label = $SafeMargin/MainVBox/BodyCenter/BodyText
-@onready var _progress: HowToPageProgress = $SafeMargin/MainVBox/ProgressCenter/TutorialProgress
-@onready var _prev: Button = $SafeMargin/MainVBox/NavigationRow/PrevButton
-@onready var _next: Button = $SafeMargin/MainVBox/NavigationRow/NextButton
+@onready var _close: Button = $SafeArea/Bounds/CloseButton
+@onready var _bounds: Control = $SafeArea/Bounds
+@onready var _main_vbox: VBoxContainer = $SafeArea/Bounds/MainVBox
+@onready var _title: Label = $SafeArea/Bounds/MainVBox/ContentScroll/PageContent/PageTitle
+@onready var _art: HowToPageArt = $SafeArea/Bounds/MainVBox/ContentScroll/PageContent/DemoCenter/PageArt
+@onready var _body: Label = $SafeArea/Bounds/MainVBox/ContentScroll/PageContent/BodyCenter/BodyText
+@onready var _progress: HowToPageProgress = $SafeArea/Bounds/MainVBox/ContentScroll/PageContent/ProgressCenter/TutorialProgress
+@onready var _prev: Button = $SafeArea/Bounds/MainVBox/NavigationRow/PrevButton
+@onready var _next: Button = $SafeArea/Bounds/MainVBox/NavigationRow/NextButton
 
 
 func _ready() -> void:
+	_bounds.resized.connect(_refresh_layout)
+	_refresh_layout()
 	Economy.mark_tutorial_seen()
 	_prev.text = tr("SETTINGS_BACK")
 	_close.pressed.connect(_exit)
 	_prev.pressed.connect(_on_prev)
 	_next.pressed.connect(_on_next)
 	_show(0)
+
+
+func _refresh_layout() -> void:
+	var width: float = minf(_bounds.size.x, MAX_CONTENT_WIDTH)
+	_main_vbox.offset_left = -width * 0.5
+	_main_vbox.offset_right = width * 0.5
 
 
 ## Changes the shared page presentation without replacing the scene or altering navigation.

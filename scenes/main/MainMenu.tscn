@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://baqdpb1y08q86"]
+[gd_scene load_steps=17 format=3 uid="uid://baqdpb1y08q86"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 [ext_resource type="Script" path="res://scripts/ui/logo.gd" id="2_logo"]
@@ -13,6 +13,9 @@
 [ext_resource type="Script" path="res://scripts/ui/daily_reward_route.gd" id="11_route"]
 [ext_resource type="Script" path="res://scripts/ui/supply_box_icon.gd" id="12_gift"]
 [ext_resource type="PackedScene" path="res://scenes/ui/SupplyPopup.tscn" id="13_reveal"]
+
+[ext_resource type="Script" path="res://scripts/ui/safe_area_margin.gd" id="14_safe"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu_layout.gd" id="15_layout"]
 
 [sub_resource type="FontVariation" id="FontVariation_dynapuff"]
 base_font = ExtResource("6_dynapuff")
@@ -32,143 +35,185 @@ anchor_bottom = 1.0
 color = Color(0.12, 0.1, 0.22, 1)
 mouse_filter = 2
 
-[node name="CoinsPanel" type="PanelContainer" parent="."]
-modulate = Color(1, 1, 1, 0.85)
-anchor_left = 1.0
+[node name="SafeArea" type="MarginContainer" parent="."]
 anchor_right = 1.0
-offset_left = -208.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = 64.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("14_safe")
+content_padding = Vector4i(28, 20, 28, 28)
+
+[node name="Bounds" type="Control" parent="SafeArea"]
+layout_mode = 2
 mouse_filter = 2
 
-[node name="Content" type="HBoxContainer" parent="CoinsPanel"]
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="Frame" type="VBoxContainer" parent="SafeArea/Bounds"]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -332.0
+offset_right = 332.0
+mouse_filter = 2
+theme_override_constants/separation = 24
+script = ExtResource("15_layout")
+alignment = 0
 
-[node name="CoinIcon" type="Control" parent="CoinsPanel/Content"]
-custom_minimum_size = Vector2(26, 26)
+[node name="Header" type="HBoxContainer" parent="SafeArea/Bounds/Frame"]
+custom_minimum_size = Vector2(0, 108)
 layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="SettingsButton" type="Button" parent="SafeArea/Bounds/Frame/Header"]
+custom_minimum_size = Vector2(108, 108)
+layout_mode = 2
+flat = true
+script = ExtResource("3_juicy")
+pop_scale = 1.05
+
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Header/SettingsButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 22.0
+offset_top = 22.0
+offset_right = -22.0
+offset_bottom = -22.0
+mouse_filter = 2
+script = ExtResource("4_seticon")
+
+[node name="RewardEntry" type="Button" parent="SafeArea/Bounds/Frame/Header"]
+custom_minimum_size = Vector2(160, 108)
+layout_mode = 2
+flat = true
+
+[node name="Content" type="HBoxContainer" parent="SafeArea/Bounds/Frame/Header/RewardEntry"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_right = -12.0
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Coin" type="Control" parent="SafeArea/Bounds/Frame/Header/RewardEntry/Content"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+size_flags_vertical = 4
 mouse_filter = 2
 script = ExtResource("9_coinicon")
 effect = 2
 
-[node name="Coins" type="Label" parent="CoinsPanel/Content"]
+[node name="Labels" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Header/RewardEntry/Content"]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 2
+
+[node name="Progress" type="Label" parent="SafeArea/Bounds/Frame/Header/RewardEntry/Content/Labels"]
+layout_mode = 2
+mouse_filter = 2
 theme_type_variation = &"Coins"
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+text = "1/10"
+
+[node name="Caption" type="Label" parent="SafeArea/Bounds/Frame/Header/RewardEntry/Content/Labels"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="SafeArea/Bounds/Frame/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="CoinsPanel" type="PanelContainer" parent="SafeArea/Bounds/Frame/Header"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="Content" type="HBoxContainer" parent="SafeArea/Bounds/Frame/Header/CoinsPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="CoinIcon" type="Control" parent="SafeArea/Bounds/Frame/Header/CoinsPanel/Content"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+script = ExtResource("9_coinicon")
+effect = 2
+
+[node name="Coins" type="Label" parent="SafeArea/Bounds/Frame/Header/CoinsPanel/Content"]
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"Coins"
+theme_override_font_sizes/font_size = 26
 horizontal_alignment = 2
 vertical_alignment = 1
 text = "Coins: 0"
 
-[node name="SettingsButton" type="Button" parent="."]
-custom_minimum_size = Vector2(64, 64)
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 84.0
-offset_bottom = 84.0
-flat = true
-script = ExtResource("3_juicy")
-
-[node name="Icon" type="Control" parent="SettingsButton"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-script = ExtResource("4_seticon")
-
-[node name="RewardEntry" type="Button" parent="."]
-offset_left = 99.0
-offset_top = 20.0
-offset_right = 209.0
-offset_bottom = 84.0
-flat = true
-
-[node name="Coin" type="Control" parent="RewardEntry"]
-offset_left = 10.0
-offset_top = 18.0
-offset_right = 38.0
-offset_bottom = 46.0
-mouse_filter = 2
-script = ExtResource("9_coinicon")
-effect = 2
-
-[node name="Progress" type="Label" parent="RewardEntry"]
-offset_left = 46.0
-offset_top = 14.0
-offset_right = 102.0
-offset_bottom = 50.0
-mouse_filter = 2
-theme_type_variation = &"Coins"
-theme_override_font_sizes/font_size = 22
-vertical_alignment = 1
-text = "1/10"
-
-[node name="Center" type="VBoxContainer" parent="."]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 40.0
-offset_top = 72.0
-offset_right = -40.0
-offset_bottom = -120.0
+[node name="Center" type="VBoxContainer" parent="SafeArea/Bounds/Frame"]
+layout_mode = 2
 mouse_filter = 2
 alignment = 1
 theme_override_constants/separation = 12
 
-[node name="Emblem" type="Control" parent="Center"]
-custom_minimum_size = Vector2(190, 190)
+[node name="Emblem" type="Control" parent="SafeArea/Bounds/Frame/Center"]
+custom_minimum_size = Vector2(224, 224)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("2_logo")
 
-[node name="Title" type="Label" parent="Center"]
+[node name="Title" type="Label" parent="SafeArea/Bounds/Frame/Center"]
 layout_mode = 2
 theme_type_variation = &"Title"
-horizontal_alignment = 1
 theme_override_fonts/font = SubResource("FontVariation_dynapuff")
+theme_override_font_sizes/font_size = 56
+horizontal_alignment = 1
 text = "NoSpace"
 
-[node name="Subtitle" type="Label" parent="Center"]
+[node name="Subtitle" type="Label" parent="SafeArea/Bounds/Frame/Center"]
 layout_mode = 2
 theme_type_variation = &"Display"
-horizontal_alignment = 1
 theme_override_colors/font_color = Color(1, 0.5, 0.95, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
 text = "A R E N A"
 
-[node name="Gap" type="Control" parent="Center"]
-custom_minimum_size = Vector2(0, 22)
+[node name="Footer" type="VBoxContainer" parent="SafeArea/Bounds/Frame"]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Buttons" type="VBoxContainer" parent="Center"]
+[node name="Buttons" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer"]
 layout_mode = 2
-size_flags_horizontal = 4
-theme_override_constants/separation = 24
+mouse_filter = 2
+theme_override_constants/separation = 16
 
-[node name="PlayButton" type="Button" parent="Center/Buttons"]
-custom_minimum_size = Vector2(370, 88)
+[node name="PlayButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons"]
+custom_minimum_size = Vector2(0, 108)
 layout_mode = 2
 theme_type_variation = &"HeroButton"
 text = "Play"
 script = ExtResource("3_juicy")
+pop_scale = 1.03
 
-[node name="HeroSpacer" type="Control" parent="Center/Buttons"]
-custom_minimum_size = Vector2(0, 8)
+[node name="HeroSpacer" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons"]
+custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="NavigationHub" type="Control" parent="Center/Buttons"]
-custom_minimum_size = Vector2(580, 210)
+[node name="NavigationHub" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons"]
+custom_minimum_size = Vector2(560, 312)
 layout_mode = 2
-size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("7_navhub")
 
-[node name="StoreButton" type="Button" parent="Center/Buttons/NavigationHub"]
-custom_minimum_size = Vector2(260, 88)
-layout_mode = 0
+[node name="StoreButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub"]
+custom_minimum_size = Vector2(250, 108)
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = 12.0
@@ -179,35 +224,35 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/StoreButton"]
-layout_mode = 1
-anchors_preset = 10
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/StoreButton"]
 anchor_right = 1.0
-offset_top = 10.0
-offset_bottom = 54.0
-grow_horizontal = 2
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/StoreButton/Content"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("8_navicon")
 icon_kind = 0
 
-[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/StoreButton"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 57.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/StoreButton/Content"]
+layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "Store"
 
-[node name="MissionsButton" type="Button" parent="Center/Buttons/NavigationHub"]
-custom_minimum_size = Vector2(260, 88)
-layout_mode = 0
+[node name="MissionsButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub"]
+custom_minimum_size = Vector2(250, 108)
 anchor_left = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
@@ -219,35 +264,35 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/MissionsButton"]
-layout_mode = 1
-anchors_preset = 10
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/MissionsButton"]
 anchor_right = 1.0
-offset_top = 10.0
-offset_bottom = 54.0
-grow_horizontal = 2
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/MissionsButton/Content"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("8_navicon")
 icon_kind = 1
 
-[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/MissionsButton"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 57.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/MissionsButton/Content"]
+layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "Missions"
 
-[node name="LeaderboardButton" type="Button" parent="Center/Buttons/NavigationHub"]
-custom_minimum_size = Vector2(260, 88)
-layout_mode = 0
+[node name="LeaderboardButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub"]
+custom_minimum_size = Vector2(250, 108)
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
@@ -259,35 +304,35 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/LeaderboardButton"]
-layout_mode = 1
-anchors_preset = 10
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/LeaderboardButton"]
 anchor_right = 1.0
-offset_top = 10.0
-offset_bottom = 54.0
-grow_horizontal = 2
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/LeaderboardButton/Content"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("8_navicon")
 icon_kind = 2
 
-[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/LeaderboardButton"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 57.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/LeaderboardButton/Content"]
+layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "Leaderboard"
 
-[node name="HowToButton" type="Button" parent="Center/Buttons/NavigationHub"]
-custom_minimum_size = Vector2(260, 88)
-layout_mode = 0
+[node name="HowToButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub"]
+custom_minimum_size = Vector2(250, 108)
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 1.0
@@ -300,27 +345,28 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Icon" type="Control" parent="Center/Buttons/NavigationHub/HowToButton"]
-layout_mode = 1
-anchors_preset = 10
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/HowToButton"]
 anchor_right = 1.0
-offset_top = 10.0
-offset_bottom = 54.0
-grow_horizontal = 2
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/HowToButton/Content"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("5_helpicon")
 
-[node name="Label" type="Label" parent="Center/Buttons/NavigationHub/HowToButton"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 57.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/HowToButton/Content"]
+layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "How to Play"
@@ -335,104 +381,142 @@ script = ExtResource("10_reward")
 [node name="Dim" type="ColorRect" parent="RewardPopup"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.02, 0.015, 0.05, 0.78)
+color = Color(0.02, 0.015, 0.05, 0.96)
 mouse_filter = 2
 
-[node name="Box" type="VBoxContainer" parent="RewardPopup"]
+[node name="SafeArea" type="MarginContainer" parent="RewardPopup"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("14_safe")
+content_padding = Vector4i(20, 20, 20, 20)
+
+[node name="Bounds" type="Control" parent="RewardPopup/SafeArea"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Box" type="VBoxContainer" parent="RewardPopup/SafeArea/Bounds"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -230.0
-offset_top = -350.0
-offset_right = 230.0
-offset_bottom = 350.0
-alignment = 1
-theme_override_constants/separation = 16
+offset_left = -340.0
+offset_top = -540.0
+offset_right = 340.0
+offset_bottom = 540.0
+mouse_filter = 2
+theme_override_constants/separation = 20
 
-[node name="RewardTitle" type="Label" parent="RewardPopup/Box"]
-theme_type_variation = &"Title"
-theme_override_font_sizes/font_size = 32
+[node name="RewardTitle" type="Label" parent="RewardPopup/SafeArea/Bounds/Box"]
 layout_mode = 2
+theme_type_variation = &"Title"
+theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
+autowrap_mode = 3
 text = "Daily Reward"
 
-[node name="Hero" type="CenterContainer" parent="RewardPopup/Box"]
-custom_minimum_size = Vector2(0, 128)
+[node name="Scroll" type="ScrollContainer" parent="RewardPopup/SafeArea/Bounds/Box"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Body" type="MarginContainer" parent="RewardPopup/SafeArea/Bounds/Box/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Content" type="VBoxContainer" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body"]
 layout_mode = 2
 mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 20
 
-[node name="Coin" type="Control" parent="RewardPopup/Box/Hero"]
-custom_minimum_size = Vector2(128, 128)
+[node name="Hero" type="CenterContainer" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
+custom_minimum_size = Vector2(0, 286)
+layout_mode = 2
+mouse_filter = 2
+[node name="Coin" type="Control" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content/Hero"]
+visible = true
+custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("9_coinicon")
 effect = 2
-
-[node name="BoostIcon" type="Control" parent="RewardPopup/Box/Hero"]
+[node name="BoostIcon" type="Control" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content/Hero"]
 visible = false
-custom_minimum_size = Vector2(128, 128)
+custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("9_coinicon")
-
-[node name="SupplyGift" type="Control" parent="RewardPopup/Box/Hero"]
+[node name="SupplyGift" type="Control" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content/Hero"]
 visible = false
-custom_minimum_size = Vector2(128, 128)
+custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("12_gift")
-
-[node name="RewardAmount" type="Label" parent="RewardPopup/Box"]
+[node name="RewardAmount" type="Label" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
 layout_mode = 2
 theme_type_variation = &"Coins"
 theme_override_font_sizes/font_size = 64
 horizontal_alignment = 1
 text = "+0"
-
-[node name="Currency" type="Label" parent="RewardPopup/Box"]
+[node name="Currency" type="Label" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
 text = "Coins"
-
-[node name="Route" type="Control" parent="RewardPopup/Box"]
-custom_minimum_size = Vector2(420, 64)
+[node name="RouteScroll" type="ScrollContainer" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
+custom_minimum_size = Vector2(0, 160)
 layout_mode = 2
-size_flags_horizontal = 4
+vertical_scroll_mode = 0
+[node name="Route" type="Control" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content/RouteScroll"]
+custom_minimum_size = Vector2(1080, 144)
+layout_mode = 2
 script = ExtResource("11_route")
-
-[node name="RewardBody" type="Label" parent="RewardPopup/Box"]
+[node name="RewardBody" type="Label" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
 theme_type_variation = &"Muted"
-theme_override_font_sizes/font_size = 18
-layout_mode = 2
-horizontal_alignment = 1
-text = "Day 1/10"
-
-[node name="ClaimButton" type="Button" parent="RewardPopup/Box"]
-layout_mode = 2
-custom_minimum_size = Vector2(260, 64)
-size_flags_horizontal = 4
-text = "Claim"
 theme_override_font_sizes/font_size = 26
-theme_type_variation = &"HeroButton"
-script = ExtResource("3_juicy")
-
-[node name="Received" type="Label" parent="RewardPopup/Box"]
-custom_minimum_size = Vector2(0, 30)
+horizontal_alignment = 1
+autowrap_mode = 3
+text = "Day 1/10"
+[node name="Received" type="Label" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 theme_type_variation = &"Coins"
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 26
 horizontal_alignment = 1
 text = ""
-
-[node name="CloseButton" type="Button" parent="RewardPopup/Box"]
-custom_minimum_size = Vector2(160, 48)
+[node name="Footer" type="HBoxContainer" parent="RewardPopup/SafeArea/Bounds/Box"]
 layout_mode = 2
-size_flags_horizontal = 4
-theme_type_variation = &"Passive"
-theme_override_font_sizes/font_size = 20
-flat = true
+mouse_filter = 2
+theme_override_constants/separation = 16
+[node name="ClaimButton" type="Button" parent="RewardPopup/SafeArea/Bounds/Box/Footer"]
+custom_minimum_size = Vector2(108, 108)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Claim"
+theme_override_font_sizes/font_size = 28
+theme_type_variation = &"HeroButton"
+script = ExtResource("3_juicy")
+pop_scale = 1.03
+[node name="CloseButton" type="Button" parent="RewardPopup/SafeArea/Bounds/Box/Footer"]
+custom_minimum_size = Vector2(108, 108)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"Secondary"
+theme_override_font_sizes/font_size = 28
+script = ExtResource("3_juicy")
+pop_scale = 1.03
 
 [node name="GiftOverlay" type="Control" parent="."]
 visible = false
@@ -445,11 +529,9 @@ anchor_bottom = 1.0
 mouse_filter = 2
 color = Color(0.02, 0.015, 0.05, 0.85)
 [node name="Reveal" parent="GiftOverlay" instance=ExtResource("13_reveal")]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -300.0
-offset_right = 320.0
-offset_bottom = 300.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0

@@ -7,6 +7,13 @@ signal dismissed
 enum State { HIDDEN, READY, CLAIMING, CLAIMED, DISMISSING, INSPECTING }
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
+const MAX_POPUP_WIDTH: float = 760.0
+const MAX_POPUP_HEIGHT: float = 1280.0
+const POPUP_HEIGHT_SHARE: float = 0.88
+const HERO_SIZES: Vector2 = Vector2(160.0, 220.0)
+const HERO_HEIGHT_SHARE: float = 0.25
+const RING_DIAMETER_SHARE: float = 1.5
+const HERO_PADDING: float = 16.0
 @export var entrance_duration: float = 0.20
 @export var claim_pulse_duration: float = 0.22
 @export var claimed_hold_duration: float = 0.7
@@ -26,18 +33,23 @@ var _ring_progress: float = 1.0:
 		queue_redraw()
 var claim_action: Callable
 var _motion: Tween
-@onready var _box: VBoxContainer = $Box
-@onready var _title: Label = $Box/RewardTitle
-@onready var _coin: Control = $Box/Hero/Coin
-@onready var _bonus_icon: Control = $Box/Hero/BoostIcon
-@onready var _gift_icon: Control = $Box/Hero/SupplyGift
-@onready var _amount: Label = $Box/RewardAmount
-@onready var _currency: Label = $Box/Currency
-@onready var _day: Label = $Box/RewardBody
-@onready var _claim: Button = $Box/ClaimButton
-@onready var _route: DailyRewardRoute = $Box/Route
-@onready var _received: Label = $Box/Received
-@onready var _close: Button = $Box/CloseButton
+var _layout_pending: bool = false
+@onready var _bounds: Control = $SafeArea/Bounds
+@onready var _scroll: ScrollContainer = $SafeArea/Bounds/Box/Scroll
+@onready var _hero: CenterContainer = $SafeArea/Bounds/Box/Scroll/Body/Content/Hero
+@onready var _route_scroll: ScrollContainer = $SafeArea/Bounds/Box/Scroll/Body/Content/RouteScroll
+@onready var _box: VBoxContainer = $SafeArea/Bounds/Box
+@onready var _title: Label = $SafeArea/Bounds/Box/RewardTitle
+@onready var _coin: Control = $SafeArea/Bounds/Box/Scroll/Body/Content/Hero/Coin
+@onready var _bonus_icon: Control = $SafeArea/Bounds/Box/Scroll/Body/Content/Hero/BoostIcon
+@onready var _gift_icon: Control = $SafeArea/Bounds/Box/Scroll/Body/Content/Hero/SupplyGift
+@onready var _amount: Label = $SafeArea/Bounds/Box/Scroll/Body/Content/RewardAmount
+@onready var _currency: Label = $SafeArea/Bounds/Box/Scroll/Body/Content/Currency
+@onready var _day: Label = $SafeArea/Bounds/Box/Scroll/Body/Content/RewardBody
+@onready var _claim: Button = $SafeArea/Bounds/Box/Footer/ClaimButton
+@onready var _route: DailyRewardRoute = $SafeArea/Bounds/Box/Scroll/Body/Content/RouteScroll/Route
+@onready var _received: Label = $SafeArea/Bounds/Box/Scroll/Body/Content/Received
+@onready var _close: Button = $SafeArea/Bounds/Box/Footer/CloseButton
 
 
 func _ready() -> void:
@@ -54,6 +66,44 @@ func _ready() -> void:
 	_coin.resized.connect(func() -> void: _coin.pivot_offset = _coin.size * 0.5)
 	_bonus_icon.resized.connect(func() -> void: _bonus_icon.pivot_offset = _bonus_icon.size * 0.5)
 	_amount.resized.connect(func() -> void: _amount.pivot_offset = _amount.size * 0.5)
+	_gift_icon.resized.connect(func() -> void: _gift_icon.pivot_offset = _gift_icon.size * 0.5)
+	_bounds.resized.connect(_queue_layout)
+	_scroll.resized.connect(_queue_layout)
+	_route_scroll.resized.connect(_focus_route)
+	_queue_layout()
+
+
+func _queue_layout() -> void:
+	if _layout_pending or not is_inside_tree():
+		return
+	_layout_pending = true
+	_refresh_layout.call_deferred()
+
+
+func _refresh_layout() -> void:
+	_layout_pending = false
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+	var width: float = minf(_bounds.size.x, MAX_POPUP_WIDTH)
+	var height: float = minf(_bounds.size.y * POPUP_HEIGHT_SHARE, MAX_POPUP_HEIGHT)
+	_box.offset_left = -width * 0.5
+	_box.offset_right = width * 0.5
+	_box.offset_top = -height * 0.5
+	_box.offset_bottom = height * 0.5
+	var side: float = roundf(clampf(_scroll.size.y * HERO_HEIGHT_SHARE, HERO_SIZES.x, HERO_SIZES.y))
+	for icon: Control in [_coin, _bonus_icon, _gift_icon]:
+		icon.custom_minimum_size = Vector2.ONE * side
+	_hero.custom_minimum_size.y = ceilf(side * RING_DIAMETER_SHARE + HERO_PADDING)
+	_focus_route()
+
+
+func _focus_route() -> void:
+	if is_inside_tree() and _box.scale.is_equal_approx(Vector2.ONE) and _route.checkpoints.size() == DailyRewardRoute.DAYS:
+		_route_scroll.ensure_control_visible(_route.checkpoints[selected_day - 1])
+
+
+func _focus_hero() -> void:
+	_scroll.ensure_control_visible(_hero)
 
 
 func _style_claim() -> void:
@@ -99,6 +149,7 @@ func present(status: Dictionary, inspect: bool = false) -> bool:
 	_motion.set_parallel(true)
 	_motion.tween_property(self, "modulate:a", 1.0, entrance_duration)
 	_motion.tween_property(_box, "scale", Vector2.ONE, entrance_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_motion.chain().tween_callback(_focus_route)
 	return true
 
 
@@ -123,6 +174,8 @@ func _update_selection() -> void:
 	_received.visible = true
 	_received.text = tr("DAILY_REWARD_RECEIVED") if selected_day <= completed_days else ""
 	_route.bind(current_day, completed_days, selected_day, Economy.LOGIN_REWARDS)
+	_queue_layout()
+	_focus_route.call_deferred()
 
 
 func _show_reward_spec(spec: Dictionary) -> void:
@@ -159,6 +212,7 @@ func _on_claim() -> void:
 	selected_day = current_day
 	_update_selection()
 	state = State.CLAIMING
+	_focus_hero()
 	_claim.disabled = true
 	_close.disabled = true
 	var claim_result: Variant = claim_action.call()

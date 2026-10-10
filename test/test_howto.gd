@@ -3,7 +3,7 @@ extends GutTest
 ## Tutorial behavior, real container geometry and depicted gameplay semantics.
 
 const SCENE: PackedScene = preload("res://scenes/ui/HowToPlay.tscn")
-const BASE: String = "SafeMargin/MainVBox/"
+const BASE: String = "SafeArea/Bounds/MainVBox/ContentScroll/PageContent/"
 const TITLES := [
 	"HOWTO_GOAL_TITLE", "HOWTO_CONTROLS_TITLE", "HOWTO_ENEMIES_TITLE", "HOWTO_LIVES_TITLE",
 ]
@@ -32,8 +32,8 @@ func test_four_page_order_back_next_and_final_action() -> void:
 	var title: Label = page.get_node(BASE + "PageTitle")
 	var art: Control = page.get_node(BASE + "DemoCenter/PageArt")
 	var progress: Control = page.get_node(BASE + "ProgressCenter/TutorialProgress")
-	var back: Button = page.get_node(BASE + "NavigationRow/PrevButton")
-	var next: Button = page.get_node(BASE + "NavigationRow/NextButton")
+	var back: Button = page.get_node("SafeArea/Bounds/MainVBox/NavigationRow/PrevButton")
+	var next: Button = page.get_node("SafeArea/Bounds/MainVBox/NavigationRow/NextButton")
 	assert_false(back.visible, "Back hidden on first page")
 	for index in 4:
 		assert_eq(title.text, tr(TITLES[index]), "page title %d" % index)
@@ -46,7 +46,7 @@ func test_four_page_order_back_next_and_final_action() -> void:
 	back.pressed.emit()
 	assert_eq(progress.page_index, 2, "Back returns to preceding page")
 	assert_eq(title.text, tr("HOWTO_ENEMIES_TITLE"))
-	assert_true(page.get_node("CloseButton").pressed.is_connected(Callable(page, "_exit")), "X stays wired")
+	assert_true(page.get_node("SafeArea/Bounds/CloseButton").pressed.is_connected(Callable(page, "_exit")), "X stays wired")
 	assert_true(next.pressed.is_connected(Callable(page, "_on_next")), "Next/Got it stays wired")
 
 
@@ -61,7 +61,7 @@ func test_all_four_pages_have_large_nonoverlapping_layout_at_720x1280() -> void:
 		var art: Control = page.get_node(BASE + "DemoCenter/PageArt")
 		var body: Control = page.get_node(BASE + "BodyCenter/BodyText")
 		var progress: Control = page.get_node(BASE + "ProgressCenter/TutorialProgress")
-		var nav: Control = page.get_node(BASE + "NavigationRow")
+		var nav: Control = page.get_node("SafeArea/Bounds/MainVBox/NavigationRow")
 		for index in 4:
 			page.call("_show", index)
 			await get_tree().process_frame
@@ -81,7 +81,7 @@ func test_all_four_pages_have_large_nonoverlapping_layout_at_720x1280() -> void:
 			assert_true(progress.get_global_rect().end.y <= nav.get_global_rect().position.y, "progress before nav " + label)
 			assert_true(page.get_global_rect().encloses(nav.get_global_rect()), "nav inside screen " + label)
 			assert_true(page.get_global_rect().encloses(body.get_global_rect()), "body inside screen " + label)
-			assert_true(page.get_global_rect().encloses(page.get_node("CloseButton").get_global_rect()), "close inside screen " + label)
+			assert_true(page.get_global_rect().encloses(page.get_node("SafeArea/Bounds/CloseButton").get_global_rect()), "close inside screen " + label)
 		assert_true(art_positions.max() - art_positions.min() < 35.0, "arena stays vertically stable " + locale)
 		assert_true(progress_positions.max() - progress_positions.min() < 35.0, "progress stays vertically stable " + locale)
 

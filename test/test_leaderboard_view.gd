@@ -28,10 +28,10 @@ func _board() -> Leaderboard:
 	return board
 
 
-func _page() -> Control:
+func _page(dimensions: Vector2i = Vector2i(720, 1280)) -> Control:
 	var page: Control = SCENE.instantiate()
 	page.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	page.size = Vector2(720.0, 1280.0)
+	page.size = Vector2(dimensions)
 	add_child_autofree(page)
 	await get_tree().process_frame
 	page.call("_render_leaderboard", _board(), TODAY)
@@ -45,7 +45,7 @@ func _label(entry: Control, name: String) -> Label:
 
 func test_real_order_top_three_and_score_date_binding() -> void:
 	var page: Control = await _page()
-	var list: VBoxContainer = page.get_node("Layout/Scroll/Content/List")
+	var list: VBoxContainer = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List")
 	assert_eq(list.get_child_count(), 5, "one view row per real daily score")
 	var expected_scores: Array[int] = [820, 820, 710, 410, 270]
 	var expected_dates: Array[int] = [20261002, 20261001, TODAY, 20260930, 20260929]
@@ -59,12 +59,12 @@ func test_real_order_top_three_and_score_date_binding() -> void:
 	for index in range(1, 5):
 		assert_true(list.get_child(index) is HBoxContainer, "other rows stay flat")
 	assert_true(_label(list.get_child(0), "Score").get_theme_font_size("font_size") > _label(list.get_child(3), "Score").get_theme_font_size("font_size"))
-	assert_eq(page.get_node("Layout/Scroll/Content/AllBest").text, tr("LEADERBOARD_ALLBEST") % 820)
+	assert_eq(page.get_node("SafeArea/Bounds/Layout/Scroll/Content/AllBest").text, tr("LEADERBOARD_ALLBEST") % 820)
 
 
 func test_today_marker_only_follows_actual_today_entry() -> void:
 	var page: Control = await _page()
-	var list: VBoxContainer = page.get_node("Layout/Scroll/Content/List")
+	var list: VBoxContainer = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List")
 	for index in 5:
 		var marker: Node = list.get_child(index).find_child("TodayMarker", true, false)
 		if index == 2:
@@ -79,21 +79,21 @@ func test_today_marker_only_follows_actual_today_entry() -> void:
 func test_empty_board_does_not_invent_scores_or_record() -> void:
 	var page: Control = await _page()
 	page.call("_render_leaderboard", BOARD.new(), TODAY)
-	assert_eq(page.get_node("Layout/Scroll/Content/List").get_child_count(), 0)
-	assert_false(page.get_node("Layout/Scroll/Content/AllBest").visible)
-	assert_true(page.get_node("EmptyLabel").visible)
-	assert_eq(page.get_node("EmptyLabel").text, tr("LEADERBOARD_EMPTY"))
+	assert_eq(page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List").get_child_count(), 0)
+	assert_false(page.get_node("SafeArea/Bounds/Layout/Scroll/Content/AllBest").visible)
+	assert_true(page.get_node("SafeArea/Bounds/EmptyLabel").visible)
+	assert_eq(page.get_node("SafeArea/Bounds/EmptyLabel").text, tr("LEADERBOARD_EMPTY"))
 
 
 func test_english_turkish_binding_and_back_wiring() -> void:
 	for locale in ["en", "tr"]:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _page()
-		var today_entry: Control = page.get_node("Layout/Scroll/Content/List/Entry3")
-		assert_eq(page.get_node("Layout/Title").text, tr("LEADERBOARD_TITLE"))
+		var today_entry: Control = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List/Entry3")
+		assert_eq(page.get_node("SafeArea/Bounds/Layout/Title").text, tr("LEADERBOARD_TITLE"))
 		assert_eq(_label(today_entry, "Date").text, "Oct 3, 2026" if locale == "en" else "3 Eki 2026")
-		assert_eq(page.get_node("Layout/Scroll/Content/AllBest").text, tr("LEADERBOARD_ALLBEST") % 820)
-		var back: Button = page.get_node("Layout/BackButton")
+		assert_eq(page.get_node("SafeArea/Bounds/Layout/Scroll/Content/AllBest").text, tr("LEADERBOARD_ALLBEST") % 820)
+		var back: Button = page.get_node("SafeArea/Bounds/Layout/BackButton")
 		assert_eq(back.text, tr("SETTINGS_BACK"))
 		assert_gt(back.pressed.get_connections().size(), 0, "Back remains connected")
 
@@ -102,10 +102,10 @@ func test_english_turkish_rows_fit_at_720x1280() -> void:
 	for locale in ["en", "tr"]:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _page()
-		var scroll: ScrollContainer = page.get_node("Layout/Scroll")
-		var list: VBoxContainer = page.get_node("Layout/Scroll/Content/List")
-		var record: Label = page.get_node("Layout/Scroll/Content/AllBest")
-		var back: Button = page.get_node("Layout/BackButton")
+		var scroll: ScrollContainer = page.get_node("SafeArea/Bounds/Layout/Scroll")
+		var list: VBoxContainer = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List")
+		var record: Label = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/AllBest")
+		var back: Button = page.get_node("SafeArea/Bounds/Layout/BackButton")
 		assert_true(page.get_global_rect().encloses(back.get_global_rect()), "back inside %s" % locale)
 		assert_true(scroll.get_global_rect().encloses(record.get_global_rect()), "record inside %s" % locale)
 		for index in list.get_child_count():
@@ -129,7 +129,7 @@ func test_full_year_date_columns_fit_at_720x1280() -> void:
 		page.call("_render_leaderboard", board, 20271003)
 		await get_tree().process_frame
 		for index in 2:
-			var entry: Control = page.get_node("Layout/Scroll/Content/List/Entry%d" % (index + 1))
+			var entry: Control = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List/Entry%d" % (index + 1))
 			var date_label: Label = _label(entry, "Date")
 			var score_label: Label = _label(entry, "Score")
 			var year: int = 2027 if index == 0 else 2026
@@ -137,3 +137,25 @@ func test_full_year_date_columns_fit_at_720x1280() -> void:
 			assert_true(date_label.size.x >= date_label.get_combined_minimum_size().x, "full date fits %s/%d" % [locale, index])
 			assert_true(date_label.get_global_rect().end.x < score_label.get_global_rect().position.x, "date and score remain separate %s/%d" % [locale, index])
 			assert_true(page.get_global_rect().encloses(score_label.get_global_rect()), "score stays on screen %s/%d" % [locale, index])
+
+
+func test_safe_header_back_scroll_and_long_scores_fit_phone_ratios_and_tablet() -> void:
+	for dimensions: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600), Vector2i(960, 1280)]:
+		var page: Control = await _page(dimensions)
+		var layout: Control = page.get_node("SafeArea/Bounds/Layout")
+		var safe: Control = page.get_node("SafeArea/Bounds")
+		var scroll: ScrollContainer = page.get_node("SafeArea/Bounds/Layout/Scroll")
+		var back: Button = page.get_node("SafeArea/Bounds/Layout/BackButton")
+		assert_true(safe.get_global_rect().encloses(layout.get_global_rect()), "layout stays in safe bounds %s" % dimensions)
+		assert_true(layout.get_global_rect().encloses(back.get_global_rect()), "Back stays accessible %s" % dimensions)
+		assert_true(layout.get_global_rect().encloses(scroll.get_global_rect()), "ranking scroll stays in layout %s" % dimensions)
+		assert_almost_eq(layout.size.x, minf(safe.size.x, 800.0), 0.1, "tablet width remains bounded")
+		var board: Leaderboard = BOARD.new()
+		board.submit(20270622, 9223372036854775807, TRACK.new())
+		page.call("_render_leaderboard", board, TODAY)
+		await get_tree().process_frame
+		var entry: Control = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List/Entry1")
+		var date_label: Label = _label(entry, "Date")
+		var score_label: Label = _label(entry, "Score")
+		assert_eq(score_label.text, "9223372036854775807")
+		assert_true(date_label.get_global_rect().end.x < score_label.get_global_rect().position.x, "long score does not overlap date %s" % dimensions)

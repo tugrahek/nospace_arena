@@ -7,6 +7,7 @@ extends Control
 const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const LEADERBOARD_PATH: String = "user://leaderboard.json"
 const MAX_ROWS: int = 60
+const MAX_CONTENT_WIDTH: float = 800.0
 
 const TodayMarker = preload("res://scripts/ui/leaderboard_today_marker.gd")
 
@@ -16,18 +17,28 @@ const BRONZE: Color = Color(0.85, 0.55, 0.35, 1.0)
 const MUTED: Color = Color(0.74, 0.72, 0.84, 1.0)
 const TOP_SURFACE: Color = Color(0.18, 0.15, 0.32, 0.9)
 
-@onready var _title: Label = $Layout/Title
-@onready var _all_best: Label = $Layout/Scroll/Content/AllBest
-@onready var _list: VBoxContainer = $Layout/Scroll/Content/List
-@onready var _empty: Label = $EmptyLabel
-@onready var _back: Button = $Layout/BackButton
+@onready var _bounds: Control = $SafeArea/Bounds
+@onready var _layout: VBoxContainer = $SafeArea/Bounds/Layout
+@onready var _title: Label = $SafeArea/Bounds/Layout/Title
+@onready var _all_best: Label = $SafeArea/Bounds/Layout/Scroll/Content/AllBest
+@onready var _list: VBoxContainer = $SafeArea/Bounds/Layout/Scroll/Content/List
+@onready var _empty: Label = $SafeArea/Bounds/EmptyLabel
+@onready var _back: Button = $SafeArea/Bounds/Layout/BackButton
 
 
 func _ready() -> void:
+	_bounds.resized.connect(_refresh_layout)
+	_refresh_layout()
 	_title.text = tr("LEADERBOARD_TITLE")
 	_back.text = tr("SETTINGS_BACK")
 	_back.pressed.connect(func() -> void: get_tree().change_scene_to_file(MENU_SCENE))
 	_populate()
+
+
+func _refresh_layout() -> void:
+	var width: float = minf(_bounds.size.x, MAX_CONTENT_WIDTH)
+	_layout.offset_left = -width * 0.5
+	_layout.offset_right = width * 0.5
 
 
 func _populate() -> void:
@@ -84,7 +95,7 @@ func _add_entry(rank: int, date: int, score: int, today: int) -> void:
 	var row := HBoxContainer.new()
 	row.name = "Content"
 	row.custom_minimum_size.y = 88.0 if rank == 1 else (74.0 if rank <= 3 else 58.0)
-	row.add_theme_constant_override("separation", 14)
+	row.add_theme_constant_override("separation", 8)
 	if rank == 1:
 		var rail := ColorRect.new()
 		rail.color = GOLD
@@ -98,6 +109,7 @@ func _add_entry(rank: int, date: int, score: int, today: int) -> void:
 	row.add_child(_score_label(score, rank))
 	var entry: Control = _wrap_entry(row, rank)
 	entry.name = "Entry%d" % rank
+	entry.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_child(entry)
 
 
@@ -129,7 +141,9 @@ func _score_label(score: int, rank: int) -> Label:
 	score_label.text = str(score)
 	score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	score_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	score_label.add_theme_font_size_override("font_size", 36 if rank == 1 else (29 if rank <= 3 else 25))
+	var base_size: int = 36 if rank == 1 else (29 if rank <= 3 else 25)
+	var score_size: int = mini(base_size, 20 if str(score).length() > 12 else (23 if str(score).length() > 9 else base_size))
+	score_label.add_theme_font_size_override("font_size", score_size)
 	score_label.add_theme_color_override("font_color", GOLD if rank == 1 else SILVER)
 	return score_label
 

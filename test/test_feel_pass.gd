@@ -147,7 +147,7 @@ func test_hud_shows_target_next_to_percent() -> void:
 	await get_tree().process_frame
 	hud.set_target(75.0)
 	hud.update_percent(62.0)
-	var label: Label = hud.get_node("TopBar/PercentLabel")
+	var label: Label = hud.get_node("TopSafeArea/InfoStack/TopBar/PercentLabel")
 	assert_eq(label.text, "62 / 75%", "player can always see the goal")
 	hud.set_target(50.0)
 	hud.update_percent(0.0)
@@ -190,9 +190,9 @@ func test_campaign_stars_reveal_staggered() -> void:
 	await get_tree().process_frame
 	hud.star_stagger = 0.02  # fast for the test; feel value stays @export
 	hud.show_campaign_stars(2, true, false)
-	var stars: Label = hud.get_node("ResultPanel/VBox/StarsLabel")
+	var stars: Label = hud.get_node("ResultPanel/SafeArea/Bounds/VBox/StarsLabel")
 	assert_eq(stars.text, "", "reveal starts empty (stars come one by one)")
 	await get_tree().create_timer(0.3).timeout
 	assert_eq(stars.text, "★★☆", "all three slots revealed with the earned fill")
-	var best: Label = hud.get_node("ResultPanel/VBox/NewBestLabel")
+	var best: Label = hud.get_node("ResultPanel/SafeArea/Bounds/VBox/NewBestLabel")
 	assert_true(best.visible, "new-best pops at the end")

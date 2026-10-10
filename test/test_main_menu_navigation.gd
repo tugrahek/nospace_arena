@@ -3,7 +3,7 @@ extends GutTest
 ## UI Pass B1 regression coverage for the shared MainMenu navigation arena.
 
 const MAIN_MENU_SCENE: PackedScene = preload("res://scenes/main/MainMenu.tscn")
-const HUB_PATH: NodePath = NodePath("Center/Buttons/NavigationHub")
+const HUB_PATH: NodePath = NodePath("SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub")
 const NAVIGATION: Array[Dictionary] = [
 	{"name": "StoreButton", "key": "MENU_STORE", "en": "Store", "tr": "Mağaza"},
 	{"name": "MissionsButton", "key": "MENU_MISSIONS_SHORT", "en": "Missions", "tr": "Görevler"},
@@ -34,8 +34,8 @@ func test_navigation_hub_keeps_four_flat_destination_targets() -> void:
 		assert_true(button.flat, "%s stays a transparent hub hit target" % entry["name"])
 		assert_true(button.custom_minimum_size.x >= 250.0, "%s keeps a comfortable touch width" % entry["name"])
 		assert_true(button.custom_minimum_size.y >= 88.0, "%s keeps a comfortable touch height" % entry["name"])
-		assert_not_null(button.get_node_or_null("Icon"), "%s retains its procedural icon" % entry["name"])
-		assert_not_null(button.get_node_or_null("Label"), "%s retains its localized label" % entry["name"])
+		assert_not_null(button.get_node_or_null("Content/Icon"), "%s retains its procedural icon" % entry["name"])
+		assert_not_null(button.get_node_or_null("Content/Label"), "%s retains its localized label" % entry["name"])
 	menu.free()
 
 
@@ -68,8 +68,8 @@ func test_destination_targets_and_scenes_remain_available() -> void:
 
 func test_currency_pill_keeps_a_procedural_coin_and_localized_label() -> void:
 	var menu: Control = MAIN_MENU_SCENE.instantiate()
-	var coin_icon: Control = menu.get_node("CoinsPanel/Content/CoinIcon")
-	var coins: Label = menu.get_node("CoinsPanel/Content/Coins")
+	var coin_icon: Control = menu.get_node("SafeArea/Bounds/Frame/Header/CoinsPanel/Content/CoinIcon")
+	var coins: Label = menu.get_node("SafeArea/Bounds/Frame/Header/CoinsPanel/Content/Coins")
 	assert_not_null(coin_icon.get_script(), "currency pill owns a procedural coin drawing")
 	assert_eq(coin_icon.mouse_filter, Control.MOUSE_FILTER_IGNORE, "coin never intercepts input")
 	assert_not_null(coins, "currency label remains in the existing pill")

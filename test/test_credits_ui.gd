@@ -31,18 +31,18 @@ func test_settings_legal_footer_localizes_and_returns_to_same_instance() -> void
 		settings._apply_texts()
 		await get_tree().process_frame
 		var copyright: String = "© 2026 Tuğra Hekimoğlu. All rights reserved." if locale == "en" else "© 2026 Tuğra Hekimoğlu. Tüm hakları saklıdır."
-		assert_eq(settings.get_node("Bottom/LegalFooter/Copyright").text, copyright)
-		var entry: Button = settings.get_node("Bottom/LegalFooter/LicensesButton") as Button
+		assert_eq(settings.get_node("SafeArea/Bounds/Bottom/LegalFooter/Copyright").text, copyright)
+		var entry: Button = settings.get_node("SafeArea/Bounds/Bottom/LegalFooter/LicensesButton") as Button
 		assert_eq(entry.text, "Open-source licenses" if locale == "en" else "Açık kaynak lisansları")
 		entry.pressed.emit()
 		await get_tree().process_frame
 		var legal: Control = settings.get("_legal_view") as Control
 		assert_not_null(legal)
-		assert_eq(legal.get_node("Layout/Title").text, tr("LEGAL_TITLE"))
-		var reader: RichTextLabel = legal.get_node("Layout/Notices") as RichTextLabel
+		assert_eq(legal.get_node("SafeArea/Bounds/Layout/Title").text, tr("LEGAL_TITLE"))
+		var reader: RichTextLabel = legal.get_node("SafeArea/Bounds/Layout/Notices") as RichTextLabel
 		assert_true(reader.scroll_active)
 		assert_gt(reader.get_v_scroll_bar().max_value, reader.get_v_scroll_bar().page, "full notices naturally scroll")
-		legal.get_node("Layout/BackButton").pressed.emit()
+		legal.get_node("SafeArea/Bounds/Layout/BackButton").pressed.emit()
 		await get_tree().process_frame
 		assert_null(settings.get("_legal_view"))
 		assert_true(is_instance_valid(settings), "legal Back preserves embedded Settings")

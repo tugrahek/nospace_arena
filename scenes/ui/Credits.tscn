@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://w3dqlrk3g1ea"]
+[gd_scene load_steps=4 format=3 uid="uid://w3dqlrk3g1ea"]
 
 [ext_resource type="Script" path="res://scripts/ui/credits.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/safe_area_margin.gd" id="3_safe"]
 
 [node name="Legal" type="Control"]
 layout_mode = 3
@@ -16,29 +17,40 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="Layout" type="VBoxContainer" parent="."]
+[node name="SafeArea" type="MarginContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 36.0
+mouse_filter = 2
+script = ExtResource("3_safe")
+
+[node name="Bounds" type="Control" parent="SafeArea"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Layout" type="VBoxContainer" parent="SafeArea/Bounds"]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -288.0
 offset_top = 40.0
-offset_right = -36.0
+offset_right = 288.0
 offset_bottom = -32.0
 theme_override_constants/separation = 24
 
-[node name="Title" type="Label" parent="Layout"]
+[node name="Title" type="Label" parent="SafeArea/Bounds/Layout"]
 layout_mode = 2
 theme_type_variation = &"Title"
 theme_override_font_sizes/font_size = 36
 horizontal_alignment = 1
 
-[node name="Notices" type="RichTextLabel" parent="Layout"]
+[node name="Notices" type="RichTextLabel" parent="SafeArea/Bounds/Layout"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 19
 bbcode_enabled = false
 scroll_active = true
 
-[node name="BackButton" type="Button" parent="Layout"]
+[node name="BackButton" type="Button" parent="SafeArea/Bounds/Layout"]
 layout_mode = 2
 custom_minimum_size = Vector2(220, 56)
 size_flags_horizontal = 4

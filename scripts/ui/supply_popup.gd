@@ -8,6 +8,9 @@ enum State { HIDDEN, READY, BUSY, REVEAL, ODDS }
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
 const REQUEST_ID_BYTES: int = 16
+const MAX_CONTENT_WIDTH: float = 800.0
+const HERO_SIZES: Vector2 = Vector2(224.0, 340.0)
+const HERO_HEIGHT_SHARE: float = 0.45
 const REWARD_KEYS: Dictionary = {"coins": "SUPPLY_REWARD_COINS", "slow_start": "SUPPLY_REWARD_SLOW",
 	"coin_bonus": "SUPPLY_REWARD_BONUS", "extra_life": "SUPPLY_REWARD_LIFE"}
 @export var reveal_duration: float = 0.55
@@ -22,16 +25,21 @@ var revealed_box_id: String = ""
 var _ad_token: int = 0
 var _day_context: int = 0
 var _motion: Tween
-@onready var _surface: VBoxContainer = $Surface
-@onready var _title: Label = $Surface/Title
-@onready var _reward_icon: Control = $RevealView/RewardIcon
-@onready var _reward: Label = $RevealView/Reward
-@onready var _feedback: Label = $Surface/Feedback
-@onready var _ad: Button = $Surface/AdRow/Ad
-@onready var _coin: Button = $Surface/CoinRow/Coin
-@onready var _continue: Button = $RevealView/Continue
-@onready var _odds: Button = $Surface/Odds
-@onready var _cube: Control = $RevealView/Cube
+var _layout_pending: bool = false
+@onready var _bounds: Control = $SafeArea/Bounds
+@onready var _frame: Control = $SafeArea/Bounds/Frame
+@onready var _identity: Control = $SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/Identity
+@onready var _close: SupplyActionButton = $SafeArea/Bounds/Frame/Surface/Footer/Close
+@onready var _surface: VBoxContainer = $SafeArea/Bounds/Frame/Surface
+@onready var _title: Label = $SafeArea/Bounds/Frame/Surface/Title
+@onready var _reward_icon: Control = $SafeArea/Bounds/Frame/RevealView/Scroll/Body/Content/RewardIcon
+@onready var _reward: Label = $SafeArea/Bounds/Frame/RevealView/Scroll/Body/Content/Reward
+@onready var _feedback: Label = $SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/Feedback
+@onready var _ad: SupplyActionButton = $SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/AdRow/Ad
+@onready var _coin: SupplyActionButton = $SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/CoinRow/Coin
+@onready var _continue: SupplyActionButton = $SafeArea/Bounds/Frame/RevealView/Footer/Continue
+@onready var _odds: SupplyActionButton = $SafeArea/Bounds/Frame/Surface/Footer/Odds
+@onready var _cube: Control = $SafeArea/Bounds/Frame/RevealView/Scroll/Body/Content/Cube
 
 
 func _ready() -> void:
@@ -47,7 +55,8 @@ func _ready() -> void:
 	_coin.pressed.connect(_buy_coin)
 	_continue.pressed.connect(_finish_reveal)
 	_odds.pressed.connect(show_odds)
-	$OddsView/Back.pressed.connect(hide_odds)
+	_close.pressed.connect(close)
+	$SafeArea/Bounds/Frame/OddsView/Footer/Back.pressed.connect(hide_odds)
 	core.box_delivered.connect(_on_delivered)
 	economy.currency_changed.connect(_on_currency)
 	economy.boosts_changed.connect(refresh)
@@ -55,12 +64,40 @@ func _ready() -> void:
 	ads.ads_unavailable.connect(_on_unavailable)
 	ads.ad_closed.connect(_on_ad_closed, CONNECT_DEFERRED)
 	ads.ad_failed.connect(_on_ad_failed, CONNECT_DEFERRED)
-	_ad.add_theme_color_override("font_color", PALETTE.accent)
-	_coin.add_theme_color_override("font_color", PALETTE.coin)
+	_ad.caption_color = PALETTE.void_bg
+	_coin.caption_color = PALETTE.coin
 	_cube.resized.connect(func() -> void: _cube.pivot_offset = _cube.size * 0.5)
 	_reward_icon.resized.connect(func() -> void: _reward_icon.pivot_offset = _reward_icon.size * 0.5)
+	_bounds.resized.connect(_queue_layout)
+	for view_name: String in ["Surface", "OddsView", "RevealView"]:
+		var scroll: ScrollContainer = _frame.get_node(view_name + "/Scroll")
+		scroll.resized.connect(_queue_layout)
 	visible = false
 	refresh()
+
+
+func _queue_layout() -> void:
+	if _layout_pending or not is_inside_tree():
+		return
+	_layout_pending = true
+	_refresh_layout.call_deferred()
+
+
+## Fit only presentation to the current host; body scrolling protects footer actions.
+func _refresh_layout() -> void:
+	_layout_pending = false
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+	var width: float = minf(_bounds.size.x, MAX_CONTENT_WIDTH)
+	_frame.offset_left = -width * 0.5
+	_frame.offset_right = width * 0.5
+	var surface_scroll: ScrollContainer = _frame.get_node("Surface/Scroll")
+	var reveal_scroll: ScrollContainer = _frame.get_node("RevealView/Scroll")
+	var max_side: float = maxf(0.0, width - 32.0)
+	_identity.custom_minimum_size = Vector2.ONE * minf(max_side,
+		roundf(clampf(surface_scroll.size.y * HERO_HEIGHT_SHARE, HERO_SIZES.x, HERO_SIZES.y)))
+	_cube.custom_minimum_size = Vector2.ONE * minf(max_side,
+		roundf(clampf(reveal_scroll.size.y * HERO_HEIGHT_SHARE, HERO_SIZES.x, HERO_SIZES.y)))
 
 
 ## Entry denotes remaining daily reward allowance independently of ad readiness.
@@ -111,27 +148,30 @@ func refresh() -> void:
 	var status: Dictionary = acquisition.status()
 	_day_context = int(status["day"])
 	_surface.visible = state not in [State.REVEAL, State.ODDS]
-	$OddsView.visible = state == State.ODDS
-	$RevealView.visible = state == State.REVEAL
+	$SafeArea/Bounds/Frame/OddsView.visible = state == State.ODDS
+	$SafeArea/Bounds/Frame/RevealView.visible = state == State.REVEAL
 	_title.text = tr("SUPPLY_TITLE")
-	$RevealView/Title.text = tr("SUPPLY_RECEIVED")
-	_continue.text = tr("SUPPLY_CONTINUE")
-	_ad.text = tr("SUPPLY_AD")
+	$SafeArea/Bounds/Frame/RevealView/Title.text = tr("SUPPLY_RECEIVED")
+	_continue.set_caption(tr("SUPPLY_CONTINUE"))
+	_ad.set_caption(tr("SUPPLY_AD"))
 	var rewarded_action: bool = daily_available() and (_ad_token != 0 or ads.is_rewarded_available())
 	_ad.get_parent().visible = rewarded_action
 	_coin.get_parent().visible = not rewarded_action
 	_ad.disabled = state != State.READY or not daily_available() or not ads.is_rewarded_available()
 	var limit: bool = int(status["coin_count"]) >= int(status["coin_limit"])
 	var affordable: bool = economy.can_afford(int(status["coin_cost"]))
-	_coin.text = tr("SUPPLY_TOMORROW") if limit else tr("SUPPLY_COST") % int(status["coin_cost"])
-	$Surface/CoinRow/Coin/Icon.visible = not limit
+	_coin.set_caption(tr("SUPPLY_TOMORROW") if limit else tr("SUPPLY_COST") % int(status["coin_cost"]))
+	$SafeArea/Bounds/Frame/Surface/Scroll/Body/Content/CoinRow/Coin/Content/Icon.visible = not limit
 	_coin.disabled = state != State.READY or not acquisition.coin_available()
 	_coin.tooltip_text = tr("SUPPLY_COIN_LIMIT") if limit else (tr("SUPPLY_NOT_ENOUGH") % int(status["coin_cost"])) if not affordable else ""
-	_odds.text = tr("SUPPLY_ODDS")
+	_odds.set_caption(tr("SUPPLY_ODDS"))
 	_odds.disabled = state != State.READY
-	$OddsView/Title.text = tr("SUPPLY_ODDS")
-	$OddsView/Back.text = tr("SUPPLY_CLOSE")
+	$SafeArea/Bounds/Frame/OddsView/Title.text = tr("SUPPLY_ODDS")
+	$SafeArea/Bounds/Frame/OddsView/Footer/Back.set_caption(tr("SUPPLY_CLOSE"))
 	_feedback.visible = not _feedback.text.is_empty()
+	_close.visible = not embedded
+	_close.set_caption(tr("SUPPLY_CLOSE"))
+	_queue_layout()
 	availability_changed.emit()
 
 
@@ -145,7 +185,7 @@ func show_odds() -> void:
 	for entry: SupplyRewardEntry in table.entries:
 		total += entry.weight
 		categories[entry.reward_type] = float(categories.get(entry.reward_type, 0.0)) + entry.weight
-	var rows: VBoxContainer = $OddsView/Rows
+	var rows: VBoxContainer = $SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows
 	for child in rows.get_children():
 		child.free()
 	for type: StringName in categories:
@@ -208,7 +248,7 @@ func _reveal(id: String) -> void:
 	_reward_icon.queue_redraw()
 	_feedback.text = ""
 	refresh()
-	$RevealView/Feedback.text = ""
+	$SafeArea/Bounds/Frame/RevealView/Scroll/Body/Content/Feedback.text = ""
 	_animate_reveal()
 
 
@@ -243,7 +283,7 @@ func _finish_reveal() -> void:
 	if state != State.REVEAL:
 		return
 	if not core.mark_presented(revealed_box_id):
-		$RevealView/Feedback.text = tr("SUPPLY_SAVE_RETRY")
+		$SafeArea/Bounds/Frame/RevealView/Scroll/Body/Content/Feedback.text = tr("SUPPLY_SAVE_RETRY")
 		return
 	_stop_reveal()
 	if embedded:

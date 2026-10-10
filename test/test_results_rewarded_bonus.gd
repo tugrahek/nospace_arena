@@ -43,7 +43,7 @@ func before_each() -> void:
 	add_child_autofree(_service)
 	_fake.complete_initialization(_fake.initialization_tokens.back())
 	_hud = HUD_SCENE.instantiate()
-	_button = _hud.get_node("ResultPanel/VBox/RewardedBonusButton")
+	_button = _hud.get_node("ResultPanel/SafeArea/Bounds/VBox/RewardedBonusButton")
 	_button.ads_service = _service
 	add_child_autofree(_hud)
 	_hud.setup(3)
@@ -80,6 +80,14 @@ func _ready_ad() -> void:
 func _tap() -> int:
 	_button.pressed.emit()
 	return _fake.show_tokens.back()
+
+
+func _make_scene_button(service: Service) -> BonusButton:
+	var hud: HUD = HUD_SCENE.instantiate()
+	var button: BonusButton = hud.get_node("ResultPanel/SafeArea/Bounds/VBox/RewardedBonusButton")
+	button.ads_service = service
+	add_child_autofree(hud)
+	return button
 
 
 func test_eligible_ready_offer_waits_for_finalized_results_and_localizes() -> void:
@@ -123,7 +131,7 @@ func test_unavailable_no_fill_does_not_block_normal_navigation() -> void:
 	_hud.next_pressed.connect(func() -> void: counts[2] += 1)
 	_hud.show_campaign_stars(3, false, true)
 	for name in ["ButtonRow/RetryButton", "ButtonRow/MenuButton", "NextButton"]:
-		var button: Button = _hud.get_node("ResultPanel/VBox/" + name)
+		var button: Button = _hud.get_node("ResultPanel/SafeArea/Bounds/VBox/" + name)
 		assert_false(button.disabled)
 		button.pressed.emit()
 	assert_eq(counts, [1, 1, 1])
@@ -154,8 +162,8 @@ func test_matching_reward_claims_exactly_once_and_updates_real_currency() -> voi
 	assert_false(_button.visible)
 	_fake.close(token)
 	await get_tree().process_frame
-	assert_false(_hud.get_node("ResultPanel/VBox/ButtonRow/RetryButton").disabled)
-	assert_false(_hud.get_node("ResultPanel/VBox/ButtonRow/MenuButton").disabled)
+	assert_false(_hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/RetryButton").disabled)
+	assert_false(_hud.get_node("ResultPanel/SafeArea/Bounds/VBox/ButtonRow/MenuButton").disabled)
 
 
 func test_close_without_reward_cancels_claim_and_late_reward_grants_nothing() -> void:
@@ -226,9 +234,7 @@ func test_synchronous_backend_reward_and_close_are_correlated() -> void:
 	service.set_requests_allowed(true)
 	add_child_autofree(service)
 	fake.complete_initialization(fake.initialization_tokens.back())
-	var button: BonusButton = BonusButton.new()
-	button.ads_service = service
-	add_child_autofree(button)
+	var button: BonusButton = _make_scene_button(service)
 	_finish()
 	button.present()
 	fake.complete_load(fake.load_tokens.back())
@@ -247,9 +253,7 @@ func test_synchronous_show_failure_leaves_no_offer_or_claim() -> void:
 	service.set_requests_allowed(true)
 	add_child_autofree(service)
 	fake.complete_initialization(fake.initialization_tokens.back())
-	var button: BonusButton = BonusButton.new()
-	button.ads_service = service
-	add_child_autofree(button)
+	var button: BonusButton = _make_scene_button(service)
 	_finish()
 	button.present()
 	fake.complete_load(fake.load_tokens.back())
@@ -353,7 +357,7 @@ func test_new_results_scene_during_old_show_cannot_take_old_reward() -> void:
 	_hud.queue_free()
 	await get_tree().process_frame
 	_hud = HUD_SCENE.instantiate()
-	_button = _hud.get_node("ResultPanel/VBox/RewardedBonusButton")
+	_button = _hud.get_node("ResultPanel/SafeArea/Bounds/VBox/RewardedBonusButton")
 	_button.ads_service = _service
 	add_child_autofree(_hud)
 	_finish(60)

@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://b7st1n0gsetg0"]
+[gd_scene load_steps=7 format=3 uid="uid://b7st1n0gsetg0"]
 
 [ext_resource type="Script" path="res://scripts/ui/settings_panel.gd" id="1_settings"]
 [ext_resource type="Script" path="res://scripts/ui/juicy_button.gd" id="2_juicy"]
 [ext_resource type="Script" path="res://scripts/ui/settings_slider.gd" id="3_slider"]
 [ext_resource type="Script" path="res://scripts/ui/settings_control_option.gd" id="4_option"]
+[ext_resource type="Script" path="res://scripts/ui/safe_area_margin.gd" id="5_safe"]
 
 [sub_resource type="ButtonGroup" id="ctrl_group"]
 
@@ -21,62 +22,85 @@ anchor_bottom = 1.0
 color = Color(0.12, 0.1, 0.22, 1)
 mouse_filter = 2
 
-[node name="Center" type="VBoxContainer" parent="."]
-anchors_preset = 15
+[node name="SafeArea" type="MarginContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 72.0
-offset_top = 64.0
-offset_right = -72.0
+mouse_filter = 2
+script = ExtResource("5_safe")
+content_padding = Vector4i(24, 24, 24, 24)
+
+[node name="Bounds" type="Control" parent="SafeArea"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Center" type="VBoxContainer" parent="SafeArea/Bounds"]
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_top = 40.0
+offset_right = 400.0
 offset_bottom = -288.0
-alignment = 1
 theme_override_constants/separation = 32
 
-[node name="Title" type="Label" parent="Center"]
+[node name="Title" type="Label" parent="SafeArea/Bounds/Center"]
 layout_mode = 2
 theme_type_variation = &"Title"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 42
 text = "Settings"
 
-[node name="Rows" type="VBoxContainer" parent="Center"]
+[node name="Scroll" type="ScrollContainer" parent="SafeArea/Bounds/Center"]
 layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="Rows" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="AudioHeading" type="Label" parent="Center/Rows"]
+[node name="AudioHeading" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows"]
 layout_mode = 2
 theme_type_variation = &"Heading"
 theme_override_font_sizes/font_size = 27
 text = "Audio"
 
-[node name="MasterRow" type="VBoxContainer" parent="Center/Rows"]
+[node name="MasterRow" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content/Rows"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 84)
 theme_override_constants/separation = 0
 
-[node name="Header" type="HBoxContainer" parent="Center/Rows/MasterRow"]
+[node name="Header" type="HBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 30)
 
-[node name="NameLabel" type="Label" parent="Center/Rows/MasterRow/Header"]
+[node name="NameLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow/Header"]
 layout_mode = 2
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 23
 text = "Master"
 
-[node name="Spacer" type="Control" parent="Center/Rows/MasterRow/Header"]
+[node name="Spacer" type="Control" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="ValueLabel" type="Label" parent="Center/Rows/MasterRow/Header"]
+[node name="ValueLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow/Header"]
 layout_mode = 2
 vertical_alignment = 1
 horizontal_alignment = 2
 theme_override_font_sizes/font_size = 22
 text = "100%"
 
-[node name="Slider" type="HSlider" parent="Center/Rows/MasterRow"]
+[node name="Slider" type="HSlider" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow"]
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -85,34 +109,34 @@ step = 0.01
 value = 1.0
 script = ExtResource("3_slider")
 
-[node name="SfxRow" type="VBoxContainer" parent="Center/Rows"]
+[node name="SfxRow" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content/Rows"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 84)
 theme_override_constants/separation = 0
 
-[node name="Header" type="HBoxContainer" parent="Center/Rows/SfxRow"]
+[node name="Header" type="HBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 30)
 
-[node name="NameLabel" type="Label" parent="Center/Rows/SfxRow/Header"]
+[node name="NameLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow/Header"]
 layout_mode = 2
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 23
 text = "Effects"
 
-[node name="Spacer" type="Control" parent="Center/Rows/SfxRow/Header"]
+[node name="Spacer" type="Control" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="ValueLabel" type="Label" parent="Center/Rows/SfxRow/Header"]
+[node name="ValueLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow/Header"]
 layout_mode = 2
 vertical_alignment = 1
 horizontal_alignment = 2
 theme_override_font_sizes/font_size = 22
 text = "100%"
 
-[node name="Slider" type="HSlider" parent="Center/Rows/SfxRow"]
+[node name="Slider" type="HSlider" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow"]
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -121,34 +145,34 @@ step = 0.01
 value = 1.0
 script = ExtResource("3_slider")
 
-[node name="MusicRow" type="VBoxContainer" parent="Center/Rows"]
+[node name="MusicRow" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content/Rows"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 84)
 theme_override_constants/separation = 0
 
-[node name="Header" type="HBoxContainer" parent="Center/Rows/MusicRow"]
+[node name="Header" type="HBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MusicRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 30)
 
-[node name="NameLabel" type="Label" parent="Center/Rows/MusicRow/Header"]
+[node name="NameLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MusicRow/Header"]
 layout_mode = 2
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 23
 text = "Music"
 
-[node name="Spacer" type="Control" parent="Center/Rows/MusicRow/Header"]
+[node name="Spacer" type="Control" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MusicRow/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="ValueLabel" type="Label" parent="Center/Rows/MusicRow/Header"]
+[node name="ValueLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MusicRow/Header"]
 layout_mode = 2
 vertical_alignment = 1
 horizontal_alignment = 2
 theme_override_font_sizes/font_size = 22
 text = "100%"
 
-[node name="Slider" type="HSlider" parent="Center/Rows/MusicRow"]
+[node name="Slider" type="HSlider" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MusicRow"]
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -157,31 +181,31 @@ step = 0.01
 value = 1.0
 script = ExtResource("3_slider")
 
-[node name="MuteRow" type="Button" parent="Center/Rows"]
+[node name="MuteRow" type="Button" parent="SafeArea/Bounds/Center/Scroll/Content/Rows"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 62)
 flat = true
 toggle_mode = true
 
-[node name="Content" type="HBoxContainer" parent="Center/Rows/MuteRow"]
+[node name="Content" type="HBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="NameLabel" type="Label" parent="Center/Rows/MuteRow/Content"]
+[node name="NameLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow/Content"]
 layout_mode = 2
 vertical_alignment = 1
 theme_override_font_sizes/font_size = 23
 mouse_filter = 2
 text = "Mute"
 
-[node name="Spacer" type="Control" parent="Center/Rows/MuteRow/Content"]
+[node name="Spacer" type="Control" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow/Content"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="StateLabel" type="Label" parent="Center/Rows/MuteRow/Content"]
+[node name="StateLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow/Content"]
 custom_minimum_size = Vector2(92, 0)
 layout_mode = 2
 vertical_alignment = 1
@@ -190,22 +214,23 @@ theme_override_font_sizes/font_size = 22
 mouse_filter = 2
 text = "Off"
 
-[node name="ControlsRow" type="VBoxContainer" parent="Center"]
+[node name="ControlsRow" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="NameLabel" type="Label" parent="Center/ControlsRow"]
+[node name="NameLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/ControlsRow"]
 layout_mode = 2
 theme_type_variation = &"Heading"
 theme_override_font_sizes/font_size = 27
 text = "Controls"
 
-[node name="Segment" type="HBoxContainer" parent="Center/ControlsRow"]
+[node name="Segment" type="HBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content/ControlsRow"]
 custom_minimum_size = Vector2(0, 116)
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="SwipeButton" type="Button" parent="Center/ControlsRow/Segment"]
+[node name="SwipeButton" type="Button" parent="SafeArea/Bounds/Center/Scroll/Content/ControlsRow/Segment"]
 custom_minimum_size = Vector2(0, 116)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -214,7 +239,7 @@ button_group = SubResource("ctrl_group")
 text = "Swipe"
 script = ExtResource("4_option")
 
-[node name="TapButton" type="Button" parent="Center/ControlsRow/Segment"]
+[node name="TapButton" type="Button" parent="SafeArea/Bounds/Center/Scroll/Content/ControlsRow/Segment"]
 custom_minimum_size = Vector2(0, 116)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -224,7 +249,7 @@ text = "Tap"
 script = ExtResource("4_option")
 icon_kind = 1
 
-[node name="DpadButton" type="Button" parent="Center/ControlsRow/Segment"]
+[node name="DpadButton" type="Button" parent="SafeArea/Bounds/Center/Scroll/Content/ControlsRow/Segment"]
 custom_minimum_size = Vector2(0, 116)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -234,24 +259,25 @@ text = "D-Pad"
 script = ExtResource("4_option")
 icon_kind = 2
 
-[node name="LanguageRow" type="VBoxContainer" parent="Center"]
+[node name="LanguageRow" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="NameLabel" type="Label" parent="Center/LanguageRow"]
+[node name="NameLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow"]
 layout_mode = 2
 theme_type_variation = &"Heading"
 theme_override_font_sizes/font_size = 27
 text = "Language"
 
-[node name="LanguageButton" type="Button" parent="Center/LanguageRow"]
+[node name="LanguageButton" type="Button" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow"]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 alignment = 0
 theme_override_font_sizes/font_size = 25
 text = "English"
 
-[node name="Chevron" type="Label" parent="Center/LanguageRow/LanguageButton"]
+[node name="Chevron" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton"]
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -263,18 +289,19 @@ theme_override_font_sizes/font_size = 28
 mouse_filter = 2
 text = "›"
 
-[node name="Bottom" type="VBoxContainer" parent="."]
+[node name="Bottom" type="VBoxContainer" parent="SafeArea/Bounds"]
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 48.0
+offset_left = -400.0
 offset_top = -264.0
-offset_right = -48.0
+offset_right = 400.0
 offset_bottom = -24.0
 alignment = 2
 theme_override_constants/separation = 40
 
-[node name="BackButton" type="Button" parent="Bottom"]
+[node name="BackButton" type="Button" parent="SafeArea/Bounds/Bottom"]
 custom_minimum_size = Vector2(220, 56)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -282,18 +309,18 @@ theme_type_variation = &"Secondary"
 text = "Back"
 script = ExtResource("2_juicy")
 
-[node name="LegalFooter" type="VBoxContainer" parent="Bottom"]
+[node name="LegalFooter" type="VBoxContainer" parent="SafeArea/Bounds/Bottom"]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Copyright" type="Label" parent="Bottom/LegalFooter"]
+[node name="Copyright" type="Label" parent="SafeArea/Bounds/Bottom/LegalFooter"]
 layout_mode = 2
 theme_type_variation = &"Muted"
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="LicensesButton" type="Button" parent="Bottom/LegalFooter"]
+[node name="LicensesButton" type="Button" parent="SafeArea/Bounds/Bottom/LegalFooter"]
 custom_minimum_size = Vector2(280, 48)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -301,7 +328,7 @@ flat = true
 theme_override_font_sizes/font_size = 18
 script = ExtResource("2_juicy")
 
-[node name="PrivacyButton" type="Button" parent="Bottom/LegalFooter"]
+[node name="PrivacyButton" type="Button" parent="SafeArea/Bounds/Bottom/LegalFooter"]
 visible = false
 custom_minimum_size = Vector2(280, 48)
 layout_mode = 2

@@ -7,9 +7,9 @@ const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const MISSIONS_PATH: String = "user://missions.json"
 const MISSION_COUNT: int = 3
 
-@onready var _title: Label = $Title
-@onready var _list: VBoxContainer = $List
-@onready var _back: Button = $BackButton
+@onready var _title: Label = $SafeArea/Bounds/Layout/Title
+@onready var _list: VBoxContainer = $SafeArea/Bounds/Layout/Scroll/List
+@onready var _back: Button = $SafeArea/Bounds/Layout/BackButton
 
 
 func _ready() -> void:

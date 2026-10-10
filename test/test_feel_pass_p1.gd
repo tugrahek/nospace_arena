@@ -186,12 +186,17 @@ func test_press_during_celebration_stops_it() -> void:
 	add_child_autofree(s)
 	var node: Button = (s.get("_nodes") as Array)[0]
 	var tween: Tween = s.get("_celebrate_tween")
+	var idle_style: StyleBoxFlat = node.get_meta("route_idle_style") as StyleBoxFlat
 	tween.custom_step(0.05)  # deterministic: past the delay, pop mid-flight (headless frame deltas vary)
-	assert_true(node.has_theme_stylebox_override("normal"), "glow applied during the pop")
+	var glow_normal: StyleBoxFlat = node.get_theme_stylebox("normal") as StyleBoxFlat
+	var glow_hover: StyleBoxFlat = node.get_theme_stylebox("hover") as StyleBoxFlat
+	assert_gt(glow_normal.shadow_size, idle_style.shadow_size, "normal glow applied during the pop")
+	assert_gt(glow_hover.shadow_size, idle_style.shadow_size, "hover glow applied during the pop")
 	assert_lt(node.scale.x, 1.0, "pop still growing")
 	node.button_down.emit()  # JuicyButton's own press pop takes over
 	assert_false(tween.is_valid(), "celebration tween killed (no two tweens on scale)")
-	assert_false(node.has_theme_stylebox_override("normal"), "glow cleared")
+	assert_same(node.get_theme_stylebox("normal"), idle_style, "normal style restored after interruption")
+	assert_same(node.get_theme_stylebox("hover"), idle_style, "hover style restored after interruption")
 	for i in 120:  # JuicyButton's press pop (0.16s) runs on real frames
 		if is_equal_approx(node.scale.x, 1.0):
 			break
@@ -205,7 +210,7 @@ func test_hud_combo_escalates_and_warms() -> void:
 	var hud: CanvasLayer = load("res://scenes/ui/HUD.tscn").instantiate()
 	add_child_autofree(hud)
 	await get_tree().process_frame
-	var label: Label = hud.get_node("ComboLabel")
+	var label: Label = hud.get_node("TopSafeArea/InfoStack/ActivityRow/ComboLabel")
 	hud.call("_on_score_changed", 10, 1)  # x2
 	var s2: float = label.scale.x
 	var c2: Color = label.get_theme_color("font_color")

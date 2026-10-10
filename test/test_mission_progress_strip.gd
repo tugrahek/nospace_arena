@@ -100,7 +100,7 @@ func test_missions_scene_builds_three_runtime_strips() -> void:
 	var screen: Control = MISSIONS_SCENE.instantiate()
 	add_child_autofree(screen)
 	await get_tree().process_frame
-	var list: VBoxContainer = screen.get_node("List")
+	var list: VBoxContainer = screen.get_node("SafeArea/Bounds/Layout/Scroll/List")
 	assert_eq(list.get_child_count(), 3)
 	for child in list.get_children():
 		assert_true(child is MissionProgressStrip)
@@ -110,7 +110,7 @@ func test_runtime_strip_geometry_does_not_cross_into_siblings() -> void:
 	var screen: Control = MISSIONS_SCENE.instantiate()
 	add_child_autofree(screen)
 	await get_tree().process_frame
-	var list: VBoxContainer = screen.get_node("List")
+	var list: VBoxContainer = screen.get_node("SafeArea/Bounds/Layout/Scroll/List")
 	for index in list.get_child_count():
 		var strip: MissionProgressStrip = list.get_child(index)
 		assert_true(_contained(strip.objective_label(), strip), "objective stays in strip %d" % index)

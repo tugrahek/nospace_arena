@@ -4,6 +4,7 @@ extends Button
 ## Optional Results action. Only a matching AdsService reward callback can claim.
 const AdsServiceScript = preload("res://scripts/monetization/ads_service.gd")
 const EconomyScript = preload("res://scripts/autoload/Economy.gd")
+const PALETTE: PaletteData = preload("res://config/palette.tres")
 
 var ads_service: AdsServiceScript
 var economy: EconomyScript
@@ -13,6 +14,8 @@ var _handled: bool = false
 var _economy_context: int = -1
 var _ad_context: String = ""
 var _request_token: int = 0
+@onready var _action_label: Label = $Content/ActionLabel
+@onready var _amount_label: Label = $Content/Reward/Amount
 
 
 func _ready() -> void:
@@ -31,6 +34,8 @@ func _ready() -> void:
 	ads_service.ad_closed.connect(_on_ad_closed, CONNECT_DEFERRED)
 	ads_service.ad_failed.connect(_on_ad_failed, CONNECT_DEFERRED)
 	economy.currency_changed.connect(_on_currency_changed)
+	_action_label.add_theme_color_override("font_color", PALETTE.text_primary)
+	_amount_label.add_theme_color_override("font_color", PALETTE.coin)
 
 
 ## Called only after mission payouts and all other run-result bookkeeping finish.
@@ -61,7 +66,12 @@ func _refresh() -> void:
 	var status: Dictionary = economy.rewarded_mission_bonus_status()
 	visible = _finalized and status["eligible"] and ads_service.is_rewarded_available()
 	disabled = not visible
-	text = tr("RESULT_REWARDED_BONUS") % int(status["amount"])
+	var formatted_text: String = tr("RESULT_REWARDED_BONUS") % int(status["amount"])
+	text = formatted_text
+	var amount_text: String = "+%d" % int(status["amount"])
+	var amount_start: int = formatted_text.rfind(amount_text)
+	_action_label.text = formatted_text.substr(0, amount_start).strip_edges() if amount_start >= 0 else formatted_text
+	_amount_label.text = amount_text
 
 
 func _on_pressed() -> void:

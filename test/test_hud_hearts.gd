@@ -7,7 +7,7 @@ func test_hearts_reflect_lives() -> void:
 	add_child_autofree(hud)
 	await get_tree().process_frame
 	hud.call("setup", 3)
-	var hearts: Node = hud.get_node("TopBar/Hearts")
+	var hearts: Node = hud.get_node("TopSafeArea/InfoStack/TopBar/Hearts")
 	assert_eq(hearts.get("_max"), 3)
 	assert_eq(hearts.get("_current"), 3)
 	hud.call("_on_life_lost", 2)
