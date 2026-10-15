@@ -8,12 +8,13 @@ enum State { HIDDEN, READY, CLAIMING, CLAIMED, DISMISSING, INSPECTING }
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
 const MAX_POPUP_WIDTH: float = 760.0
-const MAX_POPUP_HEIGHT: float = 1280.0
-const POPUP_HEIGHT_SHARE: float = 0.88
-const HERO_SIZES: Vector2 = Vector2(160.0, 220.0)
-const HERO_HEIGHT_SHARE: float = 0.25
+const MAX_POPUP_HEIGHT: float = 1040.0
+const POPUP_HEIGHT_SHARE: float = 0.90
+const HERO_SIZES: Vector2 = Vector2(112.0, 160.0)
+const HERO_HEIGHT_SHARE: float = 0.20
 const RING_DIAMETER_SHARE: float = 1.5
 const HERO_PADDING: float = 16.0
+const BODY_VERTICAL_PADDING: float = 32.0
 @export var entrance_duration: float = 0.20
 @export var claim_pulse_duration: float = 0.22
 @export var claimed_hold_duration: float = 0.7
@@ -69,6 +70,7 @@ func _ready() -> void:
 	_gift_icon.resized.connect(func() -> void: _gift_icon.pivot_offset = _gift_icon.size * 0.5)
 	_bounds.resized.connect(_queue_layout)
 	_scroll.resized.connect(_queue_layout)
+	_hero.get_parent().minimum_size_changed.connect(_queue_layout)
 	_route_scroll.resized.connect(_focus_route)
 	_queue_layout()
 
@@ -91,6 +93,16 @@ func _refresh_layout() -> void:
 	_box.offset_top = -height * 0.5
 	_box.offset_bottom = height * 0.5
 	var side: float = roundf(clampf(_scroll.size.y * HERO_HEIGHT_SHARE, HERO_SIZES.x, HERO_SIZES.y))
+	var content: VBoxContainer = _hero.get_parent() as VBoxContainer
+	var reserved: float = BODY_VERTICAL_PADDING
+	var visible_count: int = 0
+	for child: Control in content.get_children():
+		if child.visible:
+			visible_count += 1
+			if child != _hero:
+				reserved += child.get_combined_minimum_size().y
+	reserved += float(maxi(visible_count - 1, 0) * content.get_theme_constant("separation"))
+	side = minf(side, maxf(HERO_SIZES.x, floorf((_scroll.size.y - reserved - HERO_PADDING) / RING_DIAMETER_SHARE)))
 	for icon: Control in [_coin, _bonus_icon, _gift_icon]:
 		icon.custom_minimum_size = Vector2.ONE * side
 	_hero.custom_minimum_size.y = ceilf(side * RING_DIAMETER_SHARE + HERO_PADDING)

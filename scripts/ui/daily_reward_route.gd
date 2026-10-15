@@ -5,8 +5,10 @@ extends Control
 signal day_selected(day: int)
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const DAYS: int = 10
-const CELL_WIDTH: float = 108.0
-const ROUTE_HEIGHT: float = 144.0
+const COLUMNS: int = 5
+const ROWS: int = 2
+const CELL_HEIGHT: float = 108.0
+const CELL_GAP: float = 8.0
 @export var checkpoint_radius: float = 14.0
 @export var endpoint_scale: float = 1.4
 var current_day: int = 1
@@ -16,7 +18,7 @@ var checkpoints: Array[Button] = []
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(CELL_WIDTH * DAYS, ROUTE_HEIGHT)
+	custom_minimum_size = Vector2(0.0, CELL_HEIGHT * ROWS + CELL_GAP)
 	for index in DAYS:
 		var button := Button.new()
 		button.flat = true
@@ -50,18 +52,26 @@ func bind(day: int, completed: int, selected: int, _rewards: Array[int]) -> void
 
 ## Canonical center of each checkpoint, also used by the hit targets.
 func checkpoint_center(index: int) -> Vector2:
-	return Vector2(size.x * (float(index) + 0.5) / DAYS, size.y * 0.45)
+	var row: int = index / COLUMNS
+	var row_height: float = (size.y - CELL_GAP) / ROWS
+	return Vector2(size.x * (float(index % COLUMNS) + 0.5) / COLUMNS,
+		float(row) * (row_height + CELL_GAP) + row_height * 0.35)
 
 
 func _layout() -> void:
+	var row_height: float = (size.y - CELL_GAP) / ROWS
 	for index in checkpoints.size():
-		checkpoints[index].position = Vector2(size.x * index / DAYS, 0.0)
-		checkpoints[index].size = Vector2(size.x / DAYS, size.y)
+		var row: int = index / COLUMNS
+		checkpoints[index].position = Vector2(size.x * (index % COLUMNS) / COLUMNS + CELL_GAP * 0.5,
+			float(row) * (row_height + CELL_GAP))
+		checkpoints[index].size = Vector2(size.x / COLUMNS - CELL_GAP, row_height)
 	queue_redraw()
 
 
 func _draw() -> void:
-	draw_line(checkpoint_center(0), checkpoint_center(DAYS - 1), PALETTE.text_secondary.darkened(0.6), 2.0, true)
+	for row: int in ROWS:
+		draw_line(checkpoint_center(row * COLUMNS), checkpoint_center((row + 1) * COLUMNS - 1),
+			PALETTE.text_secondary.darkened(0.6), 2.0, true)
 	for index in DAYS:
 		var day: int = index + 1
 		var center: Vector2 = checkpoint_center(index)

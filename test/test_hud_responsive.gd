@@ -52,7 +52,7 @@ func test_populated_top_hud_and_pause_button_fit_portrait_sizes() -> void:
 		var mission_status: Control = hud.get_node("TopSafeArea/InfoStack/ActivityRow/MissionStatus")
 		var mission_count: Label = hud.get_node("TopSafeArea/InfoStack/ActivityRow/MissionStatus/Count")
 		var combo: Label = hud.get_node("TopSafeArea/InfoStack/ActivityRow/ComboLabel")
-		var pause_button: Button = pause.get_node("PauseButton")
+		var pause_button: Button = pause.get_node("PauseSafeArea/Bounds/PauseButton")
 
 		assert_eq(score.text, "Skor: 123456" if TranslationServer.get_locale() == "tr" else "Score: 123456")
 		assert_eq(hearts.get("_current"), 2)

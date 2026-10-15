@@ -3,7 +3,7 @@ extends GutTest
 ## UI Pass B1 regression coverage for the shared MainMenu navigation arena.
 
 const MAIN_MENU_SCENE: PackedScene = preload("res://scenes/main/MainMenu.tscn")
-const HUB_PATH: NodePath = NodePath("SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub")
+const HUB_PATH: NodePath = NodePath("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub")
 const NAVIGATION: Array[Dictionary] = [
 	{"name": "StoreButton", "key": "MENU_STORE", "en": "Store", "tr": "Mağaza"},
 	{"name": "MissionsButton", "key": "MENU_MISSIONS_SHORT", "en": "Missions", "tr": "Görevler"},

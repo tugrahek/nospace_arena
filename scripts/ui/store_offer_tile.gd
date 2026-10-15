@@ -5,7 +5,7 @@ extends Control
 
 const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
 const PALETTE = preload("res://config/palette.tres")
-const TILE_HEIGHT: float = 188.0
+const TILE_HEIGHT: float = 156.0
 const SIDE_PADDING: float = 8.0
 const MARKER_PADDING: float = 28.0
 var _content: VBoxContainer
@@ -72,7 +72,7 @@ func _make_label(item_name: String) -> Label:
 	label.add_theme_font_size_override("font_size", 22)
 	label.add_theme_color_override("font_color", PALETTE.accent if is_focused else PALETTE.text_secondary)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.custom_minimum_size.y = 56.0
+	label.custom_minimum_size.y = 30.0
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label

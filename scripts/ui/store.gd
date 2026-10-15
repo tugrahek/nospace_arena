@@ -10,6 +10,7 @@ const MAX_CONTENT_WIDTH: float = 800.0
 const FRONTIER_INSET: float = 18.0
 const FRONTIER_BOTTOM: float = 6.0
 const FRONTIER_HEIGHT: float = 2.0
+const SELECTOR_BOTTOM_BREATHING: float = 36.0
 
 enum Category { CHARACTERS, ARENAS, BOOSTS, SUPPLY }
 
@@ -33,6 +34,12 @@ var _layout_pending: bool = false
 
 
 func _ready() -> void:
+	var selector_space := Control.new()
+	selector_space.name = "SelectorVerticalBreathing"
+	selector_space.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_frame.add_child(selector_space)
+	_frame.move_child(selector_space, _back.get_index())
+	selector_space.custom_minimum_size.y = SELECTOR_BOTTOM_BREATHING
 	_title.text = tr("MENU_STORE")
 	_back.text = tr("STORE_BACK")
 	_back.pressed.connect(func() -> void: get_tree().change_scene_to_file(MENU_SCENE))
@@ -76,6 +83,10 @@ func _refresh() -> void:
 		child.free()
 	_selector = null
 	_supply = null
+	var selector_space: Control = _frame.get_node("SelectorVerticalBreathing")
+	selector_space.custom_minimum_size.y = 0.0 if _active_category == Category.SUPPLY else SELECTOR_BOTTOM_BREATHING
+	_list.alignment = BoxContainer.ALIGNMENT_CENTER if _active_category == Category.SUPPLY else BoxContainer.ALIGNMENT_END
+	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if _active_category == Category.SUPPLY else ScrollContainer.SCROLL_MODE_AUTO
 	match _active_category:
 		Category.CHARACTERS:
 			_build_characters()
@@ -86,6 +97,8 @@ func _refresh() -> void:
 		Category.SUPPLY:
 			_supply = preload("res://scenes/ui/SupplyPopup.tscn").instantiate()
 			_supply.embedded = true
+			# The embedded popup owns body scrolling; its Store host must not scroll too.
+			_supply.custom_minimum_size.y = 0.0
 			_list.add_child(_supply)
 			_supply.present()
 	_scroll.scroll_vertical = 0
@@ -101,7 +114,7 @@ func _queue_layout() -> void:
 	_refresh_layout.call_deferred()
 
 
-## Only shared shell/showcase sizing; Supply keeps its existing native scroll/minimum bounds.
+## Fit the shared shell/showcase; embedded Supply uses its own body scroll within this host.
 func _refresh_layout() -> void:
 	_layout_pending = false
 	if not is_inside_tree() or is_queued_for_deletion():

@@ -35,15 +35,15 @@ anchor_bottom = 1.0
 offset_left = -332.0
 offset_right = 332.0
 mouse_filter = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 16
 
-[node name="Header" type="VBoxContainer" parent="SafeArea/Bounds/Frame"]
+[node name="Header" type="MarginContainer" parent="SafeArea/Bounds/Frame"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="SafeArea/Bounds/Frame/Header"]
 layout_mode = 2
+size_flags_horizontal = 4
 theme_type_variation = &"Title"
 theme_override_font_sizes/font_size = 52
 horizontal_alignment = 1
@@ -51,6 +51,8 @@ text = "Store"
 
 [node name="Coins" type="Label" parent="SafeArea/Bounds/Frame/Header"]
 layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
 theme_type_variation = &"Coins"
 theme_override_font_sizes/font_size = 26
 horizontal_alignment = 2
@@ -72,7 +74,7 @@ custom_minimum_size = Vector2(108, 108)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"Heading"
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 flat = true
 
 [node name="Arenas" type="Button" parent="SafeArea/Bounds/Frame/CategoryStrip/Tabs"]
@@ -80,7 +82,7 @@ custom_minimum_size = Vector2(108, 108)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"Heading"
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 flat = true
 
 [node name="Boosts" type="Button" parent="SafeArea/Bounds/Frame/CategoryStrip/Tabs"]
@@ -88,7 +90,7 @@ custom_minimum_size = Vector2(108, 108)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"Heading"
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 flat = true
 
 [node name="Supply" type="Button" parent="SafeArea/Bounds/Frame/CategoryStrip/Tabs"]
@@ -96,7 +98,7 @@ custom_minimum_size = Vector2(108, 108)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"Heading"
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 flat = true
 
 [node name="SupplyBadge" type="Control" parent="SafeArea/Bounds/Frame/CategoryStrip/Tabs/Supply"]
@@ -117,12 +119,14 @@ mouse_filter = 2
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
 [node name="List" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
+alignment = 1
 theme_override_constants/separation = 16
 
 [node name="BackButton" type="Button" parent="SafeArea/Bounds/Frame"]

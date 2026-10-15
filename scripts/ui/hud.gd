@@ -25,6 +25,10 @@ signal missions_changed(missions: Array)
 
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const MAX_RESULTS_WIDTH: float = 720.0
+const TouchTargets = preload("res://scripts/ui/touch_target_sizing.gd")
+const PAUSE_RESERVE: float = 100.0
+const PAUSE_EDGE_AND_GAP: float = 32.0
+const BONUS_VIDEO_HEIGHT: float = 48.0
 
 var _score_tween: Tween = null
 var _target: float = 75.0                    # stage/level capture target (display only)
@@ -41,7 +45,7 @@ var _last_combo: int = 0                     # punch only when the chain actuall
 @onready var _combo_label: Label = $TopSafeArea/InfoStack/ActivityRow/ComboLabel
 @onready var _daily_label: Label = $TopSafeArea/InfoStack/MetaRow/DailyLabel
 @onready var _best_label: Label = $TopSafeArea/InfoStack/MetaRow/BestLabel
-@onready var _currency_label: Label = $CurrencyLabel
+@onready var _currency_label: Label = $CoinSafeArea/Bounds/CurrencyLabel
 @onready var _mission_status: HBoxContainer = $TopSafeArea/InfoStack/ActivityRow/MissionStatus
 @onready var _mission_count: Label = $TopSafeArea/InfoStack/ActivityRow/MissionStatus/Count
 @onready var _result_panel: Control = $ResultPanel
@@ -58,9 +62,16 @@ var _last_combo: int = 0                     # punch only when the chain actuall
 @onready var _next_button: Button = $ResultPanel/SafeArea/Bounds/VBox/NextButton
 @onready var _retry_button: Button = $ResultPanel/SafeArea/Bounds/VBox/ButtonRow/RetryButton
 @onready var _menu_button: Button = $ResultPanel/SafeArea/Bounds/VBox/ButtonRow/MenuButton
+@onready var _bonus_video: Control = $ResultPanel/SafeArea/Bounds/VBox/RewardedBonusButton/Content/VideoIcon
 
 
 func _ready() -> void:
+	_bonus_video.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_bonus_video.custom_minimum_size.y = BONUS_VIDEO_HEIGHT
+	get_viewport().size_changed.connect(_fit_pause_touch_space)
+	_fit_pause_touch_space.call_deferred()
+	for button: Button in [_next_button, _retry_button, _menu_button, $ResultPanel/SafeArea/Bounds/VBox/RewardedBonusButton]:
+		TouchTargets.attach(button)
 	_result_bounds.resized.connect(_layout_results_content)
 	_layout_results_content.call_deferred()
 	GameState.game_started.connect(_on_game_started)
@@ -82,6 +93,17 @@ func _ready() -> void:
 	_retry_button.pressed.connect(func() -> void: retry_pressed.emit())
 	_menu_button.pressed.connect(func() -> void: menu_pressed.emit())
 	_next_button.pressed.connect(func() -> void: next_pressed.emit())
+
+
+## Reserve the enlarged Pause hit area without changing the arena or camera.
+func _fit_pause_touch_space(density_dpi: int = 0) -> void:
+	var dpi: int = density_dpi if density_dpi > 0 else TouchTargets.android_density_dpi()
+	if dpi <= 0:
+		return
+	var safe: SafeAreaMargin = $TopSafeArea
+	var padding: Vector4i = safe.content_padding
+	padding.z = ceili(maxf(PAUSE_RESERVE, TouchTargets.minimum_ui_size(safe, dpi).x + PAUSE_EDGE_AND_GAP))
+	safe.content_padding = padding
 
 
 ## Centers result content in the safe area and caps its width on large screens.

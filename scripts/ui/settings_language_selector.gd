@@ -54,6 +54,7 @@ func _ready() -> void:
 	_back.theme_type_variation = &"Secondary"
 	_back.pressed.connect(queue_free)
 	_column.add_child(_back)
+	preload("res://scripts/ui/touch_target_sizing.gd").attach(_back)
 	refresh()
 
 
@@ -80,6 +81,7 @@ func _build_list(column: VBoxContainer) -> void:
 		button.pressed.connect(func() -> void: language_selected.emit(option["code"]))
 		_list.add_child(button)
 		_buttons.append(button)
+		preload("res://scripts/ui/touch_target_sizing.gd").attach(button)
 
 
 ## Refreshes localized text and current selection after an immediate locale switch.

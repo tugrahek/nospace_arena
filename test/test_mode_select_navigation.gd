@@ -17,9 +17,14 @@ func after_each() -> void:
 
 
 func test_mode_grid_keeps_four_flat_usable_targets() -> void:
+	var viewport := SubViewport.new()
+	viewport.size = Vector2i(720, 1280)
+	add_child_autofree(viewport)
 	var screen: Control = MODE_SELECT_SCENE.instantiate()
+	viewport.add_child(screen)
+	await wait_process_frames(5)
 	var grid: Control = screen.get_node(GRID_PATH)
-	assert_true(grid.custom_minimum_size.x >= 560.0, "grid keeps a wide shared surface")
+	assert_true(grid.size.x >= 560.0, "grid keeps a wide shared surface at the reference viewport")
 	assert_true(grid.custom_minimum_size.y >= 340.0, "grid keeps two comfortable rows")
 	for entry in MODES:
 		var row: Control = grid.get_node(entry["row"])

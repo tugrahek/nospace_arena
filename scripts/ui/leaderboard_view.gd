@@ -27,6 +27,7 @@ const TOP_SURFACE: Color = Color(0.18, 0.15, 0.32, 0.9)
 
 
 func _ready() -> void:
+	preload("res://scripts/ui/touch_target_sizing.gd").attach(_back)
 	_bounds.resized.connect(_refresh_layout)
 	_refresh_layout()
 	_title.text = tr("LEADERBOARD_TITLE")

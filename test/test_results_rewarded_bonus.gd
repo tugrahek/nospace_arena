@@ -158,7 +158,7 @@ func test_matching_reward_claims_exactly_once_and_updates_real_currency() -> voi
 	assert_eq(Economy.balance(), 150)
 	assert_eq(Store.load_from(PATH).currency, 150)
 	assert_eq(Store.load_from(PATH).rewarded_mission_bonus_epoch_day, SeedManager.today_epoch())
-	assert_eq(_hud.get_node("CurrencyLabel").text, tr("HUD_CURRENCY") + ": 150")
+	assert_eq(_hud.get_node("CoinSafeArea/Bounds/CurrencyLabel").text, tr("HUD_CURRENCY") + ": 150")
 	assert_false(_button.visible)
 	_fake.close(token)
 	await get_tree().process_frame

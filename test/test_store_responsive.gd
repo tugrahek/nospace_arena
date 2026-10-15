@@ -2,9 +2,11 @@ extends GutTest
 
 ## Native Store bounds/state fixtures; purchase/equip intents are recorded without persistence.
 const SCENE: PackedScene = preload("res://scenes/ui/Store.tscn")
+const Store = preload("res://scripts/ui/store.gd")
+const StoreShowcase = preload("res://scripts/ui/store_showcase.gd")
 const FRAME: String = "SafeArea/Bounds/Frame"
 const SIZES: Array[Vector2i] = [Vector2i(720, 1280), Vector2i(720, 1440), Vector2i(720, 1560),
-	Vector2i(720, 1600), Vector2i(720, 1680), Vector2i(960, 1280)]
+	Vector2i(720, 1600), Vector2i(720, 1680), Vector2i(960, 1280), Vector2i(640, 1280)]
 var _original: Variant
 
 
@@ -116,6 +118,10 @@ func test_all_ratios_locales_insets_and_three_categories() -> void:
 
 
 func _check_shell(store: Control) -> void:
+	var title: Label = store.get_node(FRAME + "/Header/Title")
+	assert_almost_eq(title.get_global_rect().get_center().x, _safe_rect(store).get_center().x, 0.5, "Store title stays centered independently of balance within pixel rounding")
+	assert_lte(title.get_minimum_size().x, title.size.x + 0.1, "Store title fits beside balance")
+	assert_false(title.get_global_rect().intersects(store._coins.get_global_rect()), "header labels do not overlap")
 	for path: String in ["Header", "Header/Title", "Header/Coins", "CategoryStrip", "Scroll", "BackButton"]:
 		_inside(store.get_node(FRAME + "/" + path).get_global_rect(), _safe_rect(store), path)
 	for tab: Button in store._tabs:
@@ -141,6 +147,8 @@ func _check_content(store: Control) -> void:
 	if showcase._action != null:
 		_inside(showcase._action.get_global_rect(), showcase.get_global_rect(), "action")
 		assert_gte(showcase._action.size.y * 320.0 / 720.0, 48.0)
+	if showcase.kind == StoreShowcase.Kind.BOOST:
+		_inside(showcase.get_node("Actions/Price").get_global_rect(), showcase.get_global_rect(), "boost price")
 	for tile: StoreOfferTile in store._selector.get_children():
 		_inside(tile.get_global_rect(), outer, "selector tile")
 		var label: Label = tile.get_node("Content/Label")
@@ -158,8 +166,12 @@ func test_states_purchase_and_equip_dispatch_without_inventory_mutation() -> voi
 			store.set_category(category)
 			store._focused_indices[category] = 0 if state == 0 else 1
 			await wait_process_frames(6)
+			_check_shell(store)
+			_check_content(store)
 			var profile: Dictionary = Economy._data.to_dict().duplicate(true)
 			var showcase: StoreShowcase = store._list.get_node("Showcase")
+			if category == 2:
+				assert_true(showcase.get_node("Actions/Price").text.contains(str(ContentCatalog.BOOSTS[store.focused_index()].cost)))
 			if category != 2 and state == 0:
 				assert_eq(showcase.state_label(), tr("STORE_SELECTED"))
 				assert_null(showcase._action)
@@ -227,3 +239,66 @@ func test_supply_tab_routes_to_existing_embedded_view_and_returns() -> void:
 	assert_eq(store.offer_count(), 3)
 	assert_eq(store.MENU_SCENE, "res://scenes/main/MainMenu.tscn")
 	assert_eq(store._back.pressed.get_connections().size(), 1)
+
+
+func test_three_category_selectors_share_bottom_position() -> void:
+	for dimensions: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600)]:
+		for locale: String in ["tr", "en"]:
+			TranslationServer.set_locale(locale)
+			var store: Control = await _mount(dimensions, Vector4i(24, 96, 24, 48))
+			var positions: Array[float] = []
+			var hero_positions: Array[float] = []
+			for category: int in 3:
+				store.set_category(category)
+				await wait_process_frames(8)
+				positions.append(store._selector.global_position.y)
+				_inside(store._selector.get_global_rect(), store._scroll.get_global_rect(), "selector accessible")
+				assert_almost_eq(store._selector.get_global_rect().end.y,
+					store._scroll.get_global_rect().end.y, 0.5)
+				var showcase: StoreShowcase = store._list.get_node("Showcase")
+				if category == Store.Category.BOOSTS:
+					assert_almost_eq(showcase._preview.optical_offset_y, -15.0, 0.01,
+						"Boost showcase icon receives the optical drawing offset")
+					assert_almost_eq(showcase._preview.visual_scale, 1.08, 0.01,
+						"Boost showcase icon draws slightly larger without changing its layout box")
+				hero_positions.append(showcase._visual.global_position.y)
+				assert_almost_eq(store._selector.global_position.y - showcase.get_global_rect().end.y,
+					float(store._list.get_theme_constant("separation")), 0.5,
+					"showcase and selector retain one consistent container gap")
+			assert_almost_eq(positions.max(), positions.min(), 0.5, "all category rails align")
+			assert_almost_eq(hero_positions[Store.Category.BOOSTS], hero_positions[Store.Category.CHARACTERS],
+				0.5, "Boost hero aligns with Character hero")
+			assert_almost_eq(hero_positions[Store.Category.ARENAS], hero_positions[Store.Category.CHARACTERS],
+				4.0, "Arena hero retains its existing near-aligned hero position")
+			store.get_parent().free()
+
+
+func test_embedded_supply_uses_one_scroll_and_keeps_footer_actions_reachable() -> void:
+	for dimensions: Vector2i in [Vector2i(720, 960), Vector2i(720, 1280), Vector2i(720, 1600), Vector2i(640, 1280), Vector2i(960, 1280)]:
+		for locale: String in ["tr", "en"]:
+			TranslationServer.set_locale(locale)
+			var store: Control = await _mount(dimensions, Vector4i(24, 96, 24, 48))
+			var profile: Dictionary = Economy._data.to_dict().duplicate(true)
+			store.set_category(3)
+			await wait_process_frames(8)
+			_check_shell(store)
+			assert_eq(store._scroll.vertical_scroll_mode, ScrollContainer.SCROLL_MODE_DISABLED)
+			_inside(store._supply.get_global_rect(), store._scroll.get_global_rect(), "Supply fits Store host")
+			var popup: SupplyPopup = store._supply
+			var inner: ScrollContainer = popup.get_node("SafeArea/Bounds/Frame/Surface/Scroll")
+			inner.ensure_control_visible(popup._coin)
+			await wait_process_frames(2)
+			_inside(popup._coin.get_global_rect(), inner.get_global_rect(), "coin action reachable")
+			_inside(popup._odds.get_global_rect(), store._scroll.get_global_rect(), "odds footer")
+			popup.show_odds()
+			await wait_process_frames(3)
+			_inside(popup.get_node("SafeArea/Bounds/Frame/OddsView/Footer").get_global_rect(), store._scroll.get_global_rect(), "odds Back footer")
+			popup.state = SupplyPopup.State.REVEAL
+			popup.refresh()
+			await wait_process_frames(3)
+			_inside(popup._continue.get_global_rect(), store._scroll.get_global_rect(), "reveal Continue footer")
+			assert_eq(Economy._data.to_dict(), profile)
+			store.set_category(0)
+			await wait_process_frames(3)
+			assert_eq(store._scroll.vertical_scroll_mode, ScrollContainer.SCROLL_MODE_AUTO)
+			store.get_parent().free()

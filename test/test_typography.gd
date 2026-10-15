@@ -29,7 +29,7 @@ func test_production_font_roles_are_bound_directly() -> void:
 	assert_eq((heading_font as FontVariation).base_font, RUBIK)
 	assert_eq(display_font, RUBIK, "Display preserves the Rubik ARENA treatment")
 	var main_menu: Control = load(TARGET_SCENES[0]).instantiate()
-	var wordmark: Label = main_menu.get_node("SafeArea/Bounds/Frame/Center/Title")
+	var wordmark: Label = main_menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Center/Title")
 	var wordmark_font: Font = wordmark.get_theme_font(&"font")
 	assert_true(wordmark_font is FontVariation, "NoSpace owns a dedicated brand variation")
 	assert_eq((wordmark_font as FontVariation).base_font, DYNA_PUFF)

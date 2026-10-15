@@ -270,8 +270,8 @@ func test_main_menu_has_no_supply_indicator_or_utility_entry() -> void:
 	var menu: Control = MENU.instantiate()
 	assert_false(menu.has_node("SupplyEntry"))
 	assert_false(menu.has_node("SupplyPopup"))
-	assert_false(menu.has_node("SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/StoreButton/Content/Icon/SupplyBadge"))
-	assert_eq(menu.get_node("SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub").get_child_count(), 4)
+	assert_false(menu.has_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton/Content/Icon/SupplyBadge"))
+	assert_eq(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub").get_child_count(), 4)
 	assert_eq(menu.STORE_SCENE, "res://scenes/ui/Store.tscn")
 	menu.free()
 

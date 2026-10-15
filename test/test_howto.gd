@@ -86,6 +86,52 @@ func test_all_four_pages_have_large_nonoverlapping_layout_at_720x1280() -> void:
 		assert_true(progress_positions.max() - progress_positions.min() < 35.0, "progress stays vertically stable " + locale)
 
 
+func test_tutorial_group_is_centered_and_short_screens_keep_scrolling() -> void:
+	for dimensions: Vector2 in [Vector2(720, 1280), Vector2(720, 1600), Vector2(720, 640)]:
+		var page: Control = await _make_tutorial()
+		page.size = dimensions
+		page.call("_show", 1)
+		await wait_process_frames(6)
+		var group: VBoxContainer = page.get_node("SafeArea/Bounds/MainVBox")
+		var scroll: ScrollContainer = group.get_node("ContentScroll")
+		var navigation: Control = group.get_node("NavigationRow")
+		var close: Control = page.get_node("SafeArea/Bounds/CloseButton")
+		var group_center: float = (scroll.global_position.y + navigation.get_global_rect().end.y) * 0.5
+		assert_almost_eq(group_center, group.get_global_rect().get_center().y, 0.5, "content and navigation share one balanced group")
+		assert_eq(close.position.y, 8.0, "Close retains its safe-area-relative top position")
+		assert_eq(page.get_node(BASE + "DemoCenter/PageArt").size, Vector2(540, 350), "approved art size stays unchanged")
+		assert_almost_eq(navigation.global_position.y - scroll.get_global_rect().end.y,
+			float(group.get_theme_constant("separation")), 0.1, "internal navigation gap stays unchanged")
+		assert_true(page.get_global_rect().encloses(navigation.get_global_rect()), "navigation stays accessible")
+		if dimensions.y == 640.0:
+			assert_gt(scroll.get_v_scroll_bar().max_value, scroll.get_v_scroll_bar().page, "short screen keeps overflow scrolling")
+		page.free()
+
+
+func test_portrait_height_is_shared_between_all_sections_in_both_locales() -> void:
+	for locale: String in ["tr", "en"]:
+		TranslationServer.set_locale(locale)
+		for dimensions: Vector2 in [Vector2(720, 1280), Vector2(720, 1600)]:
+			var page: Control = await _make_tutorial()
+			page.size = dimensions
+			for index: int in 4:
+				page._show(index)
+				await wait_process_frames(10)
+				var content: VBoxContainer = page.get_node(BASE.trim_suffix("/"))
+				var navigation: Control = page._navigation
+				var gap: int = content.get_theme_constant("separation")
+				assert_gt(gap, page.minimum_section_gap, "portrait spare height spreads sections")
+				assert_eq(gap, page._main_vbox.get_theme_constant("separation"))
+				var previous_end: float = content.global_position.y
+				for section: Control in content.get_children():
+					assert_gte(section.global_position.y, previous_end - 0.1, "sections do not overlap")
+					previous_end = section.get_global_rect().end.y
+				assert_lte(previous_end, navigation.global_position.y, "progress before navigation")
+				assert_true(page._bounds.get_global_rect().encloses(navigation.get_global_rect()))
+				assert_lte(page._body.get_minimum_size().y, page._body.size.y + 0.1, "localized body fits")
+			page.free()
+
+
 func test_page_art_depicts_all_required_mechanics() -> void:
 	var page: Control = await _make_tutorial()
 	var art: Control = page.get_node(BASE + "DemoCenter/PageArt")

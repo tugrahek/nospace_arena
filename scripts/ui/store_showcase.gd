@@ -5,11 +5,15 @@ extends VBoxContainer
 
 const PALETTE = preload("res://config/palette.tres")
 const BoostIcon = preload("res://scripts/ui/boost_icon.gd")
-const HERO_HEIGHTS: Vector2 = Vector2(240.0, 400.0)
-const HERO_SHARE: float = 0.5
+const HERO_HEIGHTS: Vector2 = Vector2(208.0, 320.0)
+const HERO_SHARE: float = 0.42
+const BOOST_ICON_SIZES: Vector2 = Vector2(112.0, 144.0)
+const BOOST_HERO_OPTICAL_OFFSET_Y: float = -15.0
+const BOOST_HERO_VISUAL_SCALE: float = 1.08
 const ICON_SHARE: float = 0.7
-const ICON_SIZES: Vector2 = Vector2(180.0, 260.0)
-const ACTION_SIZE: Vector2 = Vector2(180.0, 108.0)
+const ICON_SIZES: Vector2 = Vector2(180.0, 240.0)
+const ACTION_SIZE: Vector2 = Vector2(160.0, 108.0)
+const MAX_SHOWCASE_HEIGHT: float = 640.0
 
 signal select_requested(kind: String, id: StringName)
 signal purchase_requested(kind: String, id: StringName, cost: int)
@@ -23,6 +27,7 @@ var _state: Label
 var _action: Button
 var _preview: Control
 var _visual: CenterContainer
+var _boost_hero_spacer: Control
 
 
 func _ready() -> void:
@@ -45,6 +50,8 @@ func configure_boost(id: StringName, boost: BoostData, count: int, affordable: b
 	item_id = id
 	var icon := BoostIcon.new()
 	icon.set("effect", BoostIcon.COIN_BONUS_ICON if id == &"coin_bonus" else boost.effect)
+	icon.set("optical_offset_y", BOOST_HERO_OPTICAL_OFFSET_Y)
+	icon.set("visual_scale", BOOST_HERO_VISUAL_SCALE)
 	icon.custom_minimum_size = Vector2(142.0, 142.0)
 	_preview = icon
 	_build(tr(boost.display_name_key), tr(boost.description_key), false, false, affordable, boost.cost, count)
@@ -72,12 +79,18 @@ func action_disabled() -> bool:
 	return _action != null and _action.disabled
 
 
-## Fill spare Store height without squeezing text/actions; short pages scroll naturally.
+## Bound spare showcase space while allowing wrapped text/actions to grow on short pages.
 func fit_height(available_height: float) -> void:
-	custom_minimum_size.y = maxf(0.0, roundf(available_height))
-	_visual.custom_minimum_size.y = roundf(clampf(available_height * HERO_SHARE, HERO_HEIGHTS.x, HERO_HEIGHTS.y))
+	var fitted_height: float = clampf(roundf(available_height), 0.0, MAX_SHOWCASE_HEIGHT)
+	custom_minimum_size.y = fitted_height
+	_visual.custom_minimum_size.y = roundf(clampf(fitted_height * HERO_SHARE, HERO_HEIGHTS.x, HERO_HEIGHTS.y))
 	if kind != Kind.ARENA:
-		_preview.custom_minimum_size = Vector2.ONE * roundf(clampf(_visual.custom_minimum_size.y * ICON_SHARE, ICON_SIZES.x, ICON_SIZES.y))
+		var icon_sizes: Vector2 = BOOST_ICON_SIZES if kind == Kind.BOOST else ICON_SIZES
+		_preview.custom_minimum_size = Vector2.ONE * roundf(clampf(_visual.custom_minimum_size.y * ICON_SHARE, icon_sizes.x, icon_sizes.y))
+	if _boost_hero_spacer != null and _action != null:
+		var action_excess: float = maxf(0.0, _action.custom_minimum_size.y - _state.get_combined_minimum_size().y)
+		_boost_hero_spacer.custom_minimum_size.y = maxf(0.0,
+			action_excess - float(get_theme_constant("separation")))
 
 
 func _build(item_name: String, description: String, owned: bool, selected: bool, affordable: bool, cost: int,
@@ -92,6 +105,12 @@ func _build(item_name: String, description: String, owned: bool, selected: bool,
 	visual.custom_minimum_size = Vector2(0.0, HERO_HEIGHTS.x)
 	visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visual.add_child(_preview)
+	if kind == Kind.BOOST:
+		# Compensate for the taller Buy row so centering keeps the hero on the shared vertical rhythm.
+		_boost_hero_spacer = Control.new()
+		_boost_hero_spacer.name = "HeroBalanceSpace"
+		_boost_hero_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_boost_hero_spacer)
 	add_child(visual)
 	var name_label := Label.new()
 	name_label.name = "Name"
@@ -114,6 +133,7 @@ func _build(item_name: String, description: String, owned: bool, selected: bool,
 
 func _build_actions(owned: bool, selected: bool, affordable: bool, cost: int, owned_count: int) -> void:
 	var action_row := HBoxContainer.new()
+	action_row.name = "Actions"
 	action_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	action_row.add_theme_constant_override("separation", 14)
 	_state = Label.new()
@@ -123,6 +143,12 @@ func _build_actions(owned: bool, selected: bool, affordable: bool, cost: int, ow
 	if kind == Kind.BOOST:
 		_state.text = tr("STORE_OWNED") % owned_count
 		_state.add_theme_color_override("font_color", PALETTE.accent if owned_count > 0 else PALETTE.text_secondary)
+		var price := Label.new()
+		price.name = "Price"
+		price.text = "● %d" % cost
+		price.add_theme_font_size_override("font_size", 24)
+		price.add_theme_color_override("font_color", PALETTE.coin)
+		action_row.add_child(price)
 		_add_buy_action(action_row, affordable, cost)
 	elif selected:
 		_state.text = tr("STORE_SELECTED")

@@ -12,6 +12,7 @@ const PALETTE: PaletteData = preload("res://config/palette.tres")
 
 
 func _ready() -> void:
+	preload("res://scripts/ui/touch_target_sizing.gd").attach(_back)
 	_bounds.resized.connect(_refresh_layout)
 	_refresh_layout()
 	$Background.color = PALETTE.void_bg

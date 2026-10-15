@@ -10,8 +10,9 @@ signal menu_requested()
 
 const SETTINGS_SCENE: PackedScene = preload("res://scenes/ui/Settings.tscn")
 const MISSION_ROW: Script = preload("res://scripts/ui/pause_mission_row.gd")
+const TouchTargets = preload("res://scripts/ui/touch_target_sizing.gd")
 
-@onready var _pause_button: Button = $PauseButton
+@onready var _pause_button: Button = $PauseSafeArea/Bounds/PauseButton
 @onready var _overlay: Control = $Overlay
 @onready var _title: Label = $Overlay/SafeArea/Bounds/Box/Title
 @onready var _resume_button: Button = $Overlay/SafeArea/Bounds/Box/ResumeButton
@@ -28,6 +29,8 @@ var _rows: Array[PauseMissionRow] = []
 
 
 func _ready() -> void:
+	for button: Button in [_pause_button, _resume_button, _settings_button, _restart_button, _menu_button]:
+		TouchTargets.attach(button)
 	_overlay.visible = false
 	_apply_texts()
 	_pause_button.pressed.connect(pause)

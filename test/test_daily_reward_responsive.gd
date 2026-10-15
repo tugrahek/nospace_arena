@@ -80,7 +80,11 @@ func _check(popup: DailyRewardPopup, day: int, available: bool) -> void:
 	assert_eq(popup._route.current_day, day)
 	assert_eq(popup._route.completed_days, day - 1 if available else day)
 	assert_eq(popup._route.checkpoints.size(), 10)
+	assert_eq(popup._route_scroll.horizontal_scroll_mode, ScrollContainer.SCROLL_MODE_DISABLED)
+	assert_eq(popup._route_scroll.scroll_horizontal, 0)
 	for checkpoint: Button in popup._route.checkpoints:
+		_inside(checkpoint.get_global_rect(), popup._route_scroll.get_global_rect(), "all ten days visible together")
+		_inside(checkpoint.get_child(0).get_global_rect(), checkpoint.get_global_rect(), "day number fits target")
 		assert_gte(checkpoint.size.x * 320.0 / 720.0, 48.0)
 		assert_gte(checkpoint.size.y * 320.0 / 720.0, 48.0)
 		assert_eq(checkpoint.get_child(0).text, str(checkpoint.get_index() + 1))
@@ -97,25 +101,46 @@ func test_six_aspects_locales_insets_days_and_claimed_available_states() -> void
 					for available: bool in [false, true]:
 						var popup: DailyRewardPopup = await _mount(dimensions, insets, day, available)
 						_check(popup, day, available)
+						var bar: VScrollBar = popup._scroll.get_v_scroll_bar()
+						assert_lte(bar.max_value - bar.page, 0.1, "ordinary rewards need no vertical scrolling")
+						_inside(popup._route.get_global_rect(), popup._scroll.get_global_rect(), "entire calendar visible in body")
 						assert_eq(popup.preview_spec, Economy.login_reward_spec(day))
 						popup.get_parent().free()
 	assert_eq(Economy._data.to_dict(), original)
 
 
-func test_first_middle_last_checkpoints_and_body_scroll_are_accessible() -> void:
+func test_first_middle_last_checkpoints_are_accessible_without_scrolling() -> void:
 	for dimensions: Vector2i in SIZES:
 		var popup: DailyRewardPopup = await _mount(dimensions, Vector4i(24, 96, 24, 48), 7, true)
-		popup._scroll.ensure_control_visible(popup._route_scroll)
-		await wait_process_frames(2)
 		for day: int in [1, 5, 10]:
 			popup._route.checkpoints[day - 1].pressed.emit()
 			await wait_process_frames(3)
-			_inside(popup._route.checkpoints[day - 1].get_global_rect(), popup._route_scroll.get_global_rect(), "checkpoint reached horizontally")
+			_inside(popup._route.checkpoints[day - 1].get_global_rect(), popup._scroll.get_global_rect(), "checkpoint visible without scrolling")
+			assert_eq(popup._route_scroll.scroll_horizontal, 0)
+			assert_eq(popup._scroll.scroll_vertical, 0)
 			assert_eq(popup.selected_day, day)
 			assert_eq(popup.current_day, 7)
 			assert_true(popup._claim.visible)
 		_inside(popup._close.get_global_rect(), popup._box.get_global_rect(), "close stays reachable")
 		popup.get_parent().free()
+
+
+func test_five_columns_two_rows_fit_a_narrower_phone() -> void:
+	var popup: DailyRewardPopup = await _mount(Vector2i(640, 1280), Vector4i(24, 96, 24, 48), 10, true)
+	for index: int in 10:
+		var checkpoint: Button = popup._route.checkpoints[index]
+		_inside(checkpoint.get_global_rect(), popup._scroll.get_global_rect(), "narrow phone calendar")
+		assert_gte(checkpoint.size.x * 320.0 / 640.0, 48.0, "narrow phone touch width")
+		assert_gte(checkpoint.size.y * 320.0 / 640.0, 48.0, "narrow phone touch height")
+		if index < 5:
+			assert_almost_eq(checkpoint.position.y, 0.0, 0.1)
+		else:
+			assert_gt(checkpoint.position.y, popup._route.checkpoints[index - 5].get_rect().end.y)
+	assert_almost_eq(popup._route.checkpoints[0].position.x, popup._route.checkpoints[5].position.x, 0.1)
+	assert_eq(popup._route_scroll.scroll_horizontal, 0)
+	assert_eq(popup._scroll.scroll_vertical, 0)
+	_inside(popup._claim.get_global_rect(), popup._box.get_global_rect(), "narrow phone claim")
+	_inside(popup._close.get_global_rect(), popup._box.get_global_rect(), "narrow phone back")
 
 
 func test_long_reward_labels_scroll_without_clipping_footer() -> void:

@@ -123,14 +123,23 @@ vertical_alignment = 1
 theme_type_variation = &"Title"
 text = "Stage 1"
 
-[node name="CurrencyLabel" type="Label" parent="."]
-theme_type_variation = &"Coins"
-anchor_top = 1.0
+[node name="CoinSafeArea" type="MarginContainer" parent="."]
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = -40.0
-offset_right = 240.0
-offset_bottom = -12.0
+mouse_filter = 2
+script = ExtResource("7_safe")
+content_padding = Vector4i(16, 0, 16, 12)
+
+[node name="Bounds" type="VBoxContainer" parent="CoinSafeArea"]
+layout_mode = 2
+mouse_filter = 2
+alignment = 2
+
+[node name="CurrencyLabel" type="Label" parent="CoinSafeArea/Bounds"]
+custom_minimum_size = Vector2(224, 28)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_type_variation = &"Coins"
 text = "Coins: 0"
 
 [node name="ResultPanel" type="Control" parent="."]

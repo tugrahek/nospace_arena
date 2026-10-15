@@ -118,9 +118,9 @@ func test_main_menu_refreshes_real_currency_on_claim_signal() -> void:
 	popup.get_node("SafeArea/Bounds/Box/Footer/ClaimButton").pressed.emit()
 	assert_eq(menu.get_node("SafeArea/Bounds/Frame/Header/CoinsPanel/Content/Coins").text, tr("HUD_CURRENCY") + ": " + str(fixture.currency))
 	assert_eq(popup.state, DailyRewardPopup.State.CLAIMED)
-	assert_lt(menu.get_node("SafeArea/Bounds/Frame/Footer/Buttons").modulate.a, 1.0)
+	assert_lt(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons").modulate.a, 1.0)
 	popup.dismissed.emit()
-	assert_eq(menu.get_node("SafeArea/Bounds/Frame/Footer/Buttons").modulate.a, 1.0)
+	assert_eq(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons").modulate.a, 1.0)
 	Economy.set("_data", original)
 
 
@@ -129,6 +129,7 @@ func test_ten_real_rewards_route_mapping_and_future_preview_no_claim() -> void:
 	var popup := _popup(func() -> Dictionary: calls[0] += 1; return Economy.login_reward_spec(10))
 	for day in range(1, 11):
 		popup.present({"claimable": true, "reward": TABLE[day - 1], "new_streak": day})
+		await wait_process_frames(2)
 		var route: DailyRewardRoute = popup.get_node("SafeArea/Bounds/Box/Scroll/Body/Content/RouteScroll/Route")
 		assert_eq(route.checkpoints.size(), 10)
 		assert_eq(route.current_day, day)
@@ -297,7 +298,7 @@ func test_main_menu_entry_reopens_claimed_today_without_startup_popup() -> void:
 		assert_eq(fixture.currency, initial)
 		popup.close()
 		await wait_for_signal(popup.dismissed, 1.0)
-		assert_eq(menu.get_node("SafeArea/Bounds/Frame/Footer/Buttons/PlayButton").modulate.a, 1.0)
+		assert_eq(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/PlayButton").modulate.a, 1.0)
 		menu.get_node("SafeArea/Bounds/Frame/Header/RewardEntry").pressed.emit()
 		assert_eq(popup.state, DailyRewardPopup.State.INSPECTING)
 		assert_eq(fixture.currency, initial)

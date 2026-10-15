@@ -4,6 +4,8 @@ extends Control
 
 const COIN_BONUS_ICON: int = 3
 @export var effect: int = 0  # BoostData.Effect or COIN_BONUS_ICON.
+var optical_offset_y: float = 0.0
+var visual_scale: float = 1.0
 
 
 func _ready() -> void:
@@ -11,8 +13,9 @@ func _ready() -> void:
 
 
 func _draw() -> void:
+	draw_set_transform(Vector2(size * 0.5 + Vector2(0.0, optical_offset_y)), 0.0, Vector2.ONE * visual_scale)
 	var s: float = minf(size.x, size.y)
-	var c: Vector2 = size * 0.5
+	var c: Vector2 = Vector2.ZERO
 	var r: float = s * 0.42
 	match effect:
 		BoostData.Effect.SLOW_START:
@@ -23,6 +26,7 @@ func _draw() -> void:
 			_draw_coin(c, r)
 		_:
 			_draw_heart(c, r)
+	draw_set_transform(Vector2.ZERO)
 
 
 func _draw_heart(c: Vector2, r: float) -> void:

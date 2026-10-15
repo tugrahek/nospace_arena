@@ -155,45 +155,52 @@ horizontal_alignment = 2
 vertical_alignment = 1
 text = "Coins: 0"
 
-[node name="Center" type="VBoxContainer" parent="SafeArea/Bounds/Frame"]
+[node name="ContentGroup" type="VBoxContainer" parent="SafeArea/Bounds/Frame"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="Center" type="VBoxContainer" parent="SafeArea/Bounds/Frame/ContentGroup"]
 layout_mode = 2
 mouse_filter = 2
 alignment = 1
 theme_override_constants/separation = 12
 
-[node name="Emblem" type="Control" parent="SafeArea/Bounds/Frame/Center"]
-custom_minimum_size = Vector2(224, 224)
+[node name="Emblem" type="Control" parent="SafeArea/Bounds/Frame/ContentGroup/Center"]
+custom_minimum_size = Vector2(208, 208)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("2_logo")
 
-[node name="Title" type="Label" parent="SafeArea/Bounds/Frame/Center"]
+[node name="Title" type="Label" parent="SafeArea/Bounds/Frame/ContentGroup/Center"]
 layout_mode = 2
 theme_type_variation = &"Title"
 theme_override_fonts/font = SubResource("FontVariation_dynapuff")
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 52
 horizontal_alignment = 1
 text = "NoSpace"
 
-[node name="Subtitle" type="Label" parent="SafeArea/Bounds/Frame/Center"]
+[node name="Subtitle" type="Label" parent="SafeArea/Bounds/Frame/ContentGroup/Center"]
 layout_mode = 2
 theme_type_variation = &"Display"
 theme_override_colors/font_color = Color(1, 0.5, 0.95, 1)
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 text = "A R E N A"
 
-[node name="Footer" type="VBoxContainer" parent="SafeArea/Bounds/Frame"]
+[node name="Footer" type="VBoxContainer" parent="SafeArea/Bounds/Frame/ContentGroup"]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Buttons" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer"]
+[node name="Buttons" type="VBoxContainer" parent="SafeArea/Bounds/Frame/ContentGroup/Footer"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 16
 
-[node name="PlayButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons"]
+[node name="PlayButton" type="Button" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons"]
 custom_minimum_size = Vector2(0, 108)
 layout_mode = 2
 theme_type_variation = &"HeroButton"
@@ -201,18 +208,18 @@ text = "Play"
 script = ExtResource("3_juicy")
 pop_scale = 1.03
 
-[node name="HeroSpacer" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons"]
+[node name="HeroSpacer" type="Control" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons"]
 custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="NavigationHub" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons"]
-custom_minimum_size = Vector2(560, 312)
+[node name="NavigationHub" type="Control" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons"]
+custom_minimum_size = Vector2(560, 256)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("7_navhub")
 
-[node name="StoreButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub"]
+[node name="StoreButton" type="Button" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub"]
 custom_minimum_size = Vector2(250, 108)
 anchor_right = 0.5
 anchor_bottom = 0.5
@@ -224,7 +231,7 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/StoreButton"]
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
@@ -233,25 +240,25 @@ offset_right = -12.0
 offset_bottom = -12.0
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
-[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/StoreButton/Content"]
-custom_minimum_size = Vector2(64, 64)
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton/Content"]
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("8_navicon")
 icon_kind = 0
 
-[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/StoreButton/Content"]
+[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton/Content"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "Store"
 
-[node name="MissionsButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub"]
+[node name="MissionsButton" type="Button" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub"]
 custom_minimum_size = Vector2(250, 108)
 anchor_left = 0.5
 anchor_right = 1.0
@@ -264,7 +271,7 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/MissionsButton"]
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/MissionsButton"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
@@ -273,25 +280,25 @@ offset_right = -12.0
 offset_bottom = -12.0
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
-[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/MissionsButton/Content"]
-custom_minimum_size = Vector2(64, 64)
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/MissionsButton/Content"]
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("8_navicon")
 icon_kind = 1
 
-[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/MissionsButton/Content"]
+[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/MissionsButton/Content"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "Missions"
 
-[node name="LeaderboardButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub"]
+[node name="LeaderboardButton" type="Button" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub"]
 custom_minimum_size = Vector2(250, 108)
 anchor_top = 0.5
 anchor_right = 0.5
@@ -304,7 +311,7 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/LeaderboardButton"]
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/LeaderboardButton"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
@@ -313,25 +320,25 @@ offset_right = -12.0
 offset_bottom = -12.0
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
-[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/LeaderboardButton/Content"]
-custom_minimum_size = Vector2(64, 64)
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/LeaderboardButton/Content"]
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("8_navicon")
 icon_kind = 2
 
-[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/LeaderboardButton/Content"]
+[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/LeaderboardButton/Content"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "Leaderboard"
 
-[node name="HowToButton" type="Button" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub"]
+[node name="HowToButton" type="Button" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub"]
 custom_minimum_size = Vector2(250, 108)
 anchor_left = 0.5
 anchor_top = 0.5
@@ -345,7 +352,7 @@ flat = true
 script = ExtResource("3_juicy")
 pop_scale = 1.05
 
-[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/HowToButton"]
+[node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/HowToButton"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 12.0
@@ -354,19 +361,19 @@ offset_right = -12.0
 offset_bottom = -12.0
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
-[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/HowToButton/Content"]
-custom_minimum_size = Vector2(64, 64)
+[node name="Icon" type="Control" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/HowToButton/Content"]
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
 script = ExtResource("5_helpicon")
 
-[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/Footer/Buttons/NavigationHub/HowToButton/Content"]
+[node name="Label" type="Label" parent="SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/HowToButton/Content"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 vertical_alignment = 1
 text = "How to Play"
@@ -405,7 +412,7 @@ offset_top = -540.0
 offset_right = 340.0
 offset_bottom = 540.0
 mouse_filter = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 16
 
 [node name="RewardTitle" type="Label" parent="RewardPopup/SafeArea/Bounds/Box"]
 layout_mode = 2
@@ -434,7 +441,7 @@ theme_override_constants/margin_bottom = 16
 layout_mode = 2
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 20
+theme_override_constants/separation = 12
 
 [node name="Hero" type="CenterContainer" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
 custom_minimum_size = Vector2(0, 286)
@@ -462,11 +469,11 @@ script = ExtResource("12_gift")
 [node name="RewardAmount" type="Label" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
 layout_mode = 2
 theme_type_variation = &"Coins"
-theme_override_font_sizes/font_size = 64
+theme_override_font_sizes/font_size = 52
 horizontal_alignment = 1
 text = "+0"
 [node name="Currency" type="Label" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
@@ -474,12 +481,14 @@ vertical_alignment = 1
 autowrap_mode = 3
 text = "Coins"
 [node name="RouteScroll" type="ScrollContainer" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
-custom_minimum_size = Vector2(0, 160)
+custom_minimum_size = Vector2(0, 224)
 layout_mode = 2
+horizontal_scroll_mode = 0
 vertical_scroll_mode = 0
 [node name="Route" type="Control" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content/RouteScroll"]
-custom_minimum_size = Vector2(1080, 144)
+custom_minimum_size = Vector2(0, 224)
 layout_mode = 2
+size_flags_horizontal = 3
 script = ExtResource("11_route")
 [node name="RewardBody" type="Label" parent="RewardPopup/SafeArea/Bounds/Box/Scroll/Body/Content"]
 custom_minimum_size = Vector2(0, 40)

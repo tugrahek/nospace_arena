@@ -142,14 +142,39 @@ func _check_chips(screen: Control, context: String) -> void:
 	assert_eq(rail.get_child_count(), 3)
 	for chip: BoostLoadoutChip in rail.get_children():
 		_inside(chip, _safe_rect(screen), context + " chip")
-		for child: String in ["Content/Icon", "Content/Name", "Content/Count"]:
+		for child: String in ["Content/Icon", "Content/Labels/Name", "Content/Labels/Count"]:
 			var item: Control = chip.get_node(child)
 			_inside(item, chip.get_global_rect(), context + " chip " + child)
+			if item is Label:
+				assert_lte(item.get_minimum_size().y, item.size.y + 0.1, context + " boost label height")
+		_inside(chip._marker, chip.get_global_rect(), context + " selection marker")
 		assert_eq(chip.disabled, Economy.boost_count(chip.boost_id) == 0)
 		assert_eq(chip.button_pressed, Economy.is_boost_armed(chip.boost_id))
 		assert_eq(chip._marker.visible, chip.button_pressed)
 		assert_gte(chip.size.x * 320.0 / 720.0, 48.0)
 		assert_gte(chip.size.y * 320.0 / 720.0, 48.0)
+
+
+func test_compact_group_and_boosts_fit_portrait_and_narrow_safe_areas() -> void:
+	for dimensions: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600), Vector2i(640, 1280)]:
+		for locale: String in ["en", "tr"]:
+			TranslationServer.set_locale(locale)
+			_set_fixture(2)
+			var screen: Control = await _mount(dimensions, Vector4i(24, 96, 24, 48))
+			for path: String in ["Title", "ModeGrid", "BoostStrip", "BackButton"]:
+				_inside(screen.get_node(CENTER + "/" + path), _safe_rect(screen), "compact " + path)
+			_check_tiles(screen, "compact tiles")
+			_check_chips(screen, "compact chips")
+			var grid: Control = screen.get_node(CENTER + "/ModeGrid")
+			assert_lte(grid.size.y, 520.0, "two compact rows retain room for text")
+			var rail: HBoxContainer = screen.get_node(CENTER + "/BoostStrip/Boosts")
+			for chip: BoostLoadoutChip in rail.get_children():
+				assert_almost_eq(chip.size.y, 108.0, 0.1, "compact chip keeps a full touch target")
+				assert_eq(chip.get_node("Content/Labels/Count").text, "×%d" % Economy.boost_count(chip.boost_id))
+				if chip._marker.visible:
+					var icon: Control = chip.get_node("Content/Icon")
+					assert_false(chip._marker.get_global_rect().intersects(icon.get_global_rect()), "selection marker does not cover icon")
+			screen.get_parent().free()
 
 
 func test_mode_buttons_dispatch_immediately_once_without_extra_confirm() -> void:

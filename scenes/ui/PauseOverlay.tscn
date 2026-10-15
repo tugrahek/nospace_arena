@@ -9,13 +9,23 @@ layer = 3
 process_mode = 3
 script = ExtResource("1_pause")
 
-[node name="PauseButton" type="Button" parent="."]
+[node name="PauseSafeArea" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("3_safe_area")
+content_padding = Vector4i(16, 16, 16, 16)
+
+[node name="Bounds" type="Control" parent="PauseSafeArea"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PauseButton" type="Button" parent="PauseSafeArea/Bounds"]
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -84.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = 84.0
+offset_left = -68.0
+offset_right = 0.0
+offset_bottom = 68.0
 text = "II"
 theme_override_font_sizes/font_size = 28
 script = ExtResource("2_juicy")

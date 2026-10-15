@@ -62,11 +62,11 @@ offset_left = -360.0
 offset_top = 56.0
 offset_right = 360.0
 offset_bottom = -76.0
+alignment = 1
 theme_override_constants/separation = 18
 
 [node name="ContentScroll" type="ScrollContainer" parent="SafeArea/Bounds/MainVBox"]
 layout_mode = 2
-size_flags_vertical = 3
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 1
 
@@ -85,7 +85,6 @@ horizontal_alignment = 1
 text = "Capture the arena"
 
 [node name="DemoCenter" type="CenterContainer" parent="SafeArea/Bounds/MainVBox/ContentScroll/PageContent"]
-custom_minimum_size = Vector2(0, 370)
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2

@@ -40,8 +40,8 @@ anchor_bottom = 1.0
 offset_left = -332.0
 offset_right = 332.0
 mouse_filter = 2
-alignment = 1
-theme_override_constants/separation = 24
+alignment = 0
+theme_override_constants/separation = 20
 script = ExtResource("6_layout")
 
 [node name="Title" type="Label" parent="SafeArea/Bounds/Center"]
@@ -52,7 +52,7 @@ horizontal_alignment = 1
 text = "Select Mode"
 
 [node name="ModeGrid" type="Control" parent="SafeArea/Bounds/Center"]
-custom_minimum_size = Vector2(560, 600)
+custom_minimum_size = Vector2(0, 480)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("3_grid")
@@ -78,16 +78,16 @@ pop_scale = 1.02
 [node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Center/ModeGrid/DailyRow/Button"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Art" type="Control" parent="SafeArea/Bounds/Center/ModeGrid/DailyRow/Button/Content"]
-custom_minimum_size = Vector2(224, 128)
+custom_minimum_size = Vector2(160, 91.42857)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
@@ -102,7 +102,7 @@ theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 
 [node name="Desc" type="Label" parent="SafeArea/Bounds/Center/ModeGrid/DailyRow/Button/Content"]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"Accent"
@@ -132,16 +132,16 @@ pop_scale = 1.02
 [node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Center/ModeGrid/FreeRow/Button"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Art" type="Control" parent="SafeArea/Bounds/Center/ModeGrid/FreeRow/Button/Content"]
-custom_minimum_size = Vector2(224, 128)
+custom_minimum_size = Vector2(160, 91.42857)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
@@ -156,7 +156,7 @@ theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 
 [node name="Desc" type="Label" parent="SafeArea/Bounds/Center/ModeGrid/FreeRow/Button/Content"]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"Muted"
@@ -186,16 +186,16 @@ pop_scale = 1.02
 [node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Center/ModeGrid/LevelRow/Button"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Art" type="Control" parent="SafeArea/Bounds/Center/ModeGrid/LevelRow/Button/Content"]
-custom_minimum_size = Vector2(224, 128)
+custom_minimum_size = Vector2(160, 91.42857)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
@@ -210,7 +210,7 @@ theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 
 [node name="Desc" type="Label" parent="SafeArea/Bounds/Center/ModeGrid/LevelRow/Button/Content"]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"Muted"
@@ -240,16 +240,16 @@ pop_scale = 1.02
 [node name="Content" type="VBoxContainer" parent="SafeArea/Bounds/Center/ModeGrid/CampaignRow/Button"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
 mouse_filter = 2
 alignment = 1
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="Art" type="Control" parent="SafeArea/Bounds/Center/ModeGrid/CampaignRow/Button/Content"]
-custom_minimum_size = Vector2(224, 128)
+custom_minimum_size = Vector2(160, 91.42857)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
@@ -264,7 +264,7 @@ theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 
 [node name="Desc" type="Label" parent="SafeArea/Bounds/Center/ModeGrid/CampaignRow/Button/Content"]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 mouse_filter = 2
 theme_type_variation = &"Muted"

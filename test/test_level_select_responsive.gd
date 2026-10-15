@@ -4,7 +4,7 @@ extends GutTest
 const SCENE: PackedScene = preload("res://scenes/ui/LevelSelect.tscn")
 const CENTER: String = "SafeArea/Bounds/Center"
 const SIZES: Array[Vector2i] = [Vector2i(720, 1280), Vector2i(720, 1440), Vector2i(720, 1560),
-	Vector2i(720, 1600), Vector2i(720, 1680), Vector2i(960, 1280)]
+	Vector2i(720, 1600), Vector2i(720, 1680), Vector2i(960, 1280), Vector2i(640, 1280)]
 var _original: Variant
 var _pending: int
 

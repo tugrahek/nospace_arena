@@ -9,6 +9,8 @@ const MENU_SCENE: String = "res://scenes/main/MainMenu.tscn"
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const LANGUAGE_SELECTOR = preload("res://scripts/ui/settings_language_selector.gd")
 const MAX_CONTENT_WIDTH: float = 800.0
+const AUTHORED_FOOTER_HEIGHT: float = 240.0
+const FOOTER_GAP: float = 24.0
 
 ## When true the panel was opened as an overlay (e.g. from in-run Pause); Back closes it.
 ## When false (launched from MainMenu) Back returns to the main menu.
@@ -46,6 +48,9 @@ var _language_overlay: SettingsLanguageSelector
 
 
 func _ready() -> void:
+	_bottom.minimum_size_changed.connect(_refresh_layout)
+	for button: Button in [_back, _licenses, _privacy, _language_button]:
+		preload("res://scripts/ui/touch_target_sizing.gd").attach(button)
 	_bounds.resized.connect(_refresh_layout)
 	_refresh_layout()
 	_style_mute()
@@ -82,12 +87,16 @@ func _connect_privacy_options() -> void:
 	_on_privacy_options_changed(AdsService.is_privacy_options_required(), AdsService.is_privacy_options_busy())
 
 
+## Keep the legal footer accessible when Android hit minima require more than authored space.
 func _refresh_layout() -> void:
 	var width: float = minf(_bounds.size.x, MAX_CONTENT_WIDTH)
 	_center.offset_left = -width * 0.5
 	_center.offset_right = width * 0.5
 	_bottom.offset_left = -width * 0.5
 	_bottom.offset_right = width * 0.5
+	var footer_height: float = maxf(AUTHORED_FOOTER_HEIGHT, _bottom.get_combined_minimum_size().y)
+	_bottom.offset_top = -footer_height - FOOTER_GAP
+	_center.offset_bottom = _bottom.offset_top - FOOTER_GAP
 
 
 func _connect_audio() -> void:
