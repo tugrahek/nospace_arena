@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.svg" width="112" alt="NoSpace: Arena logo">
+  <img src="docs/media/logo.png" width="112" alt="NoSpace: Arena logo">
 </p>
 
 <h1 align="center">NoSpace: Arena</h1>
@@ -9,10 +9,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Godot-4.6.3-478CBF?style=for-the-badge&amp;logo=godotengine&amp;logoColor=white" alt="Godot 4.6.3">
   <img src="https://img.shields.io/badge/GDScript-Typed-00BFA5?style=for-the-badge" alt="Typed GDScript">
-  <img src="https://img.shields.io/badge/Android-Dev_build-3DDC84?style=for-the-badge&amp;logo=android&amp;logoColor=white" alt="Android development build">
-  <br>
-  <img src="https://img.shields.io/badge/Status-Prototype-A78BFA?style=for-the-badge" alt="In-development prototype">
-  <img src="https://img.shields.io/badge/Languages-EN_%7C_TR-FF6AD5?style=for-the-badge" alt="English and Turkish">
+  <img src="https://img.shields.io/badge/Status-In_Development-A78BFA?style=for-the-badge" alt="In Development">
 </p>
 
 ---
@@ -23,7 +20,7 @@
   <a href="docs/media/gameplay.gif"><img src="docs/media/gameplay.gif" width="360" alt="Real gameplay: move along the boundary, enter the field, draw a line, and reconnect to capture territory while an enemy moves"></a>
 </p>
 
-<p align="center"><strong>Move along safety → enter the void → close your line → claim territory.</strong></p>
+<p align="center"><strong>Move along the boundary → enter the void → close your line → claim territory.</strong></p>
 
 Inspired by **Qix** and **Volfied**, every cut is a risk: enemies can reach your exposed line before you reconnect. Captured ground changes the fight through your character's territory effect.
 
@@ -41,7 +38,7 @@ Inspired by **Qix** and **Volfied**, every cut is a risk: enemies can reach your
 | Feature | In the game |
 |:--|:--|
 | **Living Territory** | Pulse, Drag, and Halt give captured ground distinct defensive effects. |
-| **Personal Daily challenge** | Date-based arena selection, local best scores, and a replay of your own best-run ghost. |
+| **Daily challenge & personal bests** | Date-based arena selection, local best scores, and a replay of your own best-run ghost. |
 | **Progression & rewards** | Campaign stars, rotating missions, coins, daily login rewards, and Supply gifts. |
 | **Your loadout** | Three arenas, unlockable characters, and Extra Life, Coin Bonus, and Slow Start boosts. |
 | **Made for portrait play** | Swipe, tap-to-turn, and D-pad controls; responsive layouts, safe areas, and English/Turkish text. |
@@ -66,8 +63,10 @@ Built with **Godot 4.6.3** and **statically typed GDScript**. Procedural 2D visu
 **Playable prototype · Android development builds · Not yet released**
 
 - **Implemented:** the core capture loop, territory effects, four modes, progression, rewards, and bilingual UI shown above.
-- **Acceptance in progress:** physical Android UI checks; iOS export and device validation remain open.
+- **Currently validating:** the UI on physical Android devices. iOS export and device testing are still pending.
 - **Planned for v1.1:** roguelite drafting.
+
+English and Turkish are currently supported; additional languages are planned.
 
 Daily scores and ghosts are stored **on the device**. Online rankings and a server-synced Daily clock are not implemented.
 
