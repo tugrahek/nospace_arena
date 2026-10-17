@@ -9,14 +9,16 @@
 - GodotGooglePlayBilling 3.3.0 (MIT): https://github.com/godot-sdk-integrations/godot-google-play-billing/releases/tag/3.3.0
 
 ## Assets
-Third-party font licenses and attribution are listed here (and surfaced in the in-game
-Settings ? Open-source licenses view):
+Third-party font licenses and attribution are listed below. Runtime font notices are
+also available in Settings → Open-source licenses; addon editor font notices are
+included alongside their vendored files.
 
 | Asset | Type | Author | License | Source |
 |-------|------|--------|---------|--------|
 | DynaPuff | Font (NoSpace brand wordmark only) | Toshi Omagari, Jennifer Daniel | OFL 1.1 | Google Fonts |
 | Rubik | Font (screen / section headings) | Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani | OFL 1.1 | Google Fonts |
 | Nunito Sans | Font (body / button / numbers) | Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin | OFL 1.1 | Google Fonts |
+| Noto Sans CJK SC Regular 2.004 (subset) | Font (vendored AdMob editor interface) | Adobe; Noto is a Google trademark | OFL 1.1 | [Original OFL](../addons/admob/assets/fonts/OFL.txt) · [Copyright and verified provenance](../addons/admob/assets/fonts/NOTICE.txt) |
 | SFX (capture / ui_tap / life_loss / near_miss) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
 | Menu music (menu_music) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
 
@@ -24,7 +26,7 @@ Settings ? Open-source licenses view):
 > `ui_theme.tres`, body, button ve numbers için Nunito Sans; screen/section headings için Rubik
 > bağlar. DynaPuff yalnız MainMenu `NoSpace` wordmark override'ıdır.
 
-Policy (CLAUDE.md): all fonts/audio/sprites must be license-clean (CC0 or commercial-use);
+Asset policy: all fonts/audio/sprites must be license-clean (CC0 or commercial-use);
 reference games are inspiration only — no copied assets/IP.
 
 ## Runtime legal notices

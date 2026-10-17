@@ -1,0 +1,27 @@
+Noto Sans CJK SC Regular, version 2.004
+Vendored filename: NotoSansSC-Regular.otf
+
+Copyright 2014-2021 Adobe (http://www.adobe.com/).
+Noto is a trademark of Google Inc.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+The original, unmodified license text is included in OFL.txt.
+
+Provenance
+The vendored font is byte-identical to the subset distributed with Poing
+Studios Godot AdMob plugin v5.1.0. It contains 1,321 glyphs and 871 encoded
+characters; it is not the full upstream Noto CJK font. Font name/version and
+copyright are retained in its metadata. All 871 encoded character outlines
+were compared with, and match, the official upstream Regular font below.
+
+Vendor source (release v5.1.0, commit 615974e9f66921a54e3c71c33db0856bdbf19d13):
+https://github.com/poingstudios/godot-admob-plugin/blob/615974e9f66921a54e3c71c33db0856bdbf19d13/platforms/godot_editor/addons/admob/assets/fonts/NotoSansSC-Regular.otf
+
+Upstream font (Noto CJK commit f8d157532fbfaeda587e826d4cd5b21a49186f7c):
+https://github.com/notofonts/noto-cjk/blob/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf
+
+Original upstream license:
+https://github.com/notofonts/noto-cjk/blob/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/LICENSE
+
+Vendored font SHA-256:
+0832cf607170f42922aaeb8dd590e346174e247800c35aa4137055542462dbfa
