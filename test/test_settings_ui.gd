@@ -112,9 +112,16 @@ func test_privacy_choices_follow_ump_availability_busy_state_and_locale() -> voi
 
 
 func test_language_pick_applies_locale_and_refreshes_panel() -> void:
-	# Pressing a language button applies the locale immediately and the panel re-labels itself
-	# in place (cheap-hybrid refresh). Restores the saved preference + EN locale afterwards.
+	# Godot's translation notification updates both live roots; Back/scene entry is not required.
 	var saved: String = AudioManager.settings().language
+	var original_data: Variant = Economy._data
+	var fixture := SaveData.new_default()
+	fixture.tutorial_seen = true
+	fixture.last_claim_epoch_day = SeedManager.today_epoch()
+	Economy._data = fixture
+	AudioManager.set_language("en")
+	var menu: Control = MAIN_MENU_SCENE.instantiate()
+	add_child_autofree(menu)
 	var panel: Node = load("res://scenes/ui/Settings.tscn").instantiate()
 	add_child_autofree(panel)
 	await get_tree().process_frame
@@ -125,6 +132,12 @@ func test_language_pick_applies_locale_and_refreshes_panel() -> void:
 	assert_true(TranslationServer.get_locale().begins_with("tr"), "locale switched to tr")
 	var title: Label = panel.get_node("SafeArea/Bounds/Center/Title")
 	assert_eq(title.text, "Ayarlar", "panel re-labeled itself in the new language")
+	assert_eq(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton/Content/Label").text, "Mağaza", "live Main Menu label translated")
+	assert_eq(menu.get_node("SafeArea/Bounds/Frame/Header/CoinsPanel/Content/Coins").text, "Para: 0", "live Main Menu dynamic text translated")
+	panel.call("_on_language", "en")
+	assert_eq(title.text, "Settings", "Settings refreshes to English immediately")
+	assert_eq(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton/Content/Label").text, "Store", "Main Menu refreshes to English immediately")
+	Economy._data = original_data
 	# Restore persisted preference + test locale.
 	AudioManager.set_language(saved)
 	TranslationServer.set_locale("en")

@@ -36,11 +36,7 @@ const HOWTO_SCENE: String = "res://scenes/ui/HowToPlay.tscn"
 
 func _ready() -> void:
 	# Wordmark ("NoSpace" + "A R E N A") + emblem are set in the scene.
-	_play_button.text = tr("MENU_PLAY")
-	_store_label.text = tr("MENU_STORE")
-	_missions_label.text = tr("MENU_MISSIONS_SHORT")
-	_leaderboard_label.text = tr("MENU_LEADERBOARD")
-	_howto_label.text = tr("MENU_HOWTO")
+	_apply_texts()
 	_play_button.pressed.connect(_on_play)
 	_store_button.pressed.connect(_on_store)
 	_missions_button.pressed.connect(_on_missions)
@@ -60,6 +56,22 @@ func _ready() -> void:
 	# First launch: show how-to-play once (HowToPlay marks it seen on entry).
 	if not Economy.tutorial_seen():
 		get_tree().change_scene_to_file.call_deferred(HOWTO_SCENE)
+
+
+## Re-applies dynamic strings when Godot changes the active translation.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		_apply_texts()
+		_refresh()
+
+
+## Main-menu labels are assigned in code, so refresh them when the locale changes.
+func _apply_texts() -> void:
+	_play_button.text = tr("MENU_PLAY")
+	_store_label.text = tr("MENU_STORE")
+	_missions_label.text = tr("MENU_MISSIONS_SHORT")
+	_leaderboard_label.text = tr("MENU_LEADERBOARD")
+	_howto_label.text = tr("MENU_HOWTO")
 
 
 ## Shows the login-reward popup if a reward is claimable today (Step 15 polishes it).

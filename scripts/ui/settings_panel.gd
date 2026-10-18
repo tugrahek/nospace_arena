@@ -112,6 +112,12 @@ func _connect_audio() -> void:
 	_music.drag_ended.connect(func(_c: bool) -> void: AudioManager.commit_settings())
 
 
+## Rebuilds this panel's code-assigned text after Godot changes the active translation.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		_apply_texts()
+
+
 ## All panel texts from the ACTIVE locale — called on ready and again after a language switch
 ## so the panel itself updates in place. (Language names stay endonyms: English / Türkçe.)
 func _apply_texts() -> void:
@@ -137,7 +143,6 @@ func _apply_texts() -> void:
 
 func _on_language(lang: String) -> void:
 	AudioManager.set_language(lang)  # applies the locale + persists
-	_apply_texts()  # this panel updates in place; other screens rebuild on scene entry
 	if is_instance_valid(_language_overlay):
 		_language_overlay.selected_code = lang
 		_language_overlay.refresh()
