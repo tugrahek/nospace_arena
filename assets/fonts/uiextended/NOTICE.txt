@@ -1,0 +1,11 @@
+NoSpace UI Extended, derived from the bundled Nunito Sans variable font.
+Source: assets/fonts/nunitosans/nunitosans-variable.ttf
+Upstream: https://github.com/googlefonts/nunito-sans
+Source SHA256: f934d7142fb4784bf828da485b7dcbd90c0c80d514e9d49a5da0ed3a1ae2491d
+License: SIL Open Font License 1.1; see OFL.txt.
+Copyright 2016 The Nunito Sans Project Authors (https://github.com/Fonthausen/NunitoSans)
+Modified: static weight 500, other axes at defaults, shipped catalog Unicode subset;
+family/PostScript names changed. Glyph shapes/advances retained from the instantiated face.
+hhea/OS2 typo metrics match Rubik: ascent 935, descent -250, line gap 0 (1000 em).
+Used only after display faces; Nunito Sans remains the unchanged body font.
+Regenerate on catalog expansion; focused glyph shaping tests enforce coverage.

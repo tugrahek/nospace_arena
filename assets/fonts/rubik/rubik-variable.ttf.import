@@ -2,7 +2,7 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dhywkfm4h4sg3"
+uid="uid://dq66mdn6to6y3"
 path="res://.godot/imported/rubik-variable.ttf-6bd01da3b37f6276322fc5ceb30dcbb1.fontdata"
 
 [deps]
@@ -27,7 +27,7 @@ subpixel_positioning=4
 keep_rounding_remainders=true
 oversampling=0.0
 Fallbacks=null
-fallbacks=[Resource("uid://8y75iwe8swh1", "res://assets/fonts/cjk/nospace-cjk-jp.otf"), Resource("uid://c05q57xfrga48", "res://assets/fonts/cjk/nospace-cjk-kr.otf"), Resource("uid://0wjbvq6bs0y4", "res://assets/fonts/cjk/nospace-cjk-sc.otf"), Resource("uid://oi8ge3ncl8oj", "res://assets/fonts/cjk/nospace-cjk-tc.otf")]
+fallbacks=[]
 Compress=null
 compress=true
 preload=[]

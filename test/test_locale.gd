@@ -88,7 +88,7 @@ func test_full_device_locale_and_saved_preference() -> void:
 	assert_eq(LocaleUtil.resolve("invalid", "tr_CY"), "tr")
 	for unsupported: String in ["pt_PT", "ar", "hi_IN", "xx_YY", ""]:
 		assert_eq(LocaleUtil.resolve("", unsupported), "en", "safe fallback: " + unsupported)
-	assert_eq(LocaleUtil.SUPPORTED, ["en", "tr", "de", "fr", "es", "pt_BR", "it", "ja", "ko", "zh_Hans", "zh_Hant"], "only translated locales ship")
+	assert_eq(LocaleUtil.SUPPORTED, ["en", "tr", "de", "fr", "es", "pt_BR", "it", "ja", "ko", "zh_Hans", "zh_Hant", "ru", "id", "vi", "pl"], "only translated locales ship")
 
 
 func test_canonical_codes_preserve_script_and_region() -> void:
@@ -167,6 +167,28 @@ func test_cjk_device_variants_and_saved_preferences() -> void:
 		assert_eq(LocaleUtil.resolve(pair[1], "en_US"), pair[1], "saved preference wins")
 		var restored := AudioSettings.from_dict({"language": pair[0]})
 		assert_eq(AudioSettings.from_dict(restored.to_dict()).language, pair[1])
+
+
+func test_b1_device_variants_and_saved_preferences() -> void:
+	for pair: Array in [["ru_RU", "ru"], ["ru_UA", "ru"], ["id_ID", "id"],
+			["vi_VN", "vi"], ["pl_PL", "pl"]]:
+		assert_eq(LocaleUtil.resolve("", pair[0]), pair[1])
+		assert_eq(LocaleUtil.resolve(pair[1], "tr_TR"), pair[1], "saved preference wins")
+		var restored := AudioSettings.from_dict({"language": pair[0]})
+		assert_eq(AudioSettings.from_dict(restored.to_dict()).language, pair[1])
+
+
+func test_b1_catalog_shapes_without_system_fonts() -> void:
+	var parsed: Array = _read_csv()
+	for locale: String in ["ru", "id", "vi", "pl"]:
+		TranslationServer.set_locale(locale)
+		await get_tree().process_frame
+		var column: int = parsed[0].find(locale)
+		for path: String in LocaleFonts.LATIN_PATHS:
+			var font: Font = load(path)
+			for row: PackedStringArray in parsed[1]:
+				_assert_bundled_text(row[column].replace("\\n", "\n"), font, locale, row[0])
+			_assert_bundled_text("0123456789 ◆◇ ×…−→★☆♥♡ %+-:.,/()", font, locale, "runtime symbols")
 
 
 func test_cjk_catalog_uses_bundled_glyphs_and_correct_regional_faces() -> void:

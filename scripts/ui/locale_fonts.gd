@@ -13,17 +13,21 @@ const LATIN_PATHS: Array[String] = [
 ]
 
 
-## Reorders existing fallbacks on startup and live locale changes; no save data is touched.
+## Configures bundled fallbacks on startup/live switching; import order and saves stay independent.
 static func apply(locale: String) -> void:
 	var first: String = REGIONS.get(LocaleUtil.supported_locale(locale), "jp")
 	var fallbacks: Array[Font] = [_regional_font(first)]
 	for region: String in REGIONS.values():
 		if region != first:
 			fallbacks.append(_regional_font(region))
+	var display_fallbacks: Array[Font] = [load("res://assets/fonts/uiextended/nospace-ui-extended.ttf")]
+	display_fallbacks.append_array(fallbacks)
 	for path: String in LATIN_PATHS:
 		var font: FontFile = load(path)
-		if font.fallbacks != fallbacks:
-			font.fallbacks = fallbacks
+		# Match heading metrics while supplying missing Cyrillic/Vietnamese glyphs.
+		var chain: Array[Font] = fallbacks if path == LATIN_PATHS[0] else display_fallbacks
+		if font.fallbacks != chain:
+			font.fallbacks = chain
 
 
 ## Endonyms use their own region even when the surrounding UI uses a different language.

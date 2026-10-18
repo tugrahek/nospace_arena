@@ -12,6 +12,8 @@ var options: Array[Dictionary] = [
 	{"code": "pt_BR", "key": "LANG_PT_BR"}, {"code": "it", "key": "LANG_IT"},
 	{"code": "ja", "key": "LANG_JA"}, {"code": "ko", "key": "LANG_KO"},
 	{"code": "zh_Hans", "key": "LANG_ZH_HANS"}, {"code": "zh_Hant", "key": "LANG_ZH_HANT"},
+	{"code": "ru", "key": "LANG_RU"}, {"code": "id", "key": "LANG_ID"},
+	{"code": "vi", "key": "LANG_VI"}, {"code": "pl", "key": "LANG_PL"},
 ]
 var selected_code: String = ""
 var _title: Label

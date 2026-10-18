@@ -18,6 +18,7 @@ included alongside their vendored files.
 | DynaPuff | Font (NoSpace brand wordmark only) | Toshi Omagari, Jennifer Daniel | OFL 1.1 | Google Fonts |
 | Rubik | Font (screen / section headings) | Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani | OFL 1.1 | Google Fonts |
 | Nunito Sans | Font (body / button / numbers) | Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin | OFL 1.1 | Google Fonts |
+| NoSpace UI Extended | Font (display fallback; derived from bundled Nunito Sans) | Nunito Sans authors | OFL 1.1 | [Source and modifications](../assets/fonts/uiextended/NOTICE.txt) · [OFL](../assets/fonts/uiextended/OFL.txt) |
 | Noto Sans CJK SC Regular 2.004 (subset) | Font (vendored AdMob editor interface) | Adobe; Noto is a Google trademark | OFL 1.1 | [Original OFL](../addons/admob/assets/fonts/OFL.txt) · [Copyright and verified provenance](../addons/admob/assets/fonts/NOTICE.txt) |
 | NoSpace CJK JP/KR/SC/TC Subset | Font (regional gameplay/UI fallback; derived from Noto Sans CJK 2.004) | Adobe; Noto is a Google trademark | OFL 1.1 | [Source, hashes and subset details](../assets/fonts/cjk/NOTICE.txt) · [OFL](../assets/fonts/cjk/OFL.txt) |
 | SFX (capture / ui_tap / life_loss / near_miss) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
@@ -47,3 +48,8 @@ and tests will automatically omit its legal notice from the reader.
 CJK runtime fallback fonts retain region-specific outlines and OpenType layout. They cover
 the shipped catalog and language endonyms, not arbitrary CJK text. Regenerate all four
 subsets when adding characters; catalog glyph coverage is checked by focused localization tests.
+
+Rubik and DynaPuff use NoSpace UI Extended for missing Cyrillic/Vietnamese glyphs.
+This small subset derives from the bundled Nunito Sans, with line metrics matched
+to Rubik so existing headings keep their layout. The unchanged Nunito Sans body font
+and the display faces retain locale-specific CJK fallbacks.
