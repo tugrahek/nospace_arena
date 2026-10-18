@@ -37,6 +37,12 @@ var _percent_tween: Tween = null
 var _near_target_hot: bool = false
 var _combo_tween: Tween = null
 var _last_combo: int = 0                     # punch only when the chain actually grows
+var _displayed_score: int = 0
+var _displayed_combo: int = 0
+var _daily_active: bool = false
+var _daily_seed: int = 0
+var _best_score: int = -1
+var _currency_balance: int = 0
 
 @onready var _hearts: HeartsHud = $TopSafeArea/InfoStack/TopBar/Hearts
 @onready var _stage_banner: Label = $StageBanner
@@ -95,6 +101,20 @@ func _ready() -> void:
 	_next_button.pressed.connect(func() -> void: next_pressed.emit())
 
 
+## Refreshes labels assigned in code after the active locale changes.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and is_node_ready():
+		_refresh_localized_text()
+
+
+func _refresh_localized_text() -> void:
+	_render_score_text()
+	set_daily(_daily_active, _daily_seed)
+	set_best(_best_score)
+	_on_currency_changed(_currency_balance)
+	_result_score_caption.text = tr("HUD_SCORE")
+
+
 ## Reserve the enlarged Pause hit area without changing the arena or camera.
 func _fit_pause_touch_space(density_dpi: int = 0) -> void:
 	var dpi: int = density_dpi if density_dpi > 0 else TouchTargets.android_density_dpi()
@@ -122,6 +142,8 @@ func finalize_result_rewards() -> void:
 
 ## Shows/hides the daily-mode badge. Full daily UI (countdown etc.) is Step 14.
 func set_daily(active: bool, seed: int) -> void:
+	_daily_active = active
+	_daily_seed = seed
 	if active:
 		_daily_label.text = tr("HUD_DAILY") + " • " + DailySeed.date_string(seed)
 	_daily_label.visible = active
@@ -129,6 +151,7 @@ func set_daily(active: bool, seed: int) -> void:
 
 ## Shows today's best score (daily only). score < 0 hides it.
 func set_best(score: int) -> void:
+	_best_score = score
 	if score >= 0:
 		_best_label.text = tr("HUD_BEST") + ": " + str(score)
 		_best_label.visible = true
@@ -139,7 +162,9 @@ func set_best(score: int) -> void:
 ## Called by game.gd after start_run to seed the initial display.
 func setup(lives: int) -> void:
 	_hearts.set_max(lives)
-	_score_label.text = tr("HUD_SCORE") + ": 0"
+	_displayed_score = 0
+	_displayed_combo = 0
+	_render_score_text()
 	_percent_label.text = "0%"
 	_last_percent = 0.0
 	_combo_label.visible = false
@@ -206,16 +231,23 @@ func _on_life_lost(remaining: int) -> void:
 
 
 func _on_score_changed(score: int, combo: int) -> void:
-	_score_label.text = tr("HUD_SCORE") + ": " + str(score)
+	_displayed_score = score
+	_displayed_combo = combo
+	_render_score_text()
 	_punch_score()
 	if combo > 0:
-		_combo_label.text = tr("HUD_COMBO") + " x" + str(combo + 1)
-		_combo_label.visible = true
 		if combo > _last_combo:
 			_punch_combo(combo + 1)
 	else:
 		_combo_label.visible = false
 	_last_combo = combo
+
+
+func _render_score_text() -> void:
+	_score_label.text = tr("HUD_SCORE") + ": " + str(_displayed_score)
+	_combo_label.visible = _displayed_combo > 0
+	if _combo_label.visible:
+		_combo_label.text = tr("HUD_COMBO") + " x" + str(_displayed_combo + 1)
 
 
 ## Combo escalation: punch grows with the multiplier and the label warms accent -> gold from
@@ -330,6 +362,7 @@ func _pop_new_best() -> void:
 
 ## In-run coins readout (full economy UI lives in the menu/store screens).
 func _on_currency_changed(balance: int) -> void:
+	_currency_balance = balance
 	_currency_label.text = tr("HUD_CURRENCY") + ": " + str(balance)
 
 

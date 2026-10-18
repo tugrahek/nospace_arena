@@ -3,12 +3,17 @@ extends GutTest
 const HUD_SCENE: PackedScene = preload("res://scenes/ui/HUD.tscn")
 const PAUSE_SCENE: PackedScene = preload("res://scenes/ui/PauseOverlay.tscn")
 const GAME_SCENE: PackedScene = preload("res://scenes/main/Game.tscn")
+var _saved_language: String = ""
+var _restore_language: bool = false
 
 
 func after_each() -> void:
 	get_tree().paused = false
 	GameState.reset()
 	SeedManager.exit_daily()
+	if _restore_language:
+		AudioManager.set_language(_saved_language)
+		_restore_language = false
 	TranslationServer.set_locale("en")
 
 
@@ -110,6 +115,54 @@ func test_pause_labels_follow_english_and_turkish_locale() -> void:
 	pause.call("_apply_texts")
 	assert_eq(title.text, "Duraklatıldı")
 	assert_eq(pause.get_node("Overlay/SafeArea/Bounds/Box/MissionSection/Heading").text, "Görevler")
+
+
+func test_pause_settings_language_switch_refreshes_hud_without_changing_values() -> void:
+	_saved_language = AudioManager.settings().language
+	_restore_language = true
+	AudioManager.set_language("en")
+	var hud: HUD = HUD_SCENE.instantiate()
+	var pause: CanvasLayer = PAUSE_SCENE.instantiate()
+	add_child_autofree(hud)
+	add_child_autofree(pause)
+	hud.setup(3)
+	hud.set_daily(true, 20261010)
+	hud.set_best(987654)
+	hud.call("_on_score_changed", 123456, 3)
+	hud.call("_on_currency_changed", 321)
+	var last_combo: int = hud.get("_last_combo")
+	var target: float = hud.get("_target")
+	var percent: float = hud.get("_last_percent")
+	var score: Label = hud.get_node("TopSafeArea/InfoStack/TopBar/ScoreLabel")
+	var combo: Label = hud.get_node("TopSafeArea/InfoStack/ActivityRow/ComboLabel")
+	var daily: Label = hud.get_node("TopSafeArea/InfoStack/MetaRow/DailyLabel")
+	var best: Label = hud.get_node("TopSafeArea/InfoStack/MetaRow/BestLabel")
+	var currency: Label = hud.get_node("CoinSafeArea/Bounds/CurrencyLabel")
+	var expected_date: String = DailySeed.date_string(20261010)
+	assert_eq(score.text, "Score: 123456")
+	assert_eq(combo.text, "Combo x4")
+	pause.call("_on_settings")
+	var panel: Control = pause.get("_settings_panel")
+	panel.call("_open_language_selector")
+	var selector: Control = panel.get("_language_overlay")
+	var buttons: Array = selector.get("_buttons")
+	buttons[2].emit_signal("pressed")
+	assert_eq(TranslationServer.get_locale(), "tr")
+	assert_eq(score.text, "Skor: 123456")
+	assert_eq(combo.text, "Kombo x4")
+	assert_eq(daily.text, tr("HUD_DAILY") + " • " + expected_date)
+	assert_eq(best.text, "REKOR: 987654")
+	assert_eq(currency.text, "Para: 321")
+	assert_eq(hud.get("_last_combo"), last_combo)
+	assert_eq(hud.get("_target"), target)
+	assert_eq(hud.get("_last_percent"), percent)
+	buttons[1].emit_signal("pressed")
+	assert_eq(TranslationServer.get_locale(), "en")
+	assert_eq(score.text, "Score: 123456")
+	assert_eq(combo.text, "Combo x4")
+	assert_eq(daily.text, tr("HUD_DAILY") + " • " + expected_date)
+	assert_eq(best.text, "BEST: 987654")
+	assert_eq(currency.text, "Coins: 321")
 
 
 func test_game_scene_routes_hud_missions_to_pause_without_core_changes() -> void:
