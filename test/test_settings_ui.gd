@@ -25,7 +25,7 @@ func after_each() -> void:
 	AudioManager.commit_settings()
 	TranslationServer.set_locale("en")
 
-func test_new_latin_languages_select_persist_and_refresh_settings() -> void:
+func test_shipped_languages_select_persist_and_refresh_settings() -> void:
 	var panel: Control = SETTINGS_SCENE.instantiate()
 	add_child_autofree(panel)
 	panel.call("_open_language_selector")

@@ -45,3 +45,14 @@ func test_latin_display_templates_leave_canonical_date_and_seed_unchanged() -> v
 		assert_eq(LV.format_date(20260622), pair[1])
 		assert_eq(DailySeed.seed_for_date(2026, 6, 22), seed)
 		assert_eq(DailySeed.date_string(seed), canonical)
+
+
+func test_cjk_dates_keep_canonical_seed_and_date_keys() -> void:
+	var seed: int = DailySeed.seed_for_date(2026, 6, 22)
+	var canonical: String = DailySeed.date_string(seed)
+	for pair: Array in [["ja", "2026年6月22日"], ["ko", "2026년 6월 22일"],
+			["zh_Hans", "2026年6月22日"], ["zh_Hant", "2026年6月22日"]]:
+		TranslationServer.set_locale(pair[0])
+		assert_eq(LV.format_date(20260622), pair[1])
+		assert_eq(DailySeed.seed_for_date(2026, 6, 22), seed)
+		assert_eq(DailySeed.date_string(seed), canonical)

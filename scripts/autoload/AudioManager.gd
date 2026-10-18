@@ -145,7 +145,14 @@ func set_language(lang: String) -> void:
 ## Resolves and applies the active locale: saved preference > device language > English.
 ## The impure input (OS locale) is read here; the resolution itself is pure (LocaleUtil).
 func _apply_language() -> void:
-	TranslationServer.set_locale(LocaleUtil.resolve(_settings.language, OS.get_locale()))
+	var locale: String = LocaleUtil.resolve(_settings.language, OS.get_locale())
+	LocaleFonts.apply(locale)
+	TranslationServer.set_locale(locale)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED:
+		LocaleFonts.apply(TranslationServer.get_locale())
 
 
 func _apply_settings() -> void:

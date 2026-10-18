@@ -10,6 +10,8 @@ var options: Array[Dictionary] = [
 	{"code": "", "key": "LANG_AUTO"}, {"code": "en", "key": "LANG_EN"}, {"code": "tr", "key": "LANG_TR"},
 	{"code": "de", "key": "LANG_DE"}, {"code": "fr", "key": "LANG_FR"}, {"code": "es", "key": "LANG_ES"},
 	{"code": "pt_BR", "key": "LANG_PT_BR"}, {"code": "it", "key": "LANG_IT"},
+	{"code": "ja", "key": "LANG_JA"}, {"code": "ko", "key": "LANG_KO"},
+	{"code": "zh_Hans", "key": "LANG_ZH_HANS"}, {"code": "zh_Hant", "key": "LANG_ZH_HANT"},
 ]
 var selected_code: String = ""
 var _title: Label
@@ -77,6 +79,9 @@ func _build_list(column: VBoxContainer) -> void:
 	scroll.add_child(_list)
 	for option in options:
 		var button := Button.new()
+		if LocaleFonts.REGIONS.has(option["code"]):
+			button.add_theme_font_override("font", LocaleFonts.endonym_font(option["code"]))
+			button.language = option["code"]
 		button.custom_minimum_size.y = ROW_HEIGHT
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.add_theme_font_size_override("font_size", 26)

@@ -19,6 +19,7 @@ included alongside their vendored files.
 | Rubik | Font (screen / section headings) | Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani | OFL 1.1 | Google Fonts |
 | Nunito Sans | Font (body / button / numbers) | Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin | OFL 1.1 | Google Fonts |
 | Noto Sans CJK SC Regular 2.004 (subset) | Font (vendored AdMob editor interface) | Adobe; Noto is a Google trademark | OFL 1.1 | [Original OFL](../addons/admob/assets/fonts/OFL.txt) · [Copyright and verified provenance](../addons/admob/assets/fonts/NOTICE.txt) |
+| NoSpace CJK JP/KR/SC/TC Subset | Font (regional gameplay/UI fallback; derived from Noto Sans CJK 2.004) | Adobe; Noto is a Google trademark | OFL 1.1 | [Source, hashes and subset details](../assets/fonts/cjk/NOTICE.txt) · [OFL](../assets/fonts/cjk/OFL.txt) |
 | SFX (capture / ui_tap / life_loss / near_miss) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
 | Menu music (menu_music) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
 
@@ -42,3 +43,7 @@ GUT is a development dependency. Its MIT and bundled font notices appear only if
 is present in the running package. The current local all-resources export preset has no
 exclusions and therefore includes GUT; a production preset excluding the development addon
 and tests will automatically omit its legal notice from the reader.
+
+CJK runtime fallback fonts retain region-specific outlines and OpenType layout. They cover
+the shipped catalog and language endonyms, not arbitrary CJK text. Regenerate all four
+subsets when adding characters; catalog glyph coverage is checked by focused localization tests.
