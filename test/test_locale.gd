@@ -76,3 +76,35 @@ func test_comma_fields_not_truncated() -> void:
 	assert_string_contains(tr("ARENA_EMBER_DESC"), "kinder target")
 	var months: PackedStringArray = tr("MONTHS_SHORT").split(",")
 	assert_eq(months.size(), 12, "12 short month names survive quoting")
+
+
+func test_full_device_locale_and_saved_preference() -> void:
+	assert_eq(LocaleUtil.resolve("", "tr_TR"), "tr")
+	assert_eq(LocaleUtil.resolve("", "en-GB"), "en")
+	assert_eq(LocaleUtil.resolve("en", "tr_TR"), "en", "saved choice wins")
+	assert_eq(LocaleUtil.resolve("tr", "ja_JP"), "tr")
+	assert_eq(LocaleUtil.resolve("invalid", "tr_CY"), "tr")
+	for unsupported: String in ["pt_BR", "zh_Hans", "zh_Hant_TW", "ja_JP", "xx_YY", ""]:
+		assert_eq(LocaleUtil.resolve("", unsupported), "en", "safe fallback: " + unsupported)
+	assert_eq(LocaleUtil.SUPPORTED, ["en", "tr"], "only translated locales ship")
+
+
+func test_canonical_codes_preserve_script_and_region() -> void:
+	assert_eq(LocaleUtil.normalize("pt-BR"), "pt_BR")
+	assert_eq(LocaleUtil.normalize("zh-Hans"), "zh_Hans")
+	assert_eq(LocaleUtil.normalize("zh-Hant-TW"), "zh_Hant_TW")
+	assert_eq(LocaleUtil.normalize(" tr-TR "), "tr_TR")
+	assert_eq(LocaleUtil.normalize(""), "")
+
+
+func test_future_catalog_variants_without_enabling_translations() -> void:
+	var available: Array[String] = ["en", "tr", "pt_BR", "zh_Hans", "zh_Hant"]
+	assert_eq(LocaleUtil.resolve("", "pt-BR", available), "pt_BR")
+	assert_eq(LocaleUtil.resolve("", "pt_PT", available), "en", "no arbitrary regional match")
+	assert_eq(LocaleUtil.resolve("", "zh_CN", available), "zh_Hans")
+	assert_eq(LocaleUtil.resolve("", "zh_TW", available), "zh_Hant")
+	assert_eq(LocaleUtil.resolve("", "zh_HK", available), "zh_Hant")
+	assert_eq(LocaleUtil.resolve("", "zh_Hans_TW", available), "zh_Hans", "explicit script wins")
+	assert_eq(LocaleUtil.resolve("zh_Hant", "zh_CN", available), "zh_Hant")
+	assert_eq(LocaleUtil.resolve("pt_BR", "tr_TR", available), "pt_BR")
+	assert_eq(LocaleUtil.resolve("", "zh_Hant_TW", ["en", "zh_Hans"]), "en", "no script crossover")

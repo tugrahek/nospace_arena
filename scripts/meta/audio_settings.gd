@@ -41,7 +41,7 @@ func set_control_scheme(v: int) -> void:
 ## UI language preference: "" (auto/device) or a supported code; anything else normalizes
 ## to auto so a corrupt/stale save can never pin an unknown locale.
 func set_language(v: String) -> void:
-	language = v if LocaleUtil.SUPPORTED.has(v) else ""
+	language = LocaleUtil.supported_locale(v)
 
 
 ## Converts a linear volume [0,1] to decibels for a bus; 0 -> SILENCE_DB (no -inf).
