@@ -145,7 +145,7 @@ func set_daily(active: bool, seed: int) -> void:
 	_daily_active = active
 	_daily_seed = seed
 	if active:
-		_daily_label.text = tr("HUD_DAILY") + " • " + DailySeed.date_string(seed)
+		_daily_label.text = tr("HUD_DAILY_VALUE") % DailySeed.date_string(seed)
 	_daily_label.visible = active
 
 
@@ -153,7 +153,7 @@ func set_daily(active: bool, seed: int) -> void:
 func set_best(score: int) -> void:
 	_best_score = score
 	if score >= 0:
-		_best_label.text = tr("HUD_BEST") + ": " + str(score)
+		_best_label.text = tr("HUD_BEST_VALUE") % score
 		_best_label.visible = true
 	else:
 		_best_label.visible = false
@@ -244,10 +244,10 @@ func _on_score_changed(score: int, combo: int) -> void:
 
 
 func _render_score_text() -> void:
-	_score_label.text = tr("HUD_SCORE") + ": " + str(_displayed_score)
+	_score_label.text = tr("HUD_SCORE_VALUE") % _displayed_score
 	_combo_label.visible = _displayed_combo > 0
 	if _combo_label.visible:
-		_combo_label.text = tr("HUD_COMBO") + " x" + str(_displayed_combo + 1)
+		_combo_label.text = tr("HUD_COMBO_VALUE") % (_displayed_combo + 1)
 
 
 ## Combo escalation: punch grows with the multiplier and the label warms accent -> gold from
@@ -363,7 +363,7 @@ func _pop_new_best() -> void:
 ## In-run coins readout (full economy UI lives in the menu/store screens).
 func _on_currency_changed(balance: int) -> void:
 	_currency_balance = balance
-	_currency_label.text = tr("HUD_CURRENCY") + ": " + str(balance)
+	_currency_label.text = tr("HUD_CURRENCY_VALUE") % balance
 
 
 ## Compact mission count on the HUD; full run details belong to the pause view.

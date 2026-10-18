@@ -140,7 +140,7 @@ func _on_missions() -> void:
 
 func _refresh() -> void:
 	# Missions + loadout/selection have their own panels (Missions/Store) — not here.
-	_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
+	_coins.text = tr("HUD_CURRENCY_VALUE") % Economy.balance()
 	var status: Dictionary = Economy.login_reward_status()
 	_reward_progress.text = "%d/10" % clampi(int(status["new_streak"]), 1, 10)
 	_reward_entry.tooltip_text = tr("DAILY_REWARD_TITLE")

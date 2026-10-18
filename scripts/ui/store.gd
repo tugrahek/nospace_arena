@@ -78,7 +78,7 @@ func focused_index() -> int:
 
 func _refresh() -> void:
 	_refresh_pending = false
-	_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
+	_coins.text = tr("HUD_CURRENCY_VALUE") % Economy.balance()
 	for child in _list.get_children():
 		child.free()
 	_selector = null
@@ -133,7 +133,7 @@ func _refresh_layout() -> void:
 ## Rebuild only after the current button/signal stack returns; never free an emitting control.
 func _request_refresh(force: bool = false) -> void:
 	if not force and _active_category == Category.SUPPLY and is_instance_valid(_supply):
-		_coins.text = tr("HUD_CURRENCY") + ": " + str(Economy.balance())
+		_coins.text = tr("HUD_CURRENCY_VALUE") % Economy.balance()
 		_supply.refresh()
 		return
 	if _refresh_pending:

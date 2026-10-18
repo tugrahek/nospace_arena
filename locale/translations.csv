@@ -1,6 +1,8 @@
 keys,en,tr
 HUD_SCORE,Score,Skor
+HUD_SCORE_VALUE,Score: %d,Skor: %d
 HUD_COMBO,Combo,Kombo
+HUD_COMBO_VALUE,Combo x%d,Kombo x%d
 RESULT_WIN,YOU WIN!,KAZANDIN!
 RESULT_LOSE,GAME OVER,OYUN BİTTİ
 RESULT_RETRY,Retry,Tekrar
@@ -11,8 +13,11 @@ ARENA_VOID,Void,Void
 ARENA_EMBER,Ember,Ember
 ARENA_FROST,Frost,Frost
 HUD_DAILY,DAILY,GÜNLÜK
+HUD_DAILY_VALUE,DAILY • %s,GÜNLÜK • %s
 HUD_BEST,BEST,REKOR
+HUD_BEST_VALUE,BEST: %d,REKOR: %d
 HUD_CURRENCY,Coins,Para
+HUD_CURRENCY_VALUE,Coins: %d,Para: %d
 MISSION_REACH_SCORE,Score %d,Skor %d
 MISSION_REACH_PERCENT,Capture %d%%,%d%% alan ele geçir
 MISSION_TOTAL_AREAS,Capture %d areas,%d bölge ele geçir
