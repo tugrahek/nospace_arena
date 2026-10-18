@@ -51,7 +51,7 @@ func test_four_page_order_back_next_and_final_action() -> void:
 
 
 func test_all_four_pages_have_large_nonoverlapping_layout_at_720x1280() -> void:
-	for locale in ["en", "tr"]:
+	for locale in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _make_tutorial()
 		var art_positions: Array[float] = []
@@ -109,7 +109,7 @@ func test_tutorial_group_is_centered_and_short_screens_keep_scrolling() -> void:
 
 
 func test_portrait_height_is_shared_between_all_sections_in_both_locales() -> void:
-	for locale: String in ["tr", "en"]:
+	for locale: String in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		for dimensions: Vector2 in [Vector2(720, 1280), Vector2(720, 1600)]:
 			var page: Control = await _make_tutorial()
@@ -169,7 +169,7 @@ func test_page_art_depicts_all_required_mechanics() -> void:
 
 
 func test_turkish_and_english_content_resolve_in_shared_page() -> void:
-	for locale in ["tr", "en"]:
+	for locale in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _make_tutorial()
 		var title: Label = page.get_node(BASE + "PageTitle")

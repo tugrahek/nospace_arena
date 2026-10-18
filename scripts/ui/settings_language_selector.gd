@@ -7,7 +7,9 @@ const PALETTE: PaletteData = preload("res://config/palette.tres")
 const ROW_HEIGHT: float = 84.0
 const MAX_CONTENT_WIDTH: float = 800.0
 var options: Array[Dictionary] = [
-	{"code": "", "key": "LANG_AUTO"}, {"code": "en", "key": "LANG_EN"}, {"code": "tr", "key": "LANG_TR"}
+	{"code": "", "key": "LANG_AUTO"}, {"code": "en", "key": "LANG_EN"}, {"code": "tr", "key": "LANG_TR"},
+	{"code": "de", "key": "LANG_DE"}, {"code": "fr", "key": "LANG_FR"}, {"code": "es", "key": "LANG_ES"},
+	{"code": "pt_BR", "key": "LANG_PT_BR"}, {"code": "it", "key": "LANG_IT"},
 ]
 var selected_code: String = ""
 var _title: Label

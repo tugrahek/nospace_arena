@@ -105,7 +105,7 @@ func _inside(control: Control, rect: Rect2, context: String) -> void:
 
 func test_all_aspects_locales_insets_and_inventory_states_fit() -> void:
 	for dimensions: Vector2i in SIZES:
-		for locale: String in ["en", "tr"]:
+		for locale: String in LocaleUtil.SUPPORTED:
 			TranslationServer.set_locale(locale)
 			for insets: Vector4i in [Vector4i.ZERO, Vector4i(24, 96, 24, 48)]:
 				for state: int in [0, 1, 2]:
@@ -157,7 +157,7 @@ func _check_chips(screen: Control, context: String) -> void:
 
 func test_compact_group_and_boosts_fit_portrait_and_narrow_safe_areas() -> void:
 	for dimensions: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600), Vector2i(640, 1280)]:
-		for locale: String in ["en", "tr"]:
+		for locale: String in LocaleUtil.SUPPORTED:
 			TranslationServer.set_locale(locale)
 			_set_fixture(2)
 			var screen: Control = await _mount(dimensions, Vector4i(24, 96, 24, 48))

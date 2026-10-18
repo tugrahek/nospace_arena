@@ -39,7 +39,7 @@ func test_hud_menu_and_store_numeric_labels_use_locale_templates() -> void:
 	var hud_currency: Label = hud.get_node("CoinSafeArea/Bounds/CurrencyLabel")
 	var menu_currency: Label = menu.get_node("SafeArea/Bounds/Frame/Header/CoinsPanel/Content/Coins")
 	var store_currency: Label = store.get_node("SafeArea/Bounds/Frame/Header/Coins")
-	for locale: String in ["en", "tr"]:
+	for locale: String in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		store.call("_refresh")
 		await get_tree().process_frame

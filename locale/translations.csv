@@ -1,187 +1,193 @@
-keys,en,tr
-HUD_SCORE,Score,Skor
-HUD_SCORE_VALUE,Score: %d,Skor: %d
-HUD_COMBO,Combo,Kombo
-HUD_COMBO_VALUE,Combo x%d,Kombo x%d
-RESULT_WIN,YOU WIN!,KAZANDIN!
-RESULT_LOSE,GAME OVER,OYUN BİTTİ
-RESULT_RETRY,Retry,Tekrar
-CHAR_PULSE,Pulse,Pulse
-CHAR_DRAG,Drag,Drag
-CHAR_HALT,Halt,Halt
-ARENA_VOID,Void,Void
-ARENA_EMBER,Ember,Ember
-ARENA_FROST,Frost,Frost
-HUD_DAILY,DAILY,GÜNLÜK
-HUD_DAILY_VALUE,DAILY • %s,GÜNLÜK • %s
-HUD_BEST,BEST,REKOR
-HUD_BEST_VALUE,BEST: %d,REKOR: %d
-HUD_CURRENCY,Coins,Para
-HUD_CURRENCY_VALUE,Coins: %d,Para: %d
-MISSION_REACH_SCORE,Score %d,Skor %d
-MISSION_REACH_PERCENT,Capture %d%%,%d%% alan ele geçir
-MISSION_TOTAL_AREAS,Capture %d areas,%d bölge ele geçir
-MISSION_WIN_RUNS,Win %d run(s),%d oyun kazan
-MISSION_REACH_STAGE,Reach Stage %d,%d. aşamaya ulaş
-MISSION_SURVIVE_TIME,Survive %d seconds,%d saniye hayatta kal
-MISSION_COMPLETE_RUNS,Complete %d runs,%d oyun tamamla
-MENU_PLAY,Play,Oyna
-MENU_DAILY,Daily,Günlük
-MENU_LEVEL,Endless,Sonsuz
-MENU_FREE,Free,Serbest
-MODE_SELECT_TITLE,Select Mode,Mod Seç
-MODE_DAILY_DESC,Today's challenge,Bugünün meydan okuması
-MODE_FREE_DESC,Casual play,Rahat oyun
-MODE_LEVEL_DESC,Escalating difficulty,Gittikçe zorlaşır
-MENU_CAMPAIGN,Campaign,Macera
-MODE_CAMPAIGN_DESC,Level challenges,Seviye seviye ilerle
-LEVELSELECT_TITLE,Select Level,Seviye Seç
-LEVEL_LABEL,Level,Seviye
-LEVEL_LOCKED,Locked,Kilitli
-RESULT_NEW_BEST,New best!,Yeni rekor!
-RESULT_NEXT,Next,Sonraki
-RESULT_STAGE_REACHED,Stage %d,Aşama %d
-LEVEL_C01_DESC,1 Bouncer • reach 50%,1 Bouncer • %50'ye ulaş
-LEVEL_C02_DESC,2 Bouncers • reach 55%,2 Bouncer • %55'e ulaş
-LEVEL_C03_DESC,Stalker joins • reach 55%,Stalker katılır • %55'e ulaş
-LEVEL_C04_DESC,2 Stalkers • reach 60%,2 Stalker • %60'a ulaş
-LEVEL_C05_DESC,Sparx joins • reach 55%,Sparx katılır • %55'e ulaş
-LEVEL_C06_DESC,2 Sparx guard the edges + Bouncer • reach 65%,2 Sparx kenarları tutar + Bouncer • %65'e ulaş
-LEVEL_C07_DESC,Full combo • reach 60%,Tam kadro • %60'a ulaş
-LEVEL_C08_DESC,Combo • no boosts,Tam kadro • boost yok
-LEVEL_C09_DESC,"Rising swarm • the Stalker now hunts your line too","Yükselen sürü • Stalker artık çizgini de avlıyor"
-LEVEL_C10_DESC,Heavy swarm • reach 65%,Yoğun sürü • %65'e ulaş
-LEVEL_C11_DESC,Low lives (2) • reach 65%,Az can (2) • %65'e ulaş
-LEVEL_C12_DESC,"Finale • all types, no boosts",Final • tüm tipler • boost yok
-MENU_STORE,Store,Mağaza
-MENU_CREDITS,Credits,Künye
-MENU_LEADERBOARD,Leaderboard,Liderlik
-MENU_HOWTO,How to Play,Nasıl Oynanır
-LEADERBOARD_TITLE,Leaderboard,Liderlik
-LEADERBOARD_ALLBEST,All-time best: %d,Tüm zamanların rekoru: %d
-LEADERBOARD_EMPTY,Play Daily to set a record,Rekor için Günlük oyna
-LEADERBOARD_TODAY,Today,Bugün
-LEADERBOARD_YESTERDAY,Yesterday,Dün
-MONTHS_SHORT,"Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec","Oca,Şub,Mar,Nis,May,Haz,Tem,Ağu,Eyl,Eki,Kas,Ara"
-MENU_MISSIONS,Today's Missions,Bugünün Görevleri
-MENU_MISSIONS_SHORT,Missions,Görevler
-RESULT_MENU,Menu,Menü
-STORE_CHARACTERS,Characters,Karakterler
-STORE_ARENAS,Arenas,Arenalar
-STORE_BUY,Buy,Satın Al
-STORE_SELECT,Select,Seç
-STORE_SELECTED,Selected,Seçili
-STORE_BACK,Back,Geri
-CREDITS_TITLE,Credits,Künye
-DAILY_REWARD_TITLE,Daily Reward,Günlük Ödül
-DAILY_REWARD_BODY,Day %d/10  +%d,Gün %d/10  +%d
-DAILY_REWARD_CLAIM,Claim,Al
-DAILY_REWARD_RECEIVED,Received,Alındı
-DAILY_REWARD_DAY,Day %d/10,Gün %d/10
-DAILY_REWARD_TODAY,Today's reward · Day %d/10,Bugünün ödülü · Gün %d/10
-DAILY_REWARD_PREVIEW,Preview · Day %d/10,Önizleme · Gün %d/10
-DAILY_REWARD_CLAIM_TODAY,Claim Today,Bugün Al
-DAILY_REWARD_DAY_TODAY,Today · Day %d/10,Bugün · Gün %d/10
-DAILY_REWARD_DAY_CLAIMED,Claimed · Day %d/10,Alındı · Gün %d/10
-PAUSE_RESUME,Resume,Devam
-PAUSE_TITLE,Paused,Duraklatıldı
-PAUSE_SETTINGS,Settings,Ayarlar
-PAUSE_RESTART,Restart,Yeniden
-PAUSE_MENU,Menu,Menü
-MISSIONS_TITLE,Missions,Görevler
-HUD_STAGE,Stage %d,Bölüm %d
-SETTINGS_TITLE,Settings,Ayarlar
-SETTINGS_AUDIO,Audio,Ses
-SETTINGS_MASTER,Master,Ana
-SETTINGS_SFX,Effects,Efektler
-SETTINGS_MUSIC,Music,Müzik
-SETTINGS_MUTE,Mute,Sessiz
-SETTINGS_STATE_ON,On,Açık
-SETTINGS_STATE_OFF,Off,Kapalı
-SETTINGS_BACK,Back,Geri
-SETTINGS_PRIVACY_CHOICES,Privacy choices,Gizlilik tercihleri
-SETTINGS_CONTROLS,Controls,Kontroller
-CONTROL_SWIPE,Swipe,Kaydır
-CONTROL_TAP,Tap,Dokun
-CONTROL_DPAD,D-Pad,D-Pad
-HOWTO_TITLE,How to Play,Nasıl Oynanır
-HOWTO_NEXT,Next,İleri
-HOWTO_DONE,Got it,Anladım
-HOWTO_GOAL_TITLE,Capture the arena,Arenayı ele geçir
-HOWTO_GOAL_BODY,"Leave the safe border, draw into the void, and close a loop to claim that region. Reach the target % to win.","Güvenli kenardan ayrıl, boşluğa çizgi çek ve o bölgeyi almak için döngüyü kapat. Kazanmak için hedef yüzdeye ulaş."
-HOWTO_CONTROLS_TITLE,Move,Hareket
-HOWTO_CONTROLS_SWIPE,Swipe a direction to steer.,Yön vermek için kaydır.
-HOWTO_CONTROLS_TAP,Tap left or right to turn.,Dönmek için sola ya da sağa dokun.
-HOWTO_CONTROLS_DPAD,Use the on-screen d-pad to steer.,Ekrandaki d-pad ile yön ver.
-HOWTO_CONTROLS_HINT,Change controls in Settings,Kontrolleri Ayarlar'dan değiştir
-HOWTO_ENEMIES_TITLE,Watch the enemies,Düşmanlara dikkat
-ENEMY_BOUNCER_NAME,Bouncer,Bouncer
-ENEMY_STALKER_NAME,Stalker,Stalker
-ENEMY_SPARX_NAME,Sparx,Sparx
-HOWTO_ENEMIES_BODY,"Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge and ignores your territory's power — don't linger on the border. In later levels the Stalker also hunts your LINE, not just you: a long line is a real risk.","Bouncer duvarlardan seker. Stalker sen açıkta çizerken peşine düşer. Sparx ele geçirilen kenarda devriye gezer ve bölgenin gücünden etkilenmez — kenarda oyalanma. Geç bölümlerde Stalker sadece seni değil ÇİZGİNİ de avlar: uzun çizgi gerçek risktir."
-HOWTO_LIVES_TITLE,Stay alive,Hayatta kal
-HOWTO_LIVES_BODY,Hearts show your lives. You lose one when an enemy touches your active trail — or when you cross it yourself. Captured ground is safe.,Kalpler canlarını gösterir. Bir düşman aktif çizgine dokunursa — ya da kendi çizgini kesersen — bir can kaybedersin. Ele geçirilen alan güvenlidir.
-CHAR_PULSE_DESC,Pushes enemies away from your territory,Düşmanları bölgenden uzağa iter
-CHAR_DRAG_DESC,Slows enemies near your territory,Bölgene yaklaşan düşmanları yavaşlatır
-CHAR_HALT_DESC,Freezes enemies that get too close,Fazla yaklaşan düşmanları dondurur
-ARENA_VOID_DESC,Balanced starter — one drifting bouncer.,Dengeli başlangıç — tek gezinen bouncer.
-ARENA_EMBER_DESC,"Tall and tight — two bouncers, kinder target.","Uzun ve dar — iki bouncer, daha kolay hedef."
-ARENA_FROST_DESC,Wide and open — a stalker plus an edge-patrolling sparx.,Geniş ve açık — bir stalker artı kenar devriyesi bir sparx.
-BOOST_EXTRA_LIFE_NAME,Extra Life,Ekstra Can
-BOOST_EXTRA_LIFE_DESC,Start the run with one more heart.,Oyuna bir fazla kalple başla.
-BOOST_SLOW_START_NAME,Slow Start,Yavaş Başlangıç
-BOOST_SLOW_START_DESC,Enemies move at half speed for the first few seconds.,İlk birkaç saniye düşmanlar yarı hızda hareket eder.
-BOOST_COIN_BONUS_NAME,Coin Bonus,Para Bonusu
-BOOST_COIN_BONUS_DESC,Earn 50% more coins from this run.,Bu oyundan %50 daha fazla para kazan.
-STORE_BOOSTS,Boosts,Boost'lar
-STORE_OWNED,Owned: %d,Sahip: %d
-BOOST_ARM,Arm,Kuşan
-BOOST_ARMED,Armed,Kuşanıldı
-BOOST_APPLY_NOTE,"Applies in Free, Level and Campaign — not in Daily","Serbest, Seviye ve Macera'da geçerli — Günlük'te değil"
-SETTINGS_LANGUAGE,Language,Dil
-LANG_AUTO,Auto,Otomatik
-LANG_EN,English,English
-LANG_TR,Türkçe,Türkçe
-CREDITS_CREATED,Created by,Geliştiren
-CREDITS_CREATOR,Tuğra Hekimoğlu,Tuğra Hekimoğlu
-CREDITS_COPYRIGHT,"© 2026 Tuğra Hekimoğlu — all rights reserved (proprietary).","© 2026 Tuğra Hekimoğlu — tüm hakları saklıdır (özel mülkiyet)."
-CREDITS_TECH,Technology,Teknoloji
-CREDITS_TECH_CONTENT,"Godot Engine 4.6 · GUT — Godot Unit Test by Tom 'Butch' Wesley","Godot Engine 4.6 · GUT — Godot Unit Test, Tom 'Butch' Wesley"
-CREDITS_FONTS,Fonts / Assets,Yazı Tipleri / Varlıklar
-CREDITS_FONTS_CONTENT,"DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSFX and menu music: Tuğra Hekimoğlu (original / synthesized)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSes efektleri ve menü müziği: Tuğra Hekimoğlu (özgün / sentezlenmiş)"
-CREDITS_LICENSES,Licenses,Lisanslar
-CREDITS_LICENSES_CONTENT,"Godot Engine and GUT: MIT License\nGUT: addons/gut/LICENSE.md\nOFL 1.1 texts are bundled beside each font","Godot Engine ve GUT: MIT Lisansı\nGUT: addons/gut/LICENSE.md\nOFL 1.1 metinleri yazı tiplerinin yanında bulunur"
-SETTINGS_COPYRIGHT,© 2026 Tuğra Hekimoğlu. All rights reserved.,© 2026 Tuğra Hekimoğlu. Tüm hakları saklıdır.
-SETTINGS_LICENSES,Open-source licenses,Açık kaynak lisansları
-LEGAL_TITLE,Licenses,Lisanslar
-RESULT_REWARDED_BONUS,Watch Ad +%d,Reklam İzle +%d
-RESULT_REWARDED_BONUS_ACTION,Watch Ad,Reklam İzle
-RESULT_REWARDED_BONUS_AMOUNT,+%d,+%d
-SUPPLY_ENTRY,Supply,İkmal
-SUPPLY_ODDS,Rewards,Olasılıklar
-SUPPLY_TOMORROW,Tomorrow,Yarın
-SUPPLY_DAILY_COMPACT,%d/day,%d/gün
-SUPPLY_ENTRY_AVAILABLE,Supply ·,İkmal ·
-SUPPLY_DAILY_AVAILABLE,Daily rewarded box available,Günlük reklam kutusu alınabilir
-SUPPLY_TITLE,Supply Box,İkmal Kutusu
-SUPPLY_RECEIVED,Supply received,İkmal alındı
-SUPPLY_CONTENTS,100 coins or one boost,100 coin veya bir güçlendirme
-SUPPLY_AD,Watch Ad,Reklam İzle
-SUPPLY_WAITING,Ad in progress,Reklam sürüyor
-SUPPLY_DAILY_USED,Daily box claimed,Günlük kutu alındı
-SUPPLY_AD_UNAVAILABLE,Ad unavailable right now,Reklam şu anda kullanılamıyor
-SUPPLY_AD_FAILED,Ad did not complete. No reward granted.,Reklam tamamlanmadı. Ödül verilmedi.
-SUPPLY_COST,%d Coins,%d Coin
-SUPPLY_NOT_ENOUGH,Need %d coins,%d coin gerekli
-SUPPLY_COIN_LIMIT,Daily coin-box limit reached,Günlük coin kutusu limiti doldu
-SUPPLY_REMAINING,%d/%d coin boxes remaining today,Bugün %d/%d coin kutusu hakkı kaldı
-SUPPLY_INVENTORY,%d Coins · Slow Start ×%d · Coin Bonus ×%d · Extra Life ×%d,%d Coin · Yavaş Başlangıç ×%d · Coin Bonusu ×%d · Ekstra Can ×%d
-SUPPLY_REWARD_COINS,%d Coins,%d Coin
-SUPPLY_REWARD_SLOW,Slow Start ×%d,Yavaş Başlangıç ×%d
-SUPPLY_REWARD_BONUS,Coin Bonus ×%d,Coin Bonusu ×%d
-SUPPLY_REWARD_LIFE,Extra Life ×%d,Ekstra Can ×%d
-SUPPLY_CONTINUE,Continue,Devam
-SUPPLY_CLOSE,Close,Kapat
-SUPPLY_PENDING,Acquired. Delivery will resume safely.,Alındı. Teslimat güvenle devam edecek.
-SUPPLY_REJECTED,Acquisition unavailable. Please try again.,Kutu alınamadı. Tekrar deneyin.
-SUPPLY_SAVE_RETRY,Could not save. Please try Continue again.,Kayıt yapılamadı. Devam'a tekrar basın.
+keys,en,tr,de,fr,es,pt_BR,it
+HUD_SCORE,Score,Skor,Punkte,Score,Puntuación,Pontuação,Punteggio
+HUD_SCORE_VALUE,Score: %d,Skor: %d,Punkte: %d,Score : %d,Puntuación: %d,Pontuação: %d,Punteggio: %d
+HUD_COMBO,Combo,Kombo,Kombo,Combo,Combo,Combo,Combo
+HUD_COMBO_VALUE,Combo x%d,Kombo x%d,Kombo x%d,Combo x%d,Combo x%d,Combo x%d,Combo x%d
+RESULT_WIN,YOU WIN!,KAZANDIN!,GEWONNEN!,VICTOIRE !,¡VICTORIA!,VITÓRIA!,HAI VINTO!
+RESULT_LOSE,GAME OVER,OYUN BİTTİ,SPIEL VORBEI,PARTIE TERMINÉE,FIN DE LA PARTIDA,FIM DE JOGO,PARTITA TERMINATA
+RESULT_RETRY,Retry,Tekrar,Erneut,Réessayer,Reintentar,Tentar de novo,Riprova
+CHAR_PULSE,Pulse,Pulse,Pulse,Pulse,Pulse,Pulse,Pulse
+CHAR_DRAG,Drag,Drag,Drag,Drag,Drag,Drag,Drag
+CHAR_HALT,Halt,Halt,Halt,Halt,Halt,Halt,Halt
+ARENA_VOID,Void,Void,Void,Void,Void,Void,Void
+ARENA_EMBER,Ember,Ember,Ember,Ember,Ember,Ember,Ember
+ARENA_FROST,Frost,Frost,Frost,Frost,Frost,Frost,Frost
+HUD_DAILY,DAILY,GÜNLÜK,TÄGLICH,QUOTIDIEN,DIARIO,DIÁRIO,GIORNALIERO
+HUD_DAILY_VALUE,DAILY • %s,GÜNLÜK • %s,TÄGLICH • %s,QUOTIDIEN • %s,DIARIO • %s,DIÁRIO • %s,GIORNALIERO • %s
+HUD_BEST,BEST,REKOR,REKORD,RECORD,RÉCORD,RECORDE,RECORD
+HUD_BEST_VALUE,BEST: %d,REKOR: %d,REKORD: %d,RECORD : %d,RÉCORD: %d,RECORDE: %d,RECORD: %d
+HUD_CURRENCY,Coins,Para,Münzen,Pièces,Monedas,Moedas,Monete
+HUD_CURRENCY_VALUE,Coins: %d,Para: %d,Münzen: %d,Pièces : %d,Monedas: %d,Moedas: %d,Monete: %d
+MISSION_REACH_SCORE,Score %d,Skor %d,Erreiche %d Punkte,Atteignez %d points,Consigue %d puntos,Faça %d pontos,Ottieni %d punti
+MISSION_REACH_PERCENT,Capture %d%%,%d%% alan ele geçir,Erobere %d%%,Capturez %d%% de l'arène,Captura el %d%%,Capture %d%% da arena,Conquista il %d%%
+MISSION_TOTAL_AREAS,Capture %d areas,%d bölge ele geçir,Erobere %d Gebiete,Capturez %d zones,Captura %d zonas,Capture %d áreas,Conquista %d aree
+MISSION_WIN_RUNS,Win %d run(s),%d oyun kazan,Gewinne %d Runden,Gagnez %d parties,Gana %d partidas,Vença %d partidas,Vinci %d partite
+MISSION_REACH_STAGE,Reach Stage %d,%d. aşamaya ulaş,Erreiche Stufe %d,Atteignez l'étape %d,Alcanza la etapa %d,Chegue à etapa %d,Raggiungi la fase %d
+MISSION_SURVIVE_TIME,Survive %d seconds,%d saniye hayatta kal,Überlebe %d Sekunden,Survivez %d secondes,Sobrevive %d segundos,Sobreviva por %d segundos,Sopravvivi per %d secondi
+MISSION_COMPLETE_RUNS,Complete %d runs,%d oyun tamamla,Beende %d Runden,Terminez %d parties,Completa %d partidas,Conclua %d partidas,Completa %d partite
+MENU_PLAY,Play,Oyna,Spielen,Jouer,Jugar,Jogar,Gioca
+MENU_DAILY,Daily,Günlük,Täglich,Quotidien,Diario,Diário,Giornaliero
+MENU_LEVEL,Endless,Sonsuz,Endlos,Infini,Sin fin,Infinito,Infinito
+MENU_FREE,Free,Serbest,Frei,Libre,Libre,Livre,Libero
+MODE_SELECT_TITLE,Select Mode,Mod Seç,Modus wählen,Choisir un mode,Elegir modo,Escolher modo,Scegli modalità
+MODE_DAILY_DESC,Today's challenge,Bugünün meydan okuması,Die heutige Herausforderung,Le défi du jour,El desafío de hoy,O desafio de hoje,La sfida di oggi
+MODE_FREE_DESC,Casual play,Rahat oyun,Entspannt spielen,Jouez sans pression,Juega sin presión,Jogue sem pressão,Gioca senza pressioni
+MODE_LEVEL_DESC,Escalating difficulty,Gittikçe zorlaşır,Steigender Schwierigkeitsgrad,Difficulté croissante,Dificultad creciente,Dificuldade crescente,Difficoltà crescente
+MENU_CAMPAIGN,Campaign,Macera,Kampagne,Campagne,Campaña,Campanha,Campagna
+MODE_CAMPAIGN_DESC,Level challenges,Seviye seviye ilerle,Herausforderungen pro Level,Des défis par niveau,Desafíos por nivel,Desafios por fase,Sfide per livello
+LEVELSELECT_TITLE,Select Level,Seviye Seç,Level wählen,Choisir un niveau,Elegir nivel,Escolher fase,Scegli livello
+LEVEL_LABEL,Level,Seviye,Level,Niveau,Nivel,Fase,Livello
+LEVEL_LOCKED,Locked,Kilitli,Gesperrt,Verrouillé,Bloqueado,Bloqueada,Bloccato
+RESULT_NEW_BEST,New best!,Yeni rekor!,Neuer Rekord!,Nouveau record !,¡Nuevo récord!,Novo recorde!,Nuovo record!
+RESULT_NEXT,Next,Sonraki,Weiter,Suivant,Siguiente,Próxima,Avanti
+RESULT_STAGE_REACHED,Stage %d,Aşama %d,Stufe %d,Étape %d,Etapa %d,Etapa %d,Fase %d
+LEVEL_C01_DESC,1 Bouncer • reach 50%,1 Bouncer • %50'ye ulaş,1 Bouncer • erreiche 50%,1 Bouncer • atteignez 50%,1 Bouncer • alcanza el 50%,1 Bouncer • alcance 50%,1 Bouncer • raggiungi il 50%
+LEVEL_C02_DESC,2 Bouncers • reach 55%,2 Bouncer • %55'e ulaş,2 Bouncer • erreiche 55%,2 Bouncers • atteignez 55%,2 Bouncers • alcanza el 55%,2 Bouncers • alcance 55%,2 Bouncer • raggiungi il 55%
+LEVEL_C03_DESC,Stalker joins • reach 55%,Stalker katılır • %55'e ulaş,Stalker kommt hinzu • erreiche 55%,Stalker arrive • atteignez 55%,Llega Stalker • alcanza el 55%,Stalker chega • alcance 55%,Arriva Stalker • raggiungi il 55%
+LEVEL_C04_DESC,2 Stalkers • reach 60%,2 Stalker • %60'a ulaş,2 Stalker • erreiche 60%,2 Stalkers • atteignez 60%,2 Stalkers • alcanza el 60%,2 Stalkers • alcance 60%,2 Stalker • raggiungi il 60%
+LEVEL_C05_DESC,Sparx joins • reach 55%,Sparx katılır • %55'e ulaş,Sparx kommt hinzu • erreiche 55%,Sparx arrive • atteignez 55%,Llega Sparx • alcanza el 55%,Sparx chega • alcance 55%,Arriva Sparx • raggiungi il 55%
+LEVEL_C06_DESC,2 Sparx guard the edges + Bouncer • reach 65%,2 Sparx kenarları tutar + Bouncer • %65'e ulaş,2 Sparx am Rand + Bouncer • erreiche 65%,2 Sparx sur les bords + Bouncer • atteignez 65%,2 Sparx en los bordes + Bouncer • alcanza el 65%,2 Sparx nas bordas + Bouncer • alcance 65%,2 Sparx ai bordi + Bouncer • raggiungi il 65%
+LEVEL_C07_DESC,Full combo • reach 60%,Tam kadro • %60'a ulaş,Alle Gegnertypen • erreiche 60%,Tous les ennemis • atteignez 60%,Todos los enemigos • alcanza el 60%,Todos os inimigos • alcance 60%,Tutti i nemici • raggiungi il 60%
+LEVEL_C08_DESC,Combo • no boosts,Tam kadro • boost yok,Alle Gegnertypen • keine Boosts,Tous les ennemis • sans bonus,Todos los enemigos • sin potenciadores,Todos os inimigos • sem bônus,Tutti i nemici • senza potenziamenti
+LEVEL_C09_DESC,Rising swarm • the Stalker now hunts your line too,Yükselen sürü • Stalker artık çizgini de avlıyor,Wachsender Schwarm • Stalker jagt auch deine Linie,La nuée grandit • Stalker traque aussi votre ligne,La horda crece • Stalker también persigue tu línea,A horda cresce • Stalker também persegue sua linha,Lo sciame cresce • Stalker insegue anche la tua linea
+LEVEL_C10_DESC,Heavy swarm • reach 65%,Yoğun sürü • %65'e ulaş,Großer Schwarm • erreiche 65%,Nuée massive • atteignez 65%,Horda masiva • alcanza el 65%,Horda intensa • alcance 65%,Sciame intenso • raggiungi il 65%
+LEVEL_C11_DESC,Low lives (2) • reach 65%,Az can (2) • %65'e ulaş,Wenige Leben (2) • erreiche 65%,Vies limitées (2) • atteignez 65%,Pocas vidas (2) • alcanza el 65%,Poucas vidas (2) • alcance 65%,Poche vite (2) • raggiungi il 65%
+LEVEL_C12_DESC,"Finale • all types, no boosts",Final • tüm tipler • boost yok,"Finale • alle Typen, keine Boosts","Finale • tous les types, sans bonus","Final • todos los tipos, sin potenciadores","Final • todos os tipos, sem bônus","Finale • tutti i tipi, senza potenziamenti"
+MENU_STORE,Store,Mağaza,Shop,Boutique,Tienda,Loja,Negozio
+MENU_CREDITS,Credits,Künye,Mitwirkende,Crédits,Créditos,Créditos,Crediti
+MENU_LEADERBOARD,Leaderboard,Liderlik,Rangliste,Classement,Clasificación,Ranking,Classifica
+MENU_HOWTO,How to Play,Nasıl Oynanır,Spielanleitung,Comment jouer,Cómo jugar,Como jogar,Come giocare
+LEADERBOARD_TITLE,Leaderboard,Liderlik,Rangliste,Classement,Clasificación,Ranking,Classifica
+LEADERBOARD_ALLBEST,All-time best: %d,Tüm zamanların rekoru: %d,Allzeitrekord: %d,Record absolu : %d,Récord absoluto: %d,Recorde geral: %d,Record assoluto: %d
+LEADERBOARD_EMPTY,Play Daily to set a record,Rekor için Günlük oyna,Spiele Täglich für deinen Rekord,Jouez en Quotidien pour établir un record,Juega en Diario para marcar un récord,Jogue no Diário para marcar um recorde,Gioca in Giornaliero per stabilire un record
+LEADERBOARD_TODAY,Today,Bugün,Heute,Aujourd'hui,Hoy,Hoje,Oggi
+LEADERBOARD_YESTERDAY,Yesterday,Dün,Gestern,Hier,Ayer,Ontem,Ieri
+MONTHS_SHORT,"Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec","Oca,Şub,Mar,Nis,May,Haz,Tem,Ağu,Eyl,Eki,Kas,Ara","Jan.,Feb.,März,Apr.,Mai,Juni,Juli,Aug.,Sept.,Okt.,Nov.,Dez.","janv.,févr.,mars,avr.,mai,juin,juil.,août,sept.,oct.,nov.,déc.","ene,feb,mar,abr,may,jun,jul,ago,sept,oct,nov,dic","jan.,fev.,mar.,abr.,mai.,jun.,jul.,ago.,set.,out.,nov.,dez.","gen,feb,mar,apr,mag,giu,lug,ago,set,ott,nov,dic"
+MENU_MISSIONS,Today's Missions,Bugünün Görevleri,Heutige Missionen,Missions du jour,Misiones de hoy,Missões de hoje,Missioni di oggi
+MENU_MISSIONS_SHORT,Missions,Görevler,Missionen,Missions,Misiones,Missões,Missioni
+RESULT_MENU,Menu,Menü,Menü,Menu,Menú,Menu,Menu
+STORE_CHARACTERS,Characters,Karakterler,Charaktere,Personnages,Personajes,Personagens,Personaggi
+STORE_ARENAS,Arenas,Arenalar,Arenen,Arènes,Arenas,Arenas,Arene
+STORE_BUY,Buy,Satın Al,Kaufen,Acheter,Comprar,Comprar,Compra
+STORE_SELECT,Select,Seç,Wählen,Choisir,Elegir,Selecionar,Seleziona
+STORE_SELECTED,Selected,Seçili,Gewählt,Sélectionné,Seleccionado,Selecionado,Selezionato
+STORE_BACK,Back,Geri,Zurück,Retour,Volver,Voltar,Indietro
+CREDITS_TITLE,Credits,Künye,Mitwirkende,Crédits,Créditos,Créditos,Crediti
+DAILY_REWARD_TITLE,Daily Reward,Günlük Ödül,Tagesbelohnung,Récompense du jour,Recompensa diaria,Recompensa diária,Ricompensa giornaliera
+DAILY_REWARD_BODY,Day %d/10  +%d,Gün %d/10  +%d,Tag %d/10  +%d,Jour %d/10  +%d,Día %d/10  +%d,Dia %d/10  +%d,Giorno %d/10  +%d
+DAILY_REWARD_CLAIM,Claim,Al,Abholen,Récupérer,Recoger,Resgatar,Riscatta
+DAILY_REWARD_RECEIVED,Received,Alındı,Erhalten,Reçue,Recibida,Recebida,Ricevuta
+DAILY_REWARD_DAY,Day %d/10,Gün %d/10,Tag %d/10,Jour %d/10,Día %d/10,Dia %d/10,Giorno %d/10
+DAILY_REWARD_TODAY,Today's reward · Day %d/10,Bugünün ödülü · Gün %d/10,Heutige Belohnung · Tag %d/10,Récompense du jour · Jour %d/10,Recompensa de hoy · Día %d/10,Recompensa de hoje · Dia %d/10,Ricompensa di oggi · Giorno %d/10
+DAILY_REWARD_PREVIEW,Preview · Day %d/10,Önizleme · Gün %d/10,Vorschau · Tag %d/10,Aperçu · Jour %d/10,Vista previa · Día %d/10,Prévia · Dia %d/10,Anteprima · Giorno %d/10
+DAILY_REWARD_CLAIM_TODAY,Claim Today,Bugün Al,Heute abholen,Récupérer,Recoger hoy,Resgatar hoje,Riscatta oggi
+DAILY_REWARD_DAY_TODAY,Today · Day %d/10,Bugün · Gün %d/10,Heute · Tag %d/10,Aujourd'hui · Jour %d/10,Hoy · Día %d/10,Hoje · Dia %d/10,Oggi · Giorno %d/10
+DAILY_REWARD_DAY_CLAIMED,Claimed · Day %d/10,Alındı · Gün %d/10,Abgeholt · Tag %d/10,Récupérée · Jour %d/10,Recogida · Día %d/10,Resgatada · Dia %d/10,Riscattata · Giorno %d/10
+PAUSE_RESUME,Resume,Devam,Fortsetzen,Reprendre,Continuar,Continuar,Riprendi
+PAUSE_TITLE,Paused,Duraklatıldı,Pause,Pause,En pausa,Pausado,In pausa
+PAUSE_SETTINGS,Settings,Ayarlar,Optionen,Réglages,Ajustes,Ajustes,Impostazioni
+PAUSE_RESTART,Restart,Yeniden,Neustart,Recommencer,Reiniciar,Reiniciar,Ricomincia
+PAUSE_MENU,Menu,Menü,Menü,Menu,Menú,Menu,Menu
+MISSIONS_TITLE,Missions,Görevler,Missionen,Missions,Misiones,Missões,Missioni
+HUD_STAGE,Stage %d,Bölüm %d,Stufe %d,Étape %d,Etapa %d,Etapa %d,Fase %d
+SETTINGS_TITLE,Settings,Ayarlar,Optionen,Réglages,Ajustes,Ajustes,Impostazioni
+SETTINGS_AUDIO,Audio,Ses,Audio,Audio,Audio,Áudio,Audio
+SETTINGS_MASTER,Master,Ana,Gesamt,Général,General,Geral,Generale
+SETTINGS_SFX,Effects,Efektler,Effekte,Effets,Efectos,Efeitos,Effetti
+SETTINGS_MUSIC,Music,Müzik,Musik,Musique,Música,Música,Musica
+SETTINGS_MUTE,Mute,Sessiz,Stumm,Muet,Silencio,Silenciar,Silenzia
+SETTINGS_STATE_ON,On,Açık,Ein,Activé,Activado,Ativado,Attivo
+SETTINGS_STATE_OFF,Off,Kapalı,Aus,Désactivé,Desactivado,Desativado,Disattivo
+SETTINGS_BACK,Back,Geri,Zurück,Retour,Volver,Voltar,Indietro
+SETTINGS_PRIVACY_CHOICES,Privacy choices,Gizlilik tercihleri,Datenschutz,Confidentialité,Privacidad,Privacidade,Privacy
+SETTINGS_CONTROLS,Controls,Kontroller,Steuerung,Commandes,Controles,Controles,Comandi
+CONTROL_SWIPE,Swipe,Kaydır,Wischen,Balayage,Deslizar,Deslizar,Scorrimento
+CONTROL_TAP,Tap,Dokun,Tippen,Toucher,Tocar,Toque,Tocco
+CONTROL_DPAD,D-Pad,D-Pad,Steuerkreuz,Croix,Cruceta,Direcional,Croce
+HOWTO_TITLE,How to Play,Nasıl Oynanır,Spielanleitung,Comment jouer,Cómo jugar,Como jogar,Come giocare
+HOWTO_NEXT,Next,İleri,Weiter,Suivant,Siguiente,Avançar,Avanti
+HOWTO_DONE,Got it,Anladım,Verstanden,Compris,Entendido,Entendi,Capito
+HOWTO_GOAL_TITLE,Capture the arena,Arenayı ele geçir,Erobere die Arena,Capturez l'arène,Captura la arena,Capture a arena,Conquista l'arena
+HOWTO_GOAL_BODY,"Leave the safe border, draw into the void, and close a loop to claim that region. Reach the target % to win.","Güvenli kenardan ayrıl, boşluğa çizgi çek ve o bölgeyi almak için döngüyü kapat. Kazanmak için hedef yüzdeye ulaş.","Verlasse den sicheren Rand, ziehe eine Linie ins Nichts und schließe sie zu einer Fläche, um das Gebiet zu erobern. Erreiche den Zielprozentsatz, um zu gewinnen.","Quittez le bord sécurisé, tracez une ligne dans le vide et refermez-la pour capturer la zone. Atteignez le pourcentage cible pour gagner.","Sal del borde seguro, traza una línea en el vacío y ciérrala para capturar la zona. Alcanza el porcentaje objetivo para ganar.","Saia da borda segura, trace uma linha no vazio e feche o contorno para capturar a área. Alcance a porcentagem indicada para vencer.","Lascia il bordo sicuro, traccia una linea nel vuoto e chiudila per conquistare l'area. Raggiungi la percentuale obiettivo per vincere."
+HOWTO_CONTROLS_TITLE,Move,Hareket,Bewegen,Déplacement,Movimiento,Movimento,Movimento
+HOWTO_CONTROLS_SWIPE,Swipe a direction to steer.,Yön vermek için kaydır.,Wische in die gewünschte Richtung.,Balayez dans une direction pour vous diriger.,Desliza en una dirección para moverte.,Deslize na direção desejada para se mover.,Scorri nella direzione desiderata per muoverti.
+HOWTO_CONTROLS_TAP,Tap left or right to turn.,Dönmek için sola ya da sağa dokun.,"Tippe links oder rechts, um abzubiegen.",Touchez à gauche ou à droite pour tourner.,Toca a la izquierda o a la derecha para girar.,Toque à esquerda ou à direita para virar.,Tocca a sinistra o a destra per girare.
+HOWTO_CONTROLS_DPAD,Use the on-screen d-pad to steer.,Ekrandaki d-pad ile yön ver.,Steuere mit dem Steuerkreuz auf dem Bildschirm.,Utilisez la croix directionnelle à l'écran.,Usa la cruceta en pantalla para moverte.,Use o direcional na tela para se mover.,Usa la croce direzionale sullo schermo.
+HOWTO_CONTROLS_HINT,Change controls in Settings,Kontrolleri Ayarlar'dan değiştir,Steuerung in den Optionen ändern,Modifiez les commandes dans les réglages,Cambia los controles en Ajustes,Mude os controles em Ajustes,Cambia i comandi nelle impostazioni
+HOWTO_ENEMIES_TITLE,Watch the enemies,Düşmanlara dikkat,Achte auf die Gegner,Attention aux ennemis,Cuidado con los enemigos,Cuidado com os inimigos,Attento ai nemici
+ENEMY_BOUNCER_NAME,Bouncer,Bouncer,Bouncer,Bouncer,Bouncer,Bouncer,Bouncer
+ENEMY_STALKER_NAME,Stalker,Stalker,Stalker,Stalker,Stalker,Stalker,Stalker
+ENEMY_SPARX_NAME,Sparx,Sparx,Sparx,Sparx,Sparx,Sparx,Sparx
+HOWTO_ENEMIES_BODY,"Bouncer ricochets off walls. Stalker hunts you while you draw in the open. Sparx patrols the captured edge and ignores your territory's power — don't linger on the border. In later levels the Stalker also hunts your LINE, not just you: a long line is a real risk.",Bouncer duvarlardan seker. Stalker sen açıkta çizerken peşine düşer. Sparx ele geçirilen kenarda devriye gezer ve bölgenin gücünden etkilenmez — kenarda oyalanma. Geç bölümlerde Stalker sadece seni değil ÇİZGİNİ de avlar: uzun çizgi gerçek risktir.,"Bouncer prallt an Wänden ab. Stalker jagt dich, während du im offenen Feld zeichnest. Sparx patrouilliert am eroberten Rand und ignoriert die Kraft deines Gebiets — bleib nicht am Rand stehen. In späteren Leveln jagt Stalker auch deine LINIE: Lange Linien sind riskant.","Bouncer rebondit sur les murs. Stalker vous traque quand vous tracez à découvert. Sparx patrouille sur le bord capturé et ignore le pouvoir de votre territoire : ne restez pas au bord. Plus tard, Stalker traque aussi votre LIGNE : plus elle est longue, plus le risque est grand.","Bouncer rebota en las paredes. Stalker te persigue cuando trazas en campo abierto. Sparx patrulla el borde capturado e ignora el poder de tu territorio: no te quedes en el borde. Más adelante, Stalker también persigue tu LÍNEA: cuanto más larga, mayor es el riesgo.","Bouncer ricocheteia nas paredes. Stalker persegue você enquanto traça em campo aberto. Sparx patrulha a borda capturada e ignora o poder do seu território: não fique parado na borda. Nas fases seguintes, Stalker também persegue sua LINHA: linhas longas são um risco.",Bouncer rimbalza sulle pareti. Stalker ti insegue mentre tracci allo scoperto. Sparx pattuglia il bordo conquistato e ignora il potere del tuo territorio: non fermarti sul bordo. Nei livelli successivi Stalker insegue anche la tua LINEA: una linea lunga è un rischio.
+HOWTO_LIVES_TITLE,Stay alive,Hayatta kal,Überlebe,Restez en vie,Sobrevive,Sobreviva,Sopravvivi
+HOWTO_LIVES_BODY,Hearts show your lives. You lose one when an enemy touches your active trail — or when you cross it yourself. Captured ground is safe.,Kalpler canlarını gösterir. Bir düşman aktif çizgine dokunursa — ya da kendi çizgini kesersen — bir can kaybedersin. Ele geçirilen alan güvenlidir.,"Herzen zeigen deine Leben. Berührt ein Gegner deine aktive Linie oder kreuzt du sie selbst, verlierst du ein Leben. Erobertes Gebiet ist sicher.",Les cœurs indiquent vos vies. Vous en perdez une si un ennemi touche votre ligne active ou si vous la croisez vous-même. Le territoire capturé est sûr.,Los corazones indican tus vidas. Pierdes una si un enemigo toca tu línea activa o si la cruzas tú mismo. El terreno capturado es seguro.,Os corações mostram suas vidas. Você perde uma se um inimigo tocar sua linha ativa ou se você cruzar a própria linha. O território capturado é seguro.,I cuori indicano le tue vite. Ne perdi una se un nemico tocca la linea attiva o se la incroci tu stesso. Il territorio conquistato è sicuro.
+CHAR_PULSE_DESC,Pushes enemies away from your territory,Düşmanları bölgenden uzağa iter,Stößt Gegner von deinem Gebiet weg,Repousse les ennemis loin de votre territoire,Aleja a los enemigos de tu territorio,Afasta os inimigos do seu território,Respinge i nemici dal tuo territorio
+CHAR_DRAG_DESC,Slows enemies near your territory,Bölgene yaklaşan düşmanları yavaşlatır,Verlangsamt Gegner nahe deinem Gebiet,Ralentit les ennemis près de votre territoire,Ralentiza a los enemigos cerca de tu territorio,Desacelera os inimigos perto do seu território,Rallenta i nemici vicini al tuo territorio
+CHAR_HALT_DESC,Freezes enemies that get too close,Fazla yaklaşan düşmanları dondurur,"Friert Gegner ein, die zu nahe kommen",Gèle les ennemis qui s'approchent trop,Congela a los enemigos que se acercan demasiado,Congela os inimigos que chegam perto demais,Congela i nemici che si avvicinano troppo
+ARENA_VOID_DESC,Balanced starter — one drifting bouncer.,Dengeli başlangıç — tek gezinen bouncer.,Ausgewogener Einstieg — ein streifender Bouncer.,Un début équilibré — un Bouncer en mouvement.,Un inicio equilibrado: un Bouncer errante.,Um início equilibrado: um Bouncer em movimento.,Un inizio equilibrato: un Bouncer in movimento.
+ARENA_EMBER_DESC,"Tall and tight — two bouncers, kinder target.","Uzun ve dar — iki bouncer, daha kolay hedef.","Hoch und eng — zwei Bouncer, leichteres Ziel.","Haute et étroite — deux Bouncers, objectif plus facile.","Alta y estrecha: dos Bouncers, objetivo más fácil.","Alta e estreita: dois Bouncers, meta mais fácil.","Alta e stretta: due Bouncer, obiettivo più facile."
+ARENA_FROST_DESC,Wide and open — a stalker plus an edge-patrolling sparx.,Geniş ve açık — bir stalker artı kenar devriyesi bir sparx.,Weit und offen — ein Stalker und ein Sparx am Rand.,Vaste et ouverte — un Stalker et un Sparx sur les bords.,Amplia y abierta: un Stalker y un Sparx en el borde.,Ampla e aberta: um Stalker e um Sparx na borda.,Ampia e aperta: uno Stalker e uno Sparx sul bordo.
+BOOST_EXTRA_LIFE_NAME,Extra Life,Ekstra Can,Extraleben,Vie bonus,Vida extra,Vida extra,Vita extra
+BOOST_EXTRA_LIFE_DESC,Start the run with one more heart.,Oyuna bir fazla kalple başla.,Starte die Runde mit einem zusätzlichen Herz.,Commencez la partie avec un cœur de plus.,Empieza la partida con un corazón más.,Comece a partida com um coração a mais.,Inizia la partita con un cuore in più.
+BOOST_SLOW_START_NAME,Slow Start,Yavaş Başlangıç,Langsamer Start,Départ ralenti,Inicio lento,Início lento,Avvio lento
+BOOST_SLOW_START_DESC,Enemies move at half speed for the first few seconds.,İlk birkaç saniye düşmanlar yarı hızda hareket eder.,Gegner bewegen sich anfangs einige Sekunden lang halb so schnell.,Les ennemis sont deux fois plus lents pendant les premières secondes.,Los enemigos van a la mitad de velocidad durante los primeros segundos.,Os inimigos se movem na metade da velocidade nos primeiros segundos.,I nemici si muovono a metà velocità per i primi secondi.
+BOOST_COIN_BONUS_NAME,Coin Bonus,Para Bonusu,Münzbonus,Bonus de pièces,Bono de monedas,Bônus de moedas,Bonus monete
+BOOST_COIN_BONUS_DESC,Earn 50% more coins from this run.,Bu oyundan %50 daha fazla para kazan.,Erhalte in dieser Runde 50% mehr Münzen.,Gagnez 50% de pièces en plus pendant cette partie.,Gana un 50% más de monedas en esta partida.,Ganhe 50% mais moedas nesta partida.,Ottieni il 50% di monete in più in questa partita.
+STORE_BOOSTS,Boosts,Boost'lar,Boosts,Bonus,Bonos,Bônus,Bonus
+STORE_OWNED,Owned: %d,Sahip: %d,Besitz: %d,En stock : %d,Tienes: %d,Em estoque: %d,Posseduti: %d
+BOOST_ARM,Arm,Kuşan,Ausrüsten,Équiper,Equipar,Equipar,Equipaggia
+BOOST_ARMED,Armed,Kuşanıldı,Ausgerüstet,Équipé,Equipado,Equipado,Equipaggiato
+BOOST_APPLY_NOTE,"Applies in Free, Level and Campaign — not in Daily","Serbest, Seviye ve Macera'da geçerli — Günlük'te değil","Für Frei, Endlos und Kampagne — nicht für Täglich","En Libre, Infini et Campagne — pas en Quotidien","En Libre, Sin fin y Campaña; no en Diario","Em Livre, Infinito e Campanha; não no Diário","In Libero, Infinito e Campagna; non in Giornaliero"
+SETTINGS_LANGUAGE,Language,Dil,Sprache,Langue,Idioma,Idioma,Lingua
+LANG_AUTO,Auto,Otomatik,Automatisch,Automatique,Automático,Automático,Automatico
+LANG_EN,English,English,English,English,English,English,English
+LANG_TR,Türkçe,Türkçe,Türkçe,Türkçe,Türkçe,Türkçe,Türkçe
+CREDITS_CREATED,Created by,Geliştiren,Entwickelt von,Créé par,Creado por,Criado por,Creato da
+CREDITS_CREATOR,Tuğra Hekimoğlu,Tuğra Hekimoğlu,Tuğra Hekimoğlu,Tuğra Hekimoğlu,Tuğra Hekimoğlu,Tuğra Hekimoğlu,Tuğra Hekimoğlu
+CREDITS_COPYRIGHT,© 2026 Tuğra Hekimoğlu — all rights reserved (proprietary).,© 2026 Tuğra Hekimoğlu — tüm hakları saklıdır (özel mülkiyet).,© 2026 Tuğra Hekimoğlu — alle Rechte vorbehalten (proprietär).,© 2026 Tuğra Hekimoğlu — tous droits réservés (propriétaire).,© 2026 Tuğra Hekimoğlu: todos los derechos reservados (propietario).,© 2026 Tuğra Hekimoğlu — todos os direitos reservados (proprietário).,© 2026 Tuğra Hekimoğlu — tutti i diritti riservati (proprietario).
+CREDITS_TECH,Technology,Teknoloji,Technologie,Technologie,Tecnología,Tecnologia,Tecnologia
+CREDITS_TECH_CONTENT,Godot Engine 4.6 · GUT — Godot Unit Test by Tom 'Butch' Wesley,"Godot Engine 4.6 · GUT — Godot Unit Test, Tom 'Butch' Wesley",Godot Engine 4.6 · GUT — Godot Unit Test von Tom 'Butch' Wesley,Godot Engine 4.6 · GUT — Godot Unit Test par Tom 'Butch' Wesley,Godot Engine 4.6 · GUT — Godot Unit Test de Tom 'Butch' Wesley,Godot Engine 4.6 · GUT — Godot Unit Test de Tom 'Butch' Wesley,Godot Engine 4.6 · GUT — Godot Unit Test di Tom 'Butch' Wesley
+CREDITS_FONTS,Fonts / Assets,Yazı Tipleri / Varlıklar,Schriften / Assets,Polices / Ressources,Fuentes / Recursos,Fontes / Recursos,Font / Risorse
+CREDITS_FONTS_CONTENT,"DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSFX and menu music: Tuğra Hekimoğlu (original / synthesized)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSes efektleri ve menü müziği: Tuğra Hekimoğlu (özgün / sentezlenmiş)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nSoundeffekte und Menümusik: Tuğra Hekimoğlu (eigene / synthetisierte)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nEffets sonores et musique du menu : Tuğra Hekimoğlu (créations originales / synthétisées)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nEfectos de sonido y música del menú: Tuğra Hekimoğlu (originales / sintetizados)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nEfeitos sonoros e música do menu: Tuğra Hekimoğlu (originais / sintetizados)","DynaPuff: Toshi Omagari, Jennifer Daniel — OFL 1.1\nRubik: Hubert and Fischer, Meir Sadan, Cyreal, Daniel Grumer, Omaima Dajani — OFL 1.1\nNunito Sans: Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan, Alexei Vanyashin — OFL 1.1\nEffetti sonori e musica del menu: Tuğra Hekimoğlu (originali / sintetizzati)"
+CREDITS_LICENSES,Licenses,Lisanslar,Lizenzen,Licences,Licencias,Licenças,Licenze
+CREDITS_LICENSES_CONTENT,Godot Engine and GUT: MIT License\nGUT: addons/gut/LICENSE.md\nOFL 1.1 texts are bundled beside each font,Godot Engine ve GUT: MIT Lisansı\nGUT: addons/gut/LICENSE.md\nOFL 1.1 metinleri yazı tiplerinin yanında bulunur,Godot Engine und GUT: MIT-Lizenz\nGUT: addons/gut/LICENSE.md\nOFL-1.1-Texte liegen den Schriften bei,Godot Engine et GUT : licence MIT\nGUT : addons/gut/LICENSE.md\nLes textes OFL 1.1 sont fournis avec chaque police,Godot Engine y GUT: licencia MIT\nGUT: addons/gut/LICENSE.md\nLos textos OFL 1.1 se incluyen con cada fuente,Godot Engine e GUT: licença MIT\nGUT: addons/gut/LICENSE.md\nOs textos OFL 1.1 acompanham cada fonte,Godot Engine e GUT: licenza MIT\nGUT: addons/gut/LICENSE.md\nI testi OFL 1.1 sono inclusi con ogni font
+SETTINGS_COPYRIGHT,© 2026 Tuğra Hekimoğlu. All rights reserved.,© 2026 Tuğra Hekimoğlu. Tüm hakları saklıdır.,© 2026 Tuğra Hekimoğlu. Alle Rechte vorbehalten.,© 2026 Tuğra Hekimoğlu. Tous droits réservés.,© 2026 Tuğra Hekimoğlu. Todos los derechos reservados.,© 2026 Tuğra Hekimoğlu. Todos os direitos reservados.,© 2026 Tuğra Hekimoğlu. Tutti i diritti riservati.
+SETTINGS_LICENSES,Open-source licenses,Açık kaynak lisansları,Open-Source-Lizenzen,Licences open source,Licencias de código abierto,Licenças de código aberto,Licenze open source
+LEGAL_TITLE,Licenses,Lisanslar,Lizenzen,Licences,Licencias,Licenças,Licenze
+RESULT_REWARDED_BONUS,Watch Ad +%d,Reklam İzle +%d,Video ansehen +%d,Voir une pub +%d,Ver anuncio +%d,Ver anúncio +%d,Guarda annuncio +%d
+RESULT_REWARDED_BONUS_ACTION,Watch Ad,Reklam İzle,Video ansehen,Voir une pub,Ver anuncio,Ver anúncio,Guarda annuncio
+RESULT_REWARDED_BONUS_AMOUNT,+%d,+%d,+%d,+%d,+%d,+%d,+%d
+SUPPLY_ENTRY,Supply,İkmal,Kisten,Caisses,Cajas,Caixas,Casse
+SUPPLY_ODDS,Rewards,Olasılıklar,Belohnungen,Récompenses,Recompensas,Recompensas,Ricompense
+SUPPLY_TOMORROW,Tomorrow,Yarın,Morgen,Demain,Mañana,Amanhã,Domani
+SUPPLY_DAILY_COMPACT,%d/day,%d/gün,%d/Tag,%d/jour,%d/día,%d/dia,%d/giorno
+SUPPLY_ENTRY_AVAILABLE,Supply ·,İkmal ·,Nachschub ·,Ravitaillement ·,Suministros ·,Suprimentos ·,Rifornimenti ·
+SUPPLY_DAILY_AVAILABLE,Daily rewarded box available,Günlük reklam kutusu alınabilir,Tägliche Videokiste verfügbar,Caisse quotidienne disponible via une pub,Caja diaria disponible al ver un anuncio,Caixa diária disponível ao ver um anúncio,Cassa giornaliera disponibile con un annuncio
+SUPPLY_TITLE,Supply Box,İkmal Kutusu,Nachschubkiste,Caisse de ravitaillement,Caja de suministros,Caixa de suprimentos,Cassa rifornimenti
+SUPPLY_RECEIVED,Supply received,İkmal alındı,Nachschub erhalten,Ravitaillement reçu,Suministros recibidos,Suprimentos recebidos,Rifornimenti ricevuti
+SUPPLY_CONTENTS,100 coins or one boost,100 coin veya bir güçlendirme,100 Münzen oder ein Boost,100 pièces ou un bonus,100 monedas o un potenciador,100 moedas ou um bônus,100 monete o un potenziamento
+SUPPLY_AD,Watch Ad,Reklam İzle,Video ansehen,Voir une pub,Ver anuncio,Ver anúncio,Guarda annuncio
+SUPPLY_WAITING,Ad in progress,Reklam sürüyor,Video läuft,Publicité en cours,Anuncio en curso,Anúncio em andamento,Annuncio in corso
+SUPPLY_DAILY_USED,Daily box claimed,Günlük kutu alındı,Tageskiste abgeholt,Caisse du jour récupérée,Caja diaria recogida,Caixa diária resgatada,Cassa giornaliera riscattata
+SUPPLY_AD_UNAVAILABLE,Ad unavailable right now,Reklam şu anda kullanılamıyor,Derzeit kein Video verfügbar,Aucune publicité disponible pour le moment,No hay anuncios disponibles ahora,Nenhum anúncio disponível agora,Nessun annuncio disponibile al momento
+SUPPLY_AD_FAILED,Ad did not complete. No reward granted.,Reklam tamamlanmadı. Ödül verilmedi.,Video nicht beendet. Keine Belohnung erhalten.,Publicité non terminée. Aucune récompense accordée.,Anuncio sin completar. No recibiste recompensa.,Anúncio não concluído. Nenhuma recompensa concedida.,Annuncio non completato. Nessuna ricompensa assegnata.
+SUPPLY_COST,%d Coins,%d Coin,%d Münzen,%d pièces,%d monedas,%d moedas,%d monete
+SUPPLY_NOT_ENOUGH,Need %d coins,%d coin gerekli,%d Münzen benötigt,Il faut %d pièces,Necesitas %d monedas,Você precisa de %d moedas,Servono %d monete
+SUPPLY_COIN_LIMIT,Daily coin-box limit reached,Günlük coin kutusu limiti doldu,Tageslimit für Münzkisten erreicht,Limite quotidienne de caisses à pièces atteinte,Límite diario de cajas con monedas alcanzado,Limite diário de caixas com moedas atingido,Limite giornaliero di casse con monete raggiunto
+SUPPLY_REMAINING,%d/%d coin boxes remaining today,Bugün %d/%d coin kutusu hakkı kaldı,Heute noch %d/%d Münzkisten,%d/%d caisses à pièces restantes aujourd'hui,Quedan %d/%d cajas con monedas hoy,Restam %d/%d caixas com moedas hoje,%d/%d casse con monete rimaste oggi
+SUPPLY_INVENTORY,%d Coins · Slow Start ×%d · Coin Bonus ×%d · Extra Life ×%d,%d Coin · Yavaş Başlangıç ×%d · Coin Bonusu ×%d · Ekstra Can ×%d,%d Münzen · Langsamer Start ×%d · Münzbonus ×%d · Extraleben ×%d,%d pièces · Départ ralenti ×%d · Bonus de pièces ×%d · Vie bonus ×%d,%d monedas · Inicio lento ×%d · Bono de monedas ×%d · Vida extra ×%d,%d moedas · Início lento ×%d · Bônus de moedas ×%d · Vida extra ×%d,%d monete · Avvio lento ×%d · Bonus monete ×%d · Vita extra ×%d
+SUPPLY_REWARD_COINS,%d Coins,%d Coin,%d Münzen,%d pièces,%d monedas,%d moedas,%d monete
+SUPPLY_REWARD_SLOW,Slow Start ×%d,Yavaş Başlangıç ×%d,Langsamer Start ×%d,Départ ralenti ×%d,Inicio lento ×%d,Início lento ×%d,Avvio lento ×%d
+SUPPLY_REWARD_BONUS,Coin Bonus ×%d,Coin Bonusu ×%d,Münzbonus ×%d,Bonus de pièces ×%d,Bono de monedas ×%d,Bônus de moedas ×%d,Bonus monete ×%d
+SUPPLY_REWARD_LIFE,Extra Life ×%d,Ekstra Can ×%d,Extraleben ×%d,Vie bonus ×%d,Vida extra ×%d,Vida extra ×%d,Vita extra ×%d
+SUPPLY_CONTINUE,Continue,Devam,Weiter,Continuer,Continuar,Continuar,Continua
+SUPPLY_CLOSE,Close,Kapat,Schließen,Fermer,Cerrar,Fechar,Chiudi
+SUPPLY_PENDING,Acquired. Delivery will resume safely.,Alındı. Teslimat güvenle devam edecek.,Erhalten. Die Zustellung wird sicher fortgesetzt.,Obtenu. La livraison reprendra en toute sécurité.,Adquirida. La entrega continuará de forma segura.,Adquirida. A entrega será retomada com segurança.,Acquisita. La consegna riprenderà in sicurezza.
+SUPPLY_REJECTED,Acquisition unavailable. Please try again.,Kutu alınamadı. Tekrar deneyin.,Derzeit nicht verfügbar. Bitte erneut versuchen.,Acquisition indisponible. Veuillez réessayer.,No disponible. Inténtalo de nuevo.,Indisponível. Tente novamente.,Acquisto non disponibile. Riprova.
+SUPPLY_SAVE_RETRY,Could not save. Please try Continue again.,Kayıt yapılamadı. Devam'a tekrar basın.,Speichern fehlgeschlagen. Tippe erneut auf Weiter.,Échec de la sauvegarde. Appuyez à nouveau sur Continuer.,No se pudo guardar. Pulsa Continuar de nuevo.,Não foi possível salvar. Toque em Continuar de novo.,Salvataggio non riuscito. Premi di nuovo Continua.
+LANG_DE,Deutsch,Deutsch,Deutsch,Deutsch,Deutsch,Deutsch,Deutsch
+LANG_FR,Français,Français,Français,Français,Français,Français,Français
+LANG_ES,Español,Español,Español,Español,Español,Español,Español
+LANG_PT_BR,Português (Brasil),Português (Brasil),Português (Brasil),Português (Brasil),Português (Brasil),Português (Brasil),Português (Brasil)
+LANG_IT,Italiano,Italiano,Italiano,Italiano,Italiano,Italiano,Italiano
+LEADERBOARD_DATE,"{month} {day}, {year}",{day} {month} {year},{day}. {month} {year},{day} {month} {year},{day} {month} {year},{day} {month} {year},{day} {month} {year}

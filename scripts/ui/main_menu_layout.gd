@@ -11,6 +11,7 @@ extends VBoxContainer
 @export var title_font_sizes: Vector2i = Vector2i(52, 56)
 @export var section_separations: Vector2i = Vector2i(16, 20)
 @export var action_separations: Vector2i = Vector2i(12, 14)
+@export var minimum_balance_font_size: int = 18
 
 @onready var _bounds: Control = get_parent() as Control
 @onready var _content_group: VBoxContainer = $ContentGroup
@@ -19,10 +20,15 @@ extends VBoxContainer
 @onready var _buttons: VBoxContainer = $ContentGroup/Footer/Buttons
 @onready var _play: Button = $ContentGroup/Footer/Buttons/PlayButton
 @onready var _hub: Control = $ContentGroup/Footer/Buttons/NavigationHub
+@onready var _header: HBoxContainer = $Header
+@onready var _coins: Label = $Header/CoinsPanel/Content/Coins
 var _layout_pending: bool = false
+var _balance_font_size: int = 0
 
 
 func _ready() -> void:
+	_balance_font_size = _coins.get_theme_font_size("font_size")
+	_coins.minimum_size_changed.connect(_queue_layout)
 	_bounds.resized.connect(_queue_layout)
 	_queue_layout()
 
@@ -50,3 +56,17 @@ func _refresh_layout() -> void:
 	_title.add_theme_font_size_override("font_size", roundi(lerpf(title_font_sizes.x, title_font_sizes.y, room)))
 	add_theme_constant_override("separation", roundi(lerpf(section_separations.x, section_separations.y, room)))
 	_buttons.add_theme_constant_override("separation", roundi(lerpf(action_separations.x, action_separations.y, room)))
+	_fit_balance_text(width)
+
+
+## Keep translated currency and the complete balance inside the existing header.
+func _fit_balance_text(width: float) -> void:
+	var fixed_width: float = _header.get_combined_minimum_size().x - _coins.get_combined_minimum_size().x
+	var budget: float = maxf(0.0, width - fixed_width)
+	var font: Font = _coins.get_theme_font("font")
+	var font_size: int = _balance_font_size
+	while font_size > minimum_balance_font_size and font.get_string_size(_coins.text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x > budget:
+		font_size -= 1
+	if _coins.get_theme_font_size("font_size") != font_size:
+		_coins.add_theme_font_size_override("font_size", font_size)

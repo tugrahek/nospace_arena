@@ -86,12 +86,12 @@ func test_empty_board_does_not_invent_scores_or_record() -> void:
 
 
 func test_english_turkish_binding_and_back_wiring() -> void:
-	for locale in ["en", "tr"]:
+	for locale in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _page()
 		var today_entry: Control = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List/Entry3")
 		assert_eq(page.get_node("SafeArea/Bounds/Layout/Title").text, tr("LEADERBOARD_TITLE"))
-		assert_eq(_label(today_entry, "Date").text, "Oct 3, 2026" if locale == "en" else "3 Eki 2026")
+		assert_eq(_label(today_entry, "Date").text, VIEW.format_date(TODAY))
 		assert_eq(page.get_node("SafeArea/Bounds/Layout/Scroll/Content/AllBest").text, tr("LEADERBOARD_ALLBEST") % 820)
 		var back: Button = page.get_node("SafeArea/Bounds/Layout/BackButton")
 		assert_eq(back.text, tr("SETTINGS_BACK"))
@@ -99,7 +99,7 @@ func test_english_turkish_binding_and_back_wiring() -> void:
 
 
 func test_english_turkish_rows_fit_at_720x1280() -> void:
-	for locale in ["en", "tr"]:
+	for locale in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _page()
 		var scroll: ScrollContainer = page.get_node("SafeArea/Bounds/Layout/Scroll")
@@ -119,7 +119,7 @@ func test_english_turkish_rows_fit_at_720x1280() -> void:
 
 
 func test_full_year_date_columns_fit_at_720x1280() -> void:
-	for locale in ["en", "tr"]:
+	for locale in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _page()
 		var board: Leaderboard = BOARD.new()
@@ -133,7 +133,7 @@ func test_full_year_date_columns_fit_at_720x1280() -> void:
 			var date_label: Label = _label(entry, "Date")
 			var score_label: Label = _label(entry, "Score")
 			var year: int = 2027 if index == 0 else 2026
-			assert_eq(date_label.text, "Jun 22, %d" % year if locale == "en" else "22 Haz %d" % year)
+			assert_eq(date_label.text, VIEW.format_date(year * 10000 + 622))
 			assert_true(date_label.size.x >= date_label.get_combined_minimum_size().x, "full date fits %s/%d" % [locale, index])
 			assert_true(date_label.get_global_rect().end.x < score_label.get_global_rect().position.x, "date and score remain separate %s/%d" % [locale, index])
 			assert_true(page.get_global_rect().encloses(score_label.get_global_rect()), "score stays on screen %s/%d" % [locale, index])

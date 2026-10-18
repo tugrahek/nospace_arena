@@ -25,6 +25,30 @@ func after_each() -> void:
 	AudioManager.commit_settings()
 	TranslationServer.set_locale("en")
 
+func test_new_latin_languages_select_persist_and_refresh_settings() -> void:
+	var panel: Control = SETTINGS_SCENE.instantiate()
+	add_child_autofree(panel)
+	panel.call("_open_language_selector")
+	var selector: SettingsLanguageSelector = panel.get("_language_overlay")
+	assert_eq(selector.options.size(), LocaleUtil.SUPPORTED.size() + 1)
+	for index in range(3, selector.options.size()):
+		var button: Button = selector.get("_buttons")[index]
+		button.pressed.emit()
+		var code: String = selector.options[index]["code"]
+		assert_eq(AudioManager.settings().language, code)
+		assert_eq(TranslationServer.get_locale(), code)
+		assert_eq(SettingsStore.load_from(AudioManager.SETTINGS_PATH).language, code)
+		assert_eq(panel.get_node("SafeArea/Bounds/Center/Title").text, tr("SETTINGS_TITLE"))
+		assert_eq(panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton").text,
+			tr(selector.options[index]["key"]))
+		await get_tree().process_frame
+		var language_button: Button = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton")
+		assert_gte(language_button.size.x, language_button.get_combined_minimum_size().x, "endonym fits")
+		selector.scroll.ensure_control_visible(button)
+		await get_tree().process_frame
+		assert_true(selector.scroll.get_global_rect().intersects(button.get_global_rect()), "last choices are reachable")
+
+
 func test_panel_instantiates_and_reflects_settings() -> void:
 	var panel: Node = load("res://scenes/ui/Settings.tscn").instantiate()
 	add_child_autofree(panel)
@@ -237,9 +261,11 @@ func test_sections_and_language_labels_fit_720_by_1280() -> void:
 		assert_gte(language_button.size.x, language_button.get_combined_minimum_size().x)
 
 
-func test_language_selector_three_and_ten_entries_scroll_without_new_languages() -> void:
+func test_language_selector_small_and_long_lists_keep_scroll_behavior() -> void:
 	for count in [3, 10]:
 		var selector := SettingsLanguageSelector.new()
+		if count == 3:
+			selector.options = selector.options.slice(0, count)
 		if count == 10:
 			selector.options.clear()
 			for i in count:

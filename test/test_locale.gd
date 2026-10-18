@@ -31,14 +31,16 @@ func test_catalog_en_and_tr_full() -> void:
 	# every row has exactly the header's column count (no unquoted-comma truncation).
 	var parsed: Array = _read_csv()
 	var header: PackedStringArray = parsed[0]
-	assert_eq(header.size(), 3, "columns: keys,en,tr")
+	assert_eq(header.slice(1), PackedStringArray(LocaleUtil.SUPPORTED), "catalog matches shipped locales")
 	var seen: Dictionary = {}
 	for row in rows_of(parsed):
-		assert_eq(row.size(), 3, "row '%s' has exactly 3 cells (quote commas!)" % row[0])
+		assert_eq(row.size(), header.size(), "row '%s' has all locale cells (quote commas!)" % row[0])
 		assert_false(seen.has(row[0]), "key '%s' is unique" % row[0])
 		seen[row[0]] = true
 		assert_true(row[1].strip_edges() != "", "EN cell of '%s' non-empty" % row[0])
 		assert_true(row[2].strip_edges() != "", "TR cell of '%s' non-empty" % row[0])
+		for column in range(3, header.size()):
+			assert_false(row[column].strip_edges().is_empty(), "%s/%s is translated" % [row[0], header[column]])
 	assert_gt(seen.size(), 100, "catalog has the full key set")
 
 
@@ -84,9 +86,9 @@ func test_full_device_locale_and_saved_preference() -> void:
 	assert_eq(LocaleUtil.resolve("en", "tr_TR"), "en", "saved choice wins")
 	assert_eq(LocaleUtil.resolve("tr", "ja_JP"), "tr")
 	assert_eq(LocaleUtil.resolve("invalid", "tr_CY"), "tr")
-	for unsupported: String in ["pt_BR", "zh_Hans", "zh_Hant_TW", "ja_JP", "xx_YY", ""]:
+	for unsupported: String in ["pt_PT", "zh_Hans", "zh_Hant_TW", "ja_JP", "xx_YY", ""]:
 		assert_eq(LocaleUtil.resolve("", unsupported), "en", "safe fallback: " + unsupported)
-	assert_eq(LocaleUtil.SUPPORTED, ["en", "tr"], "only translated locales ship")
+	assert_eq(LocaleUtil.SUPPORTED, ["en", "tr", "de", "fr", "es", "pt_BR", "it"], "only translated locales ship")
 
 
 func test_canonical_codes_preserve_script_and_region() -> void:
@@ -95,6 +97,50 @@ func test_canonical_codes_preserve_script_and_region() -> void:
 	assert_eq(LocaleUtil.normalize("zh-Hant-TW"), "zh_Hant_TW")
 	assert_eq(LocaleUtil.normalize(" tr-TR "), "tr_TR")
 	assert_eq(LocaleUtil.normalize(""), "")
+
+
+func test_latin_device_variants_and_preference_priority() -> void:
+	for pair: Array in [["de_DE", "de"], ["fr_CA", "fr"], ["es_MX", "es"], ["it_IT", "it"], ["pt-BR", "pt_BR"]]:
+		assert_eq(LocaleUtil.resolve("", pair[0]), pair[1])
+		assert_eq(LocaleUtil.resolve(pair[1], "tr_TR"), pair[1])
+	assert_eq(LocaleUtil.resolve("", "pt_PT"), "en", "regional variants never cross")
+	assert_eq(LocaleUtil.resolve("", "pt"), "en", "no unspecified Portuguese variant is selected")
+
+
+func test_all_catalog_placeholders_and_imported_resources_match() -> void:
+	var parsed: Array = _read_csv()
+	var header: PackedStringArray = parsed[0]
+	var pattern := RegEx.new()
+	pattern.compile("%(?:%|[ds])")
+	for row: PackedStringArray in parsed[1]:
+		var reference: Array[String] = []
+		for token: RegExMatch in pattern.search_all(row[1]):
+			reference.append(token.get_string())
+		for column in range(1, header.size()):
+			var placeholders: Array[String] = []
+			for token: RegExMatch in pattern.search_all(row[column]):
+				placeholders.append(token.get_string())
+			assert_eq(placeholders, reference, "%s/%s placeholder signature" % [row[0], header[column]])
+			for field: String in ["{day}", "{month}", "{year}"]:
+				assert_eq(row[column].count(field), row[1].count(field), "%s/%s named field %s" % [row[0], header[column], field])
+	for column in range(1, header.size()):
+		TranslationServer.set_locale(header[column])
+		for row: PackedStringArray in parsed[1]:
+			assert_eq(tr(row[0]), row[column].replace("\\n", "\n"), "%s/%s imported translation" % [row[0], header[column]])
+		assert_eq(tr("MONTHS_SHORT").split(",").size(), 12)
+
+
+func test_latin_catalog_glyphs_exist_in_all_game_fonts() -> void:
+	var glyphs: Dictionary = {}
+	for row: PackedStringArray in _read_csv()[1]:
+		for column in range(3, row.size()):
+			for character: String in row[column]:
+				if character.unicode_at(0) >= 32:
+					glyphs[character] = true
+	for path: String in ["res://assets/fonts/dynapuff/dynapuff-variable.ttf", "res://assets/fonts/rubik/rubik-variable.ttf", "res://assets/fonts/nunitosans/nunitosans-variable.ttf"]:
+		var font: FontFile = load(path)
+		for character: String in glyphs:
+			assert_true(font.has_char(character.unicode_at(0)), "%s contains %s" % [path, character])
 
 
 func test_future_catalog_variants_without_enabling_translations() -> void:

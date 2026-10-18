@@ -94,7 +94,7 @@ func _check(popup: DailyRewardPopup, day: int, available: bool) -> void:
 func test_six_aspects_locales_insets_days_and_claimed_available_states() -> void:
 	var original: Dictionary = Economy._data.to_dict().duplicate(true)
 	for dimensions: Vector2i in SIZES:
-		for locale: String in ["en", "tr"]:
+		for locale: String in LocaleUtil.SUPPORTED:
 			TranslationServer.set_locale(locale)
 			for insets: Vector4i in [Vector4i.ZERO, Vector4i(24, 96, 24, 48)]:
 				for day: int in [1, 7, 10]:
@@ -144,7 +144,7 @@ func test_five_columns_two_rows_fit_a_narrower_phone() -> void:
 
 
 func test_long_reward_labels_scroll_without_clipping_footer() -> void:
-	for locale: String in ["en", "tr"]:
+	for locale: String in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		var popup: DailyRewardPopup = await _mount(Vector2i(720, 1280), Vector4i(24, 96, 24, 48), 7, true)
 		popup._currency.text = "A longer localized reward name with readable complete details. ".repeat(4)

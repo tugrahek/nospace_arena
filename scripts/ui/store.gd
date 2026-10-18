@@ -12,6 +12,8 @@ const FRONTIER_BOTTOM: float = 6.0
 const FRONTIER_HEIGHT: float = 2.0
 const SELECTOR_BOTTOM_BREATHING: float = 36.0
 
+@export var minimum_balance_font_size: int = 18
+
 enum Category { CHARACTERS, ARENAS, BOOSTS, SUPPLY }
 
 @onready var _bounds: Control = $SafeArea/Bounds
@@ -31,9 +33,11 @@ var _supply: SupplyPopup
 var _refresh_pending: bool = false
 var _selector: HBoxContainer
 var _layout_pending: bool = false
+var _balance_font_size: int = 0
 
 
 func _ready() -> void:
+	_balance_font_size = _coins.get_theme_font_size("font_size")
 	var selector_space := Control.new()
 	selector_space.name = "SelectorVerticalBreathing"
 	selector_space.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -122,6 +126,7 @@ func _refresh_layout() -> void:
 	var width: float = minf(_bounds.size.x, MAX_CONTENT_WIDTH)
 	_frame.offset_left = -width * 0.5
 	_frame.offset_right = width * 0.5
+	_fit_balance_text(width)
 	if _active_category != Category.SUPPLY and is_instance_valid(_selector):
 		var showcase: StoreShowcase = _list.get_node_or_null("Showcase") as StoreShowcase
 		if showcase != null:
@@ -130,10 +135,23 @@ func _refresh_layout() -> void:
 	_layout_frontier()
 
 
+## Fit localized balances beside the centered title without moving either label.
+func _fit_balance_text(width: float) -> void:
+	var budget: float = maxf(0.0, (width - _title.get_combined_minimum_size().x) * 0.5
+		- float(_frame.get_theme_constant("separation")))
+	var font: Font = _coins.get_theme_font("font")
+	var font_size: int = _balance_font_size
+	while font_size > minimum_balance_font_size and font.get_string_size(_coins.text,
+			HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x > budget:
+		font_size -= 1
+	_coins.add_theme_font_size_override("font_size", font_size)
+
+
 ## Rebuild only after the current button/signal stack returns; never free an emitting control.
 func _request_refresh(force: bool = false) -> void:
 	if not force and _active_category == Category.SUPPLY and is_instance_valid(_supply):
 		_coins.text = tr("HUD_CURRENCY_VALUE") % Economy.balance()
+		_queue_layout()
 		_supply.refresh()
 		return
 	if _refresh_pending:

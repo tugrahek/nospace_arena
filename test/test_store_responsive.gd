@@ -99,7 +99,7 @@ func _inside(actual: Rect2, outer: Rect2, context: String) -> void:
 
 func test_all_ratios_locales_insets_and_three_categories() -> void:
 	for dimensions: Vector2i in SIZES:
-		for locale: String in ["en", "tr"]:
+		for locale: String in LocaleUtil.SUPPORTED:
 			TranslationServer.set_locale(locale)
 			for insets: Vector4i in [Vector4i.ZERO, Vector4i(24, 96, 24, 48)]:
 				var store: Control = await _mount(dimensions, insets)
@@ -211,7 +211,7 @@ func test_final_selector_and_action_can_scroll_above_back_on_all_ratios() -> voi
 
 func test_long_balance_and_long_selector_text_reflow() -> void:
 	Economy._data.currency = 999999999
-	for locale: String in ["en", "tr"]:
+	for locale: String in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		var store: Control = await _mount(Vector2i(720, 1280), Vector4i(24, 96, 24, 48))
 		_check_shell(store)
@@ -243,7 +243,7 @@ func test_supply_tab_routes_to_existing_embedded_view_and_returns() -> void:
 
 func test_three_category_selectors_share_bottom_position() -> void:
 	for dimensions: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600)]:
-		for locale: String in ["tr", "en"]:
+		for locale: String in LocaleUtil.SUPPORTED:
 			TranslationServer.set_locale(locale)
 			var store: Control = await _mount(dimensions, Vector4i(24, 96, 24, 48))
 			var positions: Array[float] = []
@@ -275,7 +275,7 @@ func test_three_category_selectors_share_bottom_position() -> void:
 
 func test_embedded_supply_uses_one_scroll_and_keeps_footer_actions_reachable() -> void:
 	for dimensions: Vector2i in [Vector2i(720, 960), Vector2i(720, 1280), Vector2i(720, 1600), Vector2i(640, 1280), Vector2i(960, 1280)]:
-		for locale: String in ["tr", "en"]:
+		for locale: String in LocaleUtil.SUPPORTED:
 			TranslationServer.set_locale(locale)
 			var store: Control = await _mount(dimensions, Vector4i(24, 96, 24, 48))
 			var profile: Dictionary = Economy._data.to_dict().duplicate(true)

@@ -35,3 +35,13 @@ func test_december_january_boundary_keeps_full_dates() -> void:
 	TranslationServer.set_locale("tr")
 	assert_eq(LV.format_date(20261231), "31 Ara 2026")
 	assert_eq(LV.format_date(20270101), "1 Oca 2027")
+
+
+func test_latin_display_templates_leave_canonical_date_and_seed_unchanged() -> void:
+	var seed: int = DailySeed.seed_for_date(2026, 6, 22)
+	var canonical: String = DailySeed.date_string(seed)
+	for pair: Array in [["de", "22. Juni 2026"], ["fr", "22 juin 2026"], ["es", "22 jun 2026"], ["pt_BR", "22 jun. 2026"], ["it", "22 giu 2026"]]:
+		TranslationServer.set_locale(pair[0])
+		assert_eq(LV.format_date(20260622), pair[1])
+		assert_eq(DailySeed.seed_for_date(2026, 6, 22), seed)
+		assert_eq(DailySeed.date_string(seed), canonical)

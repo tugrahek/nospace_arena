@@ -86,9 +86,7 @@ static func format_date(date_int: int) -> String:
 	var d: int = date_int % 100
 	var months: PackedStringArray = TranslationServer.translate(&"MONTHS_SHORT").split(",")
 	var mon: String = months[clampi(m - 1, 0, months.size() - 1)] if months.size() >= 12 else str(m)
-	if TranslationServer.get_locale().begins_with("tr"):
-		return "%d %s %d" % [d, mon, y]
-	return "%s %d, %d" % [mon, d, y]
+	return TranslationServer.translate(&"LEADERBOARD_DATE").format({"day": d, "month": mon, "year": y})
 
 
 ## Builds a single flat score row, with one prominent surface for the actual first place.

@@ -136,7 +136,8 @@ func _apply_texts() -> void:
 	_tap.text = tr("CONTROL_TAP")
 	_dpad.text = tr("CONTROL_DPAD")
 	_language_label.text = tr("SETTINGS_LANGUAGE")
-	var key: String = {"": "LANG_AUTO", "en": "LANG_EN", "tr": "LANG_TR"}.get(AudioManager.settings().language, "LANG_AUTO")
+	var language: String = AudioManager.settings().language
+	var key: String = "LANG_AUTO" if language.is_empty() else "LANG_" + language.to_upper()
 	_language_button.text = tr(key)
 	_back.text = tr("SETTINGS_BACK")
 

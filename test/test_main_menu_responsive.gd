@@ -80,7 +80,7 @@ func _assert_inside(control: Control, outer: Rect2, context: String) -> void:
 func test_six_aspects_safe_and_zero_insets_in_both_locales() -> void:
 	for dimensions: Vector2i in SIZES:
 		for insets: Vector4i in [Vector4i.ZERO, Vector4i(24, 96, 24, 48)]:
-			for locale: String in ["en", "tr"]:
+			for locale: String in LocaleUtil.SUPPORTED:
 				TranslationServer.set_locale(locale)
 				var menu: Control = await _mount(dimensions, insets)
 				var safe: Rect2 = _content_rect(menu)
@@ -130,7 +130,7 @@ func test_practical_phone_touch_targets_and_square_artwork() -> void:
 
 func test_long_balance_and_claimed_counter_remain_visible() -> void:
 	Economy._data.currency = 999999999
-	for locale: String in ["en", "tr"]:
+	for locale: String in LocaleUtil.SUPPORTED:
 		TranslationServer.set_locale(locale)
 		var menu: Control = await _mount(Vector2i(720, 1280), Vector4i(24, 96, 24, 48))
 		_assert_header_order(menu)
@@ -174,7 +174,7 @@ func test_native_resize_reflows_the_same_menu() -> void:
 
 func test_compact_composition_fits_portrait_and_narrow_safe_widths() -> void:
 	for dimensions: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600), Vector2i(640, 1280)]:
-		for locale: String in ["en", "tr"]:
+		for locale: String in LocaleUtil.SUPPORTED:
 			TranslationServer.set_locale(locale)
 			var menu: Control = await _mount(dimensions, Vector4i(24, 96, 24, 48))
 			var safe: Rect2 = _content_rect(menu)

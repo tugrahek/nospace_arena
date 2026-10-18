@@ -91,7 +91,7 @@ func test_locale_preference_normalizes_and_preserves_legacy_settings() -> void:
 	assert_eq(restored.control_scheme, 2)
 	settings.set_language("en_US")
 	assert_eq(settings.language, "en")
-	for unsupported: String in ["pt_BR", "zh_Hans", "zh_Hant", "invalid", ""]:
+	for unsupported: String in ["pt_PT", "zh_Hans", "zh_Hant", "invalid", ""]:
 		settings.set_language(unsupported)
 		assert_eq(settings.language, "", "unshipped preference remains auto")
 
@@ -102,7 +102,7 @@ func test_locale_preference_json_persistence() -> void:
 	if FileAccess.file_exists(path):
 		return
 	var settings := AudioSettings.new()
-	for preference: String in ["en", "tr", ""]:
+	for preference: String in LocaleUtil.SUPPORTED + [""]:
 		settings.set_language(preference)
 		SettingsStore.save_to(path, settings)
 		assert_eq(SettingsStore.load_from(path).language, preference, "disk round-trip")
