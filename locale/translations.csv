@@ -155,6 +155,8 @@ SETTINGS_COPYRIGHT,© 2026 Tuğra Hekimoğlu. All rights reserved.,© 2026 Tuğr
 SETTINGS_LICENSES,Open-source licenses,Açık kaynak lisansları
 LEGAL_TITLE,Licenses,Lisanslar
 RESULT_REWARDED_BONUS,Watch Ad +%d,Reklam İzle +%d
+RESULT_REWARDED_BONUS_ACTION,Watch Ad,Reklam İzle
+RESULT_REWARDED_BONUS_AMOUNT,+%d,+%d
 SUPPLY_ENTRY,Supply,İkmal
 SUPPLY_ODDS,Rewards,Olasılıklar
 SUPPLY_TOMORROW,Tomorrow,Yarın

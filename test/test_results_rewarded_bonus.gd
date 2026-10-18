@@ -99,8 +99,29 @@ func test_eligible_ready_offer_waits_for_finalized_results_and_localizes() -> vo
 		_hud.finalize_result_rewards()
 		assert_true(_button.visible)
 		assert_false(_button.disabled)
+		assert_eq(_button.get_node("Content/ActionLabel").text, "Watch Ad" if locale == "en" else "Reklam İzle")
+		assert_eq(_button.get_node("Content/Reward/Amount").text, "+50")
 		assert_eq(_button.text, "Watch Ad +50" if locale == "en" else "Reklam İzle +50")
 	assert_eq(_button.theme_type_variation, &"Secondary")
+
+
+func test_reward_labels_do_not_parse_translated_sentence_or_assume_amount_position() -> void:
+	_ready_ad()
+	_finish(101, false)
+	var translation := Translation.new()
+	translation.locale = "en_US"
+	translation.add_message("RESULT_REWARDED_BONUS", "%d coins: continue")
+	translation.add_message("RESULT_REWARDED_BONUS_ACTION", "Continue")
+	translation.add_message("RESULT_REWARDED_BONUS_AMOUNT", "%d coins")
+	TranslationServer.add_translation(translation)
+	TranslationServer.set_locale("en_US")
+	_hud.finalize_result_rewards()
+	assert_eq(_button.text, "50 coins: continue")
+	assert_eq(_button.get_node("Content/ActionLabel").text, "Continue")
+	assert_eq(_button.get_node("Content/Reward/Amount").text, "50 coins")
+	assert_eq(Economy.balance(), 101, "formatting never claims a reward")
+	assert_eq(_fake.show_tokens.size(), 0, "formatting never shows an ad")
+	TranslationServer.remove_translation(translation)
 
 
 func test_zero_payout_hides_offer_without_requesting_ad() -> void:

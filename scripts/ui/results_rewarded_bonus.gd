@@ -66,12 +66,10 @@ func _refresh() -> void:
 	var status: Dictionary = economy.rewarded_mission_bonus_status()
 	visible = _finalized and status["eligible"] and ads_service.is_rewarded_available()
 	disabled = not visible
-	var formatted_text: String = tr("RESULT_REWARDED_BONUS") % int(status["amount"])
-	text = formatted_text
-	var amount_text: String = "+%d" % int(status["amount"])
-	var amount_start: int = formatted_text.rfind(amount_text)
-	_action_label.text = formatted_text.substr(0, amount_start).strip_edges() if amount_start >= 0 else formatted_text
-	_amount_label.text = amount_text
+	var amount: int = int(status["amount"])
+	text = tr("RESULT_REWARDED_BONUS") % amount
+	_action_label.text = tr("RESULT_REWARDED_BONUS_ACTION")
+	_amount_label.text = tr("RESULT_REWARDED_BONUS_AMOUNT") % amount
 
 
 func _on_pressed() -> void:
