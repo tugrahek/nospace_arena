@@ -222,3 +222,13 @@ func test_reveal_animation_envelope_stays_inside_scroll_without_model_mutation()
 		await wait_seconds(0.07)
 	assert_eq(_economy._data.to_dict(), snapshot)
 	assert_eq(_economy.supply_boxes()._rng.state, rng)
+
+
+func test_b1_long_supply_labels_fit_360_by_640() -> void:
+	for locale: String in ["ru", "id", "vi", "pl"]:
+		TranslationServer.set_locale(locale)
+		LocaleFonts.apply(locale)
+		for case_name: String in ["odds", "coins", "extra_life", "slow_start"]:
+			var popup: SupplyPopup = await _mount(Vector2i(360, 640), Vector4i(12, 32, 12, 24), case_name)
+			_check_view(popup, case_name)
+			popup.get_parent().free()

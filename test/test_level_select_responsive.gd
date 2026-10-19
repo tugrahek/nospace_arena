@@ -205,3 +205,13 @@ func test_resize_recenters_route_and_preserves_profile() -> void:
 	assert_almost_eq(center.get_global_rect().get_center().x, 480.0, 0.1)
 	_check_route(screen, "resized tablet")
 	assert_eq(Economy._data.to_dict(), profile)
+
+
+func test_b1_long_campaign_descriptions_fit_360_by_640() -> void:
+	for locale: String in ["ru", "id", "vi", "pl"]:
+		TranslationServer.set_locale(locale)
+		LocaleFonts.apply(locale)
+		_progress(ContentCatalog.LEVELS.size() - 1)
+		var screen: Control = await _mount(Vector2i(360, 640), Vector4i(12, 32, 12, 24))
+		_check_route(screen, "B1 campaign 360x640 " + locale)
+		screen.get_parent().free()

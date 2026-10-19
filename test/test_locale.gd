@@ -132,19 +132,15 @@ func test_all_catalog_placeholders_and_imported_resources_match() -> void:
 
 func test_latin_catalog_glyphs_exist_in_all_game_fonts() -> void:
 	var parsed: Array = _read_csv()
-	var glyphs: Dictionary = {}
-	for row: PackedStringArray in parsed[1]:
-		for column in range(1, row.size()):
-			if LocaleFonts.REGIONS.has(parsed[0][column]):
-				continue
-			for character: String in row[column]:
-				if character.unicode_at(0) >= 32:
-					glyphs[character] = true
-	for path: String in ["res://assets/fonts/dynapuff/dynapuff-variable.ttf", "res://assets/fonts/rubik/rubik-variable.ttf", "res://assets/fonts/nunitosans/nunitosans-variable.ttf"]:
-		var font: FontFile = load(path)
-		for character: String in glyphs:
-			assert_true(font.has_char(character.unicode_at(0)), "%s contains %s" % [path, character])
-
+	for column in range(1, parsed[0].size()):
+		var locale: String = parsed[0][column]
+		if LocaleFonts.REGIONS.has(locale):
+			continue
+		LocaleFonts.apply(locale)
+		for path: String in LocaleFonts.LATIN_PATHS:
+			var font: Font = load(path)
+			for row: PackedStringArray in parsed[1]:
+				_assert_bundled_text(row[column].replace("\\n", "\n"), font, locale, row[0])
 
 func test_future_catalog_variants_without_enabling_translations() -> void:
 	var available: Array[String] = ["en", "tr", "pt_BR", "zh_Hans", "zh_Hant"]
@@ -182,6 +178,7 @@ func test_b1_catalog_shapes_without_system_fonts() -> void:
 	var parsed: Array = _read_csv()
 	for locale: String in ["ru", "id", "vi", "pl"]:
 		TranslationServer.set_locale(locale)
+		LocaleFonts.apply(locale)
 		await get_tree().process_frame
 		var column: int = parsed[0].find(locale)
 		for path: String in LocaleFonts.LATIN_PATHS:
