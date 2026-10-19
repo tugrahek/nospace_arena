@@ -41,7 +41,7 @@ offset_left = -400.0
 offset_top = 40.0
 offset_right = 400.0
 offset_bottom = -288.0
-theme_override_constants/separation = 32
+theme_override_constants/separation = 24
 
 [node name="Title" type="Label" parent="SafeArea/Bounds/Center"]
 layout_mode = 2
@@ -61,6 +61,36 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 20
+
+[node name="LanguageRow" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="NameLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow"]
+layout_mode = 2
+theme_type_variation = &"Heading"
+theme_override_font_sizes/font_size = 27
+text = "Language"
+
+[node name="LanguageButton" type="Button" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+alignment = 0
+theme_override_font_sizes/font_size = 25
+text = "English"
+
+[node name="Chevron" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton"]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -48.0
+offset_right = -20.0
+vertical_alignment = 1
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 28
+mouse_filter = 2
+text = "›"
 
 [node name="Rows" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content"]
 layout_mode = 2
@@ -258,36 +288,6 @@ button_group = SubResource("ctrl_group")
 text = "D-Pad"
 script = ExtResource("4_option")
 icon_kind = 2
-
-[node name="LanguageRow" type="VBoxContainer" parent="SafeArea/Bounds/Center/Scroll/Content"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 12
-
-[node name="NameLabel" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow"]
-layout_mode = 2
-theme_type_variation = &"Heading"
-theme_override_font_sizes/font_size = 27
-text = "Language"
-
-[node name="LanguageButton" type="Button" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow"]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-alignment = 0
-theme_override_font_sizes/font_size = 25
-text = "English"
-
-[node name="Chevron" type="Label" parent="SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton"]
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -48.0
-offset_right = -20.0
-vertical_alignment = 1
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 28
-mouse_filter = 2
-text = "›"
 
 [node name="Bottom" type="VBoxContainer" parent="SafeArea/Bounds"]
 anchor_left = 0.5

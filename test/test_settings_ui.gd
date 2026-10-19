@@ -262,6 +262,33 @@ func test_sections_and_language_labels_fit_720_by_1280() -> void:
 		assert_gte(language_button.size.x, language_button.get_combined_minimum_size().x)
 
 
+func test_initial_language_row_is_visible_at_compact_and_standard_sizes() -> void:
+	for viewport_size in [Vector2(360, 640), Vector2(393, 852)]:
+		var panel: Control = SETTINGS_SCENE.instantiate()
+		panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		panel.size = viewport_size
+		add_child_autofree(panel)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var scroll: ScrollContainer = panel.get_node("SafeArea/Bounds/Center/Scroll")
+		var language_row: Control = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow")
+		var label: Label = language_row.get_node("NameLabel")
+		var language_button: Button = language_row.get_node("LanguageButton")
+		var scroll_rect: Rect2 = scroll.get_global_rect()
+		assert_gte(label.get_global_rect().position.y, scroll_rect.position.y, "language label starts in the initial viewport at %s" % viewport_size)
+		assert_lte(language_button.get_global_rect().end.y, scroll_rect.end.y, "language selector is visible without scrolling at %s" % viewport_size)
+		assert_gte(language_row.get_global_rect().position.x, scroll_rect.position.x)
+		assert_lte(language_row.get_global_rect().end.x, scroll_rect.end.x, "language row has no horizontal overflow")
+		assert_gte(language_button.size.y, 72.0, "language touch target remains unchanged")
+		var back_button: Button = panel.get_node("SafeArea/Bounds/Bottom/BackButton")
+		var footer: Control = panel.get_node("SafeArea/Bounds/Bottom/LegalFooter")
+		assert_lte(back_button.get_global_rect().end.y, viewport_size.y - 24.0, "Back remains above the safe-area edge")
+		assert_lte(footer.get_global_rect().end.y, viewport_size.y - 24.0, "legal footer remains visible above the safe-area edge")
+		assert_gte(back_button.size.y, 56.0)
+		panel.queue_free()
+		await get_tree().process_frame
+
+
 func test_language_selector_small_and_long_lists_keep_scroll_behavior() -> void:
 	for count in [3, 10]:
 		var selector := SettingsLanguageSelector.new()
