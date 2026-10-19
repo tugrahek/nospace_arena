@@ -89,6 +89,12 @@ func test_pause_settings_round_trip_and_actions_keep_existing_semantics() -> voi
 		assert_true(get_tree().paused)
 		var panel: Control = pause.get("_settings_panel")
 		assert_not_null(panel)
+		for action in ["AudioButton", "ControlsButton"]:
+			panel.get_node("SafeArea/Bounds/Center/Views/Main/" + action).pressed.emit()
+			panel.call("close")
+			assert_true(panel.get_node("SafeArea/Bounds/Center/Views/Main").visible)
+			assert_false(panel.is_queued_for_deletion(), "subview Back returns to Settings")
+			assert_true(get_tree().paused, "subview Back preserves Pause")
 		panel.call("close")
 		await get_tree().process_frame
 		assert_null(pause.get("_settings_panel"), "Settings closes cleanly on each return")
@@ -113,7 +119,7 @@ func test_pause_labels_follow_english_and_turkish_locale() -> void:
 	assert_eq(title.text, "Paused")
 	TranslationServer.set_locale("tr")
 	pause.call("_apply_texts")
-	assert_eq(title.text, "Duraklatıldı")
+	assert_eq(title.text, "Oyun Duraklatıldı")
 	assert_eq(pause.get_node("Overlay/SafeArea/Bounds/Box/MissionSection/Heading").text, "Görevler")
 
 
@@ -152,7 +158,7 @@ func test_pause_settings_language_switch_refreshes_hud_without_changing_values()
 	assert_eq(combo.text, "Kombo x4")
 	assert_eq(daily.text, tr("HUD_DAILY") + " • " + expected_date)
 	assert_eq(best.text, "REKOR: 987654")
-	assert_eq(currency.text, "Para: 321")
+	assert_eq(currency.text, "Jeton: 321")
 	assert_eq(hud.get("_last_combo"), last_combo)
 	assert_eq(hud.get("_target"), target)
 	assert_eq(hud.get("_last_percent"), percent)

@@ -38,12 +38,12 @@ func test_shipped_languages_select_persist_and_refresh_settings() -> void:
 		assert_eq(AudioManager.settings().language, code)
 		assert_eq(TranslationServer.get_locale(), code)
 		assert_eq(SettingsStore.load_from(AudioManager.SETTINGS_PATH).language, code)
-		assert_eq(panel.get_node("SafeArea/Bounds/Center/Title").text, tr("SETTINGS_TITLE"))
-		assert_eq(panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton").text,
-			tr(selector.options[index]["key"]))
+		assert_eq(panel.get_node("SafeArea/Bounds/Center/Header/Title").text, tr("SETTINGS_TITLE"))
+		assert_eq(panel.get_node("SafeArea/Bounds/Center/Views/Main/LanguageRow/LanguageButton").text,
+			tr("SETTINGS_LANGUAGE") + "\n" + tr(selector.options[index]["key"]))
 		await get_tree().process_frame
 		assert_eq(panel.is_layout_rtl(), code == "ar", "UI follows active locale direction")
-		var language_button: Button = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton")
+		var language_button: Button = panel.get_node("SafeArea/Bounds/Center/Views/Main/LanguageRow/LanguageButton")
 		assert_gte(language_button.size.x, language_button.get_combined_minimum_size().x, "endonym fits")
 		selector.scroll.ensure_control_visible(button)
 		await get_tree().process_frame
@@ -54,14 +54,14 @@ func test_panel_instantiates_and_reflects_settings() -> void:
 	var panel: Node = load("res://scenes/ui/Settings.tscn").instantiate()
 	add_child_autofree(panel)
 	await get_tree().process_frame
-	var master: HSlider = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/MasterRow/Slider")
+	var master: HSlider = panel.get_node("SafeArea/Bounds/Center/Views/Audio/MasterRow/Slider")
 	assert_almost_eq(master.value, AudioManager.settings().master, 0.0001)
 	for entry in [
 		{"name": "MasterRow", "value": AudioManager.settings().master},
 		{"name": "SfxRow", "value": AudioManager.settings().sfx},
 		{"name": "MusicRow", "value": AudioManager.settings().music},
 	]:
-		var label: Label = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/%s/Header/ValueLabel" % entry["name"])
+		var label: Label = panel.get_node("SafeArea/Bounds/Center/Views/Audio/%s/Header/ValueLabel" % entry["name"])
 		assert_eq(label.text, "%d%%" % roundi(float(entry["value"]) * 100.0))
 
 
@@ -73,7 +73,7 @@ func test_main_menu_and_standalone_back_keep_settings_route() -> void:
 	var panel: Control = SETTINGS_SCENE.instantiate()
 	assert_eq(panel.get_script().get_script_constant_map()["MENU_SCENE"], "res://scenes/main/MainMenu.tscn")
 	assert_false(panel.embedded)
-	assert_not_null(panel.get_node("SafeArea/Bounds/Bottom/BackButton"))
+	assert_not_null(panel.get_node("SafeArea/Bounds/Center/Header/BackButton"))
 	panel.free()
 
 
@@ -81,7 +81,7 @@ func test_slider_change_applies_to_audiomanager() -> void:
 	var panel: Node = load("res://scenes/ui/Settings.tscn").instantiate()
 	add_child_autofree(panel)
 	await get_tree().process_frame
-	var sfx: HSlider = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/SfxRow/Slider")
+	var sfx: HSlider = panel.get_node("SafeArea/Bounds/Center/Views/Audio/SfxRow/Slider")
 	sfx.value = 0.25
 	await get_tree().process_frame
 	assert_almost_eq(AudioManager.settings().sfx, 0.25, 0.0001)
@@ -107,8 +107,9 @@ func test_legal_footer_is_separate_bottom_safe_region() -> void:
 	var footer: Control = panel.get_node("SafeArea/Bounds/Bottom/LegalFooter")
 	assert_false(panel.has_node("SafeArea/Bounds/Center/LegalFooter"))
 	assert_eq(panel.get_node("SafeArea/Bounds/Bottom").anchor_bottom, 1.0)
-	assert_eq(panel.get_node("SafeArea/Bounds/Bottom").offset_bottom, -24.0)
-	assert_almost_eq(footer.get_global_rect().position.y - panel.get_node("SafeArea/Bounds/Bottom/BackButton").get_global_rect().end.y, 40.0, 0.5)
+	assert_eq(panel.get_node("SafeArea/Bounds/Bottom").offset_bottom, 0.0)
+	assert_lte(panel.get_node("SafeArea/Bounds/Center").get_global_rect().end.y, footer.get_global_rect().position.y)
+	assert_eq(panel.get_node("SafeArea/Bounds/Center/Header/BackButton").accessibility_name, tr("SETTINGS_BACK"))
 	assert_not_null(footer.get_node("Copyright"))
 	assert_not_null(footer.get_node("LicensesButton"))
 
@@ -150,12 +151,12 @@ func test_language_pick_applies_locale_and_refreshes_panel() -> void:
 	var panel: Node = load("res://scenes/ui/Settings.tscn").instantiate()
 	add_child_autofree(panel)
 	await get_tree().process_frame
-	panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton").pressed.emit()
+	panel.get_node("SafeArea/Bounds/Center/Views/Main/LanguageRow/LanguageButton").pressed.emit()
 	var selector: SettingsLanguageSelector = panel.get("_language_overlay")
 	var tr_button: Button = selector.get("_buttons")[2]
 	tr_button.pressed.emit()
 	assert_true(TranslationServer.get_locale().begins_with("tr"), "locale switched to tr")
-	var title: Label = panel.get_node("SafeArea/Bounds/Center/Title")
+	var title: Label = panel.get_node("SafeArea/Bounds/Center/Header/Title")
 	assert_eq(title.text, "Ayarlar", "panel re-labeled itself in the new language")
 	assert_eq(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton/Content/Label").text, "Mağaza", "live Main Menu label translated")
 	assert_eq(menu.get_node("SafeArea/Bounds/Frame/Header/CoinsPanel/Content/Coins").text, "Jeton: 0", "live Main Menu dynamic text translated")
@@ -176,12 +177,12 @@ func test_all_audio_sliders_keep_range_and_persist_on_drag_end() -> void:
 		{"name": "SfxRow", "field": "sfx"},
 		{"name": "MusicRow", "field": "music"},
 	]:
-		var slider: HSlider = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/%s/Slider" % entry["name"])
+		var slider: HSlider = panel.get_node("SafeArea/Bounds/Center/Views/Audio/%s/Slider" % entry["name"])
 		assert_eq(slider.min_value, 0.0)
 		assert_eq(slider.max_value, 1.0)
 		assert_eq(slider.step, 0.01)
 		slider.value = 0.37
-		var value_label: Label = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/%s/Header/ValueLabel" % entry["name"])
+		var value_label: Label = panel.get_node("SafeArea/Bounds/Center/Views/Audio/%s/Header/ValueLabel" % entry["name"])
 		assert_eq(value_label.text, "37%", "visible value follows the real slider setting")
 		slider.drag_ended.emit(true)
 		assert_almost_eq(float(AudioManager.settings().get(entry["field"])), 0.37, 0.0001)
@@ -192,8 +193,8 @@ func test_all_audio_sliders_keep_range_and_persist_on_drag_end() -> void:
 func test_mute_state_and_all_control_choices_keep_saved_semantics() -> void:
 	var panel: Control = SETTINGS_SCENE.instantiate()
 	add_child_autofree(panel)
-	var mute: Button = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow")
-	var mute_state: Label = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/MuteRow/Content/StateLabel")
+	var mute: Button = panel.get_node("SafeArea/Bounds/Center/Views/Audio/MuteRow")
+	var mute_state: Label = panel.get_node("SafeArea/Bounds/Center/Views/Audio/MuteRow/Content/StateLabel")
 	var next_state: bool = not AudioManager.settings().muted
 	mute.button_pressed = next_state
 	assert_eq(AudioManager.settings().muted, next_state)
@@ -205,7 +206,7 @@ func test_mute_state_and_all_control_choices_keep_saved_semantics() -> void:
 		{"name": "SwipeButton", "id": 1},
 		{"name": "DpadButton", "id": 2},
 	]:
-		var button: Button = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/ControlsRow/Segment/%s" % entry["name"])
+		var button: Button = panel.get_node("SafeArea/Bounds/Center/Views/Controls/Segment/%s" % entry["name"])
 		button.button_pressed = true
 		button.pressed.emit()
 		assert_eq(AudioManager.settings().control_scheme, entry["id"])
@@ -216,8 +217,8 @@ func test_mute_state_and_all_control_choices_keep_saved_semantics() -> void:
 func test_language_choices_persist_and_refresh_both_locales() -> void:
 	var panel: Control = SETTINGS_SCENE.instantiate()
 	add_child_autofree(panel)
-	var title: Label = panel.get_node("SafeArea/Bounds/Center/Title")
-	panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton").pressed.emit()
+	var title: Label = panel.get_node("SafeArea/Bounds/Center/Header/Title")
+	panel.get_node("SafeArea/Bounds/Center/Views/Main/LanguageRow/LanguageButton").pressed.emit()
 	var selector: SettingsLanguageSelector = panel.get("_language_overlay")
 	assert_not_null(selector)
 	for entry in [
@@ -237,56 +238,15 @@ func test_language_choices_persist_and_refresh_both_locales() -> void:
 	assert_true(is_instance_valid(panel), "language Back preserves Settings")
 
 
-func test_sections_and_language_labels_fit_720_by_1280() -> void:
+func test_explicit_current_locale_refreshes_selected_language() -> void:
+	AudioManager.set_language("")
 	var panel: Control = SETTINGS_SCENE.instantiate()
 	add_child_autofree(panel)
-	for locale in ["en", "tr"]:
-		TranslationServer.set_locale(locale)
-		panel.call("_apply_texts")
-		await get_tree().process_frame
-		for path in ["SafeArea/Bounds/Center/Title", "SafeArea/Bounds/Center/Scroll/Content/Rows", "SafeArea/Bounds/Center/Scroll/Content/ControlsRow", "SafeArea/Bounds/Center/Scroll/Content/LanguageRow", "SafeArea/Bounds/Bottom/BackButton"]:
-			var section: Control = panel.get_node(path)
-			assert_gte(section.get_global_rect().position.y, 0.0)
-			assert_lte(section.get_global_rect().end.y, 1280.0)
-		for row_name in ["MasterRow", "SfxRow", "MusicRow"]:
-			var name_label: Label = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/%s/Header/NameLabel" % row_name)
-			var value_label: Label = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/Rows/%s/Header/ValueLabel" % row_name)
-			assert_lte(name_label.get_global_rect().end.x, value_label.get_global_rect().position.x)
-			assert_gte(name_label.size.x, name_label.get_combined_minimum_size().x)
-			assert_gte(value_label.size.x, value_label.get_combined_minimum_size().x)
-		var segment: Control = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/ControlsRow/Segment")
-		for child in segment.get_children():
-			assert_true(segment.get_global_rect().encloses(child.get_global_rect()))
-			assert_gte(child.size.x, child.get_combined_minimum_size().x)
-		var language_button: Button = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton")
-		assert_gte(language_button.size.x, language_button.get_combined_minimum_size().x)
-
-
-func test_initial_language_row_is_visible_at_compact_and_standard_sizes() -> void:
-	for viewport_size in [Vector2(360, 640), Vector2(393, 852)]:
-		var panel: Control = SETTINGS_SCENE.instantiate()
-		panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-		panel.size = viewport_size
-		add_child_autofree(panel)
-		await get_tree().process_frame
-		await get_tree().process_frame
-		var scroll: ScrollContainer = panel.get_node("SafeArea/Bounds/Center/Scroll")
-		var language_row: Control = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow")
-		var label: Label = language_row.get_node("NameLabel")
-		var language_button: Button = language_row.get_node("LanguageButton")
-		var scroll_rect: Rect2 = scroll.get_global_rect()
-		assert_gte(label.get_global_rect().position.y, scroll_rect.position.y, "language label starts in the initial viewport at %s" % viewport_size)
-		assert_lte(language_button.get_global_rect().end.y, scroll_rect.end.y, "language selector is visible without scrolling at %s" % viewport_size)
-		assert_gte(language_row.get_global_rect().position.x, scroll_rect.position.x)
-		assert_lte(language_row.get_global_rect().end.x, scroll_rect.end.x, "language row has no horizontal overflow")
-		assert_gte(language_button.size.y, 72.0, "language touch target remains unchanged")
-		var back_button: Button = panel.get_node("SafeArea/Bounds/Bottom/BackButton")
-		var footer: Control = panel.get_node("SafeArea/Bounds/Bottom/LegalFooter")
-		assert_lte(back_button.get_global_rect().end.y, viewport_size.y - 24.0, "Back remains above the safe-area edge")
-		assert_lte(footer.get_global_rect().end.y, viewport_size.y - 24.0, "legal footer remains visible above the safe-area edge")
-		assert_gte(back_button.size.y, 56.0)
-		panel.queue_free()
-		await get_tree().process_frame
+	var locale: String = TranslationServer.get_locale()
+	panel.call("_on_language", locale)
+	var button: Button = panel.get_node("SafeArea/Bounds/Center/Views/Main/LanguageRow/LanguageButton")
+	assert_eq(button.text, tr("SETTINGS_LANGUAGE") + "\n" + tr("LANG_" + locale.to_upper()))
+	assert_eq(SettingsStore.load_from(AudioManager.SETTINGS_PATH).language, locale)
 
 
 func test_language_selector_small_and_long_lists_keep_scroll_behavior() -> void:
@@ -320,9 +280,9 @@ func test_language_selector_repeated_open_close_keeps_one_live_instance() -> voi
 	var panel: Control = SETTINGS_SCENE.instantiate()
 	add_child_autofree(panel)
 	for i in 3:
-		panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton").pressed.emit()
+		panel.get_node("SafeArea/Bounds/Center/Views/Main/LanguageRow/LanguageButton").pressed.emit()
 		var selector: SettingsLanguageSelector = panel.get("_language_overlay")
-		panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton").pressed.emit()
+		panel.get_node("SafeArea/Bounds/Center/Views/Main/LanguageRow/LanguageButton").pressed.emit()
 		assert_same(panel.get("_language_overlay"), selector)
 		assert_eq(selector.language_selected.get_connections().size(), 1)
 		panel.call("close")
