@@ -33,9 +33,9 @@ func test_scene_open_close_and_localization() -> void:
 		TranslationServer.set_locale(locale)
 		_popup.present()
 		assert_true(_popup.visible)
-		assert_eq(_popup._title.text, "İkmal Kutusu" if locale == "tr" else "Supply Box")
+		assert_eq(_popup._title.text, "Ödül Kutusu" if locale == "tr" else "Supply Box")
 		assert_eq(_popup._ad.text, "Reklam İzle" if locale == "tr" else "Watch Ad")
-		assert_eq(_popup._coin.text, "150 Coin" if locale == "tr" else "150 Coins")
+		assert_eq(_popup._coin.text, "150 Jeton" if locale == "tr" else "150 Coins")
 		_popup.close()
 		assert_false(_popup.visible)
 	assert_eq(_economy.writes, 0)
@@ -354,6 +354,14 @@ func test_odds_info_displays_resource_percentages_only_when_opened() -> void:
 	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child_count(), 4)
 	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child(0).get_node("Name").text, "Coins")
 	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child(0).get_node("Probability").text, "35%")
+	var coin_tiers: Array[int] = []
+	var coin_weight: float = 0.0
+	for entry: SupplyRewardEntry in _acquisition._config.reward_table.entries:
+		if entry.reward_type == &"coins":
+			coin_tiers.append(entry.amount)
+			coin_weight += entry.weight
+	assert_eq(coin_tiers, [100, 200, 500], "the 35% coin category contains three configured tiers")
+	assert_eq(coin_weight, 105.0, "coin tiers contribute the full 35% category weight")
 	var bonus_row: Control = _popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child(2)
 	assert_eq(bonus_row.get_node("Icon").get("effect"), BoostIcon.COIN_BONUS_ICON)
 	assert_false(_popup.has_node("SafeArea/Bounds/Frame/OddsView/CoinValues"))
@@ -362,11 +370,30 @@ func test_odds_info_displays_resource_percentages_only_when_opened() -> void:
 	_popup.hide_odds()
 	_popup.show_odds()
 	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Scroll/Body/Content/Rows").get_child(0).get_node("Name").text, tr("HUD_CURRENCY"))
-	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Title").text, "Olasılıklar")
+	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Title").text, "Ödül Olasılıkları")
+	assert_eq(_popup.get_node("SafeArea/Bounds/Frame/OddsView/Footer/Back").text, "Kutuya Dön")
+	assert_eq(_popup._close.text, "Kapat", "general close keeps its existing caption")
 	assert_false(_popup.has_node("SafeArea/Bounds/Frame/OddsView/CoinValues"))
 	_popup.get_node("SafeArea/Bounds/Frame/OddsView/Footer/Back").pressed.emit()
 	assert_true(_popup._surface.visible)
 	assert_false(_popup.get_node("SafeArea/Bounds/Frame/OddsView").visible)
+
+
+func test_odds_view_title_and_return_button_fit_reference_viewports() -> void:
+	var viewport: Viewport = get_viewport()
+	for dimensions: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600), Vector2i(960, 1280)]:
+		viewport.size = dimensions
+		_popup.visible = true
+		_popup.state = SupplyPopup.State.READY
+		_popup.show_odds()
+		await wait_process_frames(4)
+		var odds: Control = _popup.get_node("SafeArea/Bounds/Frame/OddsView")
+		var title: Control = _popup.get_node("SafeArea/Bounds/Frame/OddsView/Title")
+		var back: Control = _popup.get_node("SafeArea/Bounds/Frame/OddsView/Footer/Back")
+		assert_true(odds.get_global_rect().encloses(title.get_global_rect()), "title stays in odds frame at %s" % dimensions)
+		assert_true(odds.get_global_rect().encloses(back.get_global_rect()), "back stays in odds frame at %s" % dimensions)
+		assert_false(title.get_global_rect().intersects(back.get_global_rect()), "title and footer stay separate at %s" % dimensions)
+	viewport.size = Vector2i(720, 1280)
 
 
 func test_embedded_continue_returns_to_acquisition_without_inventory_or_regrant() -> void:

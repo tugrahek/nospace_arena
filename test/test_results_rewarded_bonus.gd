@@ -99,7 +99,7 @@ func test_eligible_ready_offer_waits_for_finalized_results_and_localizes() -> vo
 		_hud.finalize_result_rewards()
 		assert_true(_button.visible)
 		assert_false(_button.disabled)
-		assert_eq(_button.get_node("Content/ActionLabel").text, "Watch Ad" if locale == "en" else "Reklam İzle")
+		assert_eq(_button.get_node("Content/ActionLabel").text, "Watch an Ad" if locale == "en" else "Reklam İzle")
 		assert_eq(_button.get_node("Content/Reward/Amount").text, "+50")
 		assert_eq(_button.text, "Watch Ad +50" if locale == "en" else "Reklam İzle +50")
 	assert_eq(_button.theme_type_variation, &"Secondary")

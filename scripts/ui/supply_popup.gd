@@ -167,7 +167,7 @@ func refresh() -> void:
 	_odds.set_caption(tr("SUPPLY_ODDS"))
 	_odds.disabled = state != State.READY
 	$SafeArea/Bounds/Frame/OddsView/Title.text = tr("SUPPLY_ODDS")
-	$SafeArea/Bounds/Frame/OddsView/Footer/Back.set_caption(tr("SUPPLY_CLOSE"))
+	$SafeArea/Bounds/Frame/OddsView/Footer/Back.set_caption(tr("SUPPLY_BACK_TO_BOX"))
 	_feedback.visible = not _feedback.text.is_empty()
 	_close.visible = not embedded
 	_close.set_caption(tr("SUPPLY_CLOSE"))

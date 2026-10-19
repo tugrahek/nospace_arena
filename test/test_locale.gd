@@ -73,9 +73,9 @@ func test_resolver_chain() -> void:
 
 func test_comma_fields_not_truncated() -> void:
 	# Pins the quoting fix: these EN values used to be cut at their first comma by the CSV import.
-	assert_string_contains(tr("HOWTO_GOAL_BODY"), "close a loop")
+	assert_string_contains(tr("HOWTO_GOAL_BODY"), "Reconnect to claim an area")
 	assert_string_contains(tr("LEVEL_C12_DESC"), "no boosts")
-	assert_string_contains(tr("ARENA_EMBER_DESC"), "kinder target")
+	assert_string_contains(tr("ARENA_EMBER_DESC"), "lower capture target")
 	var months: PackedStringArray = tr("MONTHS_SHORT").split(",")
 	assert_eq(months.size(), 12, "12 short month names survive quoting")
 

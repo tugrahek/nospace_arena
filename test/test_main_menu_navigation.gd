@@ -7,7 +7,7 @@ const HUB_PATH: NodePath = NodePath("SafeArea/Bounds/Frame/ContentGroup/Footer/B
 const NAVIGATION: Array[Dictionary] = [
 	{"name": "StoreButton", "key": "MENU_STORE", "en": "Store", "tr": "Mağaza"},
 	{"name": "MissionsButton", "key": "MENU_MISSIONS_SHORT", "en": "Missions", "tr": "Görevler"},
-	{"name": "LeaderboardButton", "key": "MENU_LEADERBOARD", "en": "Leaderboard", "tr": "Liderlik"},
+	{"name": "LeaderboardButton", "key": "MENU_LEADERBOARD", "en": "Leaderboard", "tr": "Sıralama"},
 	{"name": "HowToButton", "key": "MENU_HOWTO", "en": "How to Play", "tr": "Nasıl Oynanır"},
 ]
 const DESTINATION_SCENES: Array[Dictionary] = [
@@ -74,7 +74,7 @@ func test_currency_pill_keeps_a_procedural_coin_and_localized_label() -> void:
 	assert_eq(coin_icon.mouse_filter, Control.MOUSE_FILTER_IGNORE, "coin never intercepts input")
 	assert_not_null(coins, "currency label remains in the existing pill")
 	TranslationServer.set_locale("tr")
-	assert_eq(tr("HUD_CURRENCY"), "Para", "TR currency label remains localized")
+	assert_eq(tr("HUD_CURRENCY"), "Jeton", "TR currency label remains localized")
 	TranslationServer.set_locale("en")
 	assert_eq(tr("HUD_CURRENCY"), "Coins", "EN currency label remains localized")
 	menu.free()

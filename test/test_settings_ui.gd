@@ -157,7 +157,7 @@ func test_language_pick_applies_locale_and_refreshes_panel() -> void:
 	var title: Label = panel.get_node("SafeArea/Bounds/Center/Title")
 	assert_eq(title.text, "Ayarlar", "panel re-labeled itself in the new language")
 	assert_eq(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton/Content/Label").text, "Mağaza", "live Main Menu label translated")
-	assert_eq(menu.get_node("SafeArea/Bounds/Frame/Header/CoinsPanel/Content/Coins").text, "Para: 0", "live Main Menu dynamic text translated")
+	assert_eq(menu.get_node("SafeArea/Bounds/Frame/Header/CoinsPanel/Content/Coins").text, "Jeton: 0", "live Main Menu dynamic text translated")
 	panel.call("_on_language", "en")
 	assert_eq(title.text, "Settings", "Settings refreshes to English immediately")
 	assert_eq(menu.get_node("SafeArea/Bounds/Frame/ContentGroup/Footer/Buttons/NavigationHub/StoreButton/Content/Label").text, "Store", "Main Menu refreshes to English immediately")
