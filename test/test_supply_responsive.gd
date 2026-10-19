@@ -159,6 +159,17 @@ func test_all_six_ratios_locales_insets_and_supply_states() -> void:
 					popup.get_parent().free()
 
 
+func test_a1_localized_supply_copy_fits_representative_portrait_views() -> void:
+	for locale: String in ["de", "fr", "es", "pt_BR", "it"]:
+		TranslationServer.set_locale(locale)
+		for dimensions: Vector2i in [Vector2i(720, 1280), Vector2i(720, 1600), Vector2i(960, 1280)]:
+			for insets: Vector4i in [Vector4i.ZERO, Vector4i(24, 96, 24, 48)]:
+				for case_name: String in ["odds", "coins", "slow_start", "extra_life", "tomorrow"]:
+					var popup: SupplyPopup = await _mount(dimensions, insets, case_name)
+					_check_view(popup, case_name)
+					popup.get_parent().free()
+
+
 func test_shared_small_dialog_and_scroll_keep_actions_accessible() -> void:
 	for case_name: String in ["ad", "odds", "coins", "extra_life", "save_retry"]:
 		var popup: SupplyPopup = await _mount(Vector2i(720, 1280), Vector4i(24, 96, 24, 48), case_name, true)
