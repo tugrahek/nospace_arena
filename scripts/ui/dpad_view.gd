@@ -8,6 +8,11 @@ extends Control
 var _active: bool = false
 
 
+func _ready() -> void:
+	# The directional overlay must match physical input coordinates in every locale.
+	layout_direction = Control.LAYOUT_DIRECTION_LTR
+
+
 func set_active(active: bool) -> void:
 	_active = active
 	visible = active

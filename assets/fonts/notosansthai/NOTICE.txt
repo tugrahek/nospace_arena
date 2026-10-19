@@ -1,0 +1,5 @@
+Source: https://raw.githubusercontent.com/google/fonts/main/ofl/notosansthai/NotoSansThai[wdth,wght].ttf
+License: SIL Open Font License 1.1; see OFL.txt.
+Unmodified upstream variable font.
+SHA256: 5a1c559bb539583c8a1fd99d1c5b9491e5e14478c9cd2bd0970d5c3096cc9ef8
+OFL text: trailing whitespace removed; wording unchanged.

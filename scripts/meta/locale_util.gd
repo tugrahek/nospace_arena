@@ -5,7 +5,7 @@ extends RefCounted
 ## OS.get_locale(); Godot supplies canonical locale codes and script defaults.
 
 ## Only translated languages ship. Future script/region locales belong here once ready.
-const SUPPORTED: Array[String] = ["en", "tr", "de", "fr", "es", "pt_BR", "it", "ja", "ko", "zh_Hans", "zh_Hant", "ru", "id", "vi", "pl"]
+const SUPPORTED: Array[String] = ["en", "tr", "de", "fr", "es", "pt_BR", "it", "ja", "ko", "zh_Hans", "zh_Hant", "ru", "id", "vi", "pl", "hi", "th", "ar"]
 const DEFAULT: String = "en"
 
 

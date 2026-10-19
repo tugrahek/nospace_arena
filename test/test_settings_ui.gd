@@ -42,6 +42,7 @@ func test_shipped_languages_select_persist_and_refresh_settings() -> void:
 		assert_eq(panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton").text,
 			tr(selector.options[index]["key"]))
 		await get_tree().process_frame
+		assert_eq(panel.is_layout_rtl(), code == "ar", "UI follows active locale direction")
 		var language_button: Button = panel.get_node("SafeArea/Bounds/Center/Scroll/Content/LanguageRow/LanguageButton")
 		assert_gte(language_button.size.x, language_button.get_combined_minimum_size().x, "endonym fits")
 		selector.scroll.ensure_control_visible(button)

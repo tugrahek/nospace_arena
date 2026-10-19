@@ -21,6 +21,9 @@ included alongside their vendored files.
 | NoSpace UI Extended | Font (display fallback; derived from bundled Nunito Sans) | Nunito Sans authors | OFL 1.1 | [Source and modifications](../assets/fonts/uiextended/NOTICE.txt) · [OFL](../assets/fonts/uiextended/OFL.txt) |
 | Noto Sans CJK SC Regular 2.004 (subset) | Font (vendored AdMob editor interface) | Adobe; Noto is a Google trademark | OFL 1.1 | [Original OFL](../addons/admob/assets/fonts/OFL.txt) · [Copyright and verified provenance](../addons/admob/assets/fonts/NOTICE.txt) |
 | NoSpace CJK JP/KR/SC/TC Subset | Font (regional gameplay/UI fallback; derived from Noto Sans CJK 2.004) | Adobe; Noto is a Google trademark | OFL 1.1 | [Source, hashes and subset details](../assets/fonts/cjk/NOTICE.txt) · [OFL](../assets/fonts/cjk/OFL.txt) |
+| Noto Sans Devanagari | Font (complex-script UI fallback) | The Noto Sans Devanagari Project Authors | OFL 1.1 | [Source and hash](../assets/fonts/notosansdevanagari/NOTICE.txt) · [OFL](../assets/fonts/notosansdevanagari/OFL.txt) |
+| Noto Sans Thai | Font (complex-script UI fallback) | The Noto Sans Thai Project Authors | OFL 1.1 | [Source and hash](../assets/fonts/notosansthai/NOTICE.txt) · [OFL](../assets/fonts/notosansthai/OFL.txt) |
+| Noto Sans Arabic | Font (complex-script UI fallback) | The Noto Sans Arabic Project Authors | OFL 1.1 | [Source and hash](../assets/fonts/notosansarabic/NOTICE.txt) · [OFL](../assets/fonts/notosansarabic/OFL.txt) |
 | SFX (capture / ui_tap / life_loss / near_miss) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
 | Menu music (menu_music) | Audio | Tuğra Hekimoğlu | original / synthesized | — (no third-party asset) |
 

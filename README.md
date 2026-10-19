@@ -41,7 +41,7 @@ Inspired by **Qix** and **Volfied**, every cut is a risk: enemies can reach your
 | **Daily challenge & personal bests** | Date-based arena selection, local best scores, and a replay of your own best-run ghost. |
 | **Progression & rewards** | Campaign stars, rotating missions, coins, daily login rewards, and Supply gifts. |
 | **Your loadout** | Three arenas, unlockable characters, and Extra Life, Coin Bonus, and Slow Start boosts. |
-| **Made for portrait play** | Swipe, tap-to-turn, and D-pad controls; responsive layouts, safe areas, and 15 UI languages. |
+| **Made for portrait play** | Swipe, tap-to-turn, and D-pad controls; responsive layouts, safe areas, and 18 UI languages. |
 
 ## 🕹️ Game Modes
 
@@ -67,9 +67,8 @@ Built with **Godot 4.6.3** and **statically typed GDScript**. Procedural 2D visu
 - **Planned for v1.1:** roguelite drafting.
 
 English, Turkish, German, French, Spanish, Brazilian Portuguese, Italian, Japanese, Korean,
-Simplified Chinese, Traditional Chinese, Russian, Indonesian, Vietnamese, and Polish are supported.
+Simplified Chinese, Traditional Chinese, Russian, Indonesian, Vietnamese, Polish, Hindi, Thai, and Arabic are supported.
 New translations await native-speaker review; physical Android acceptance is pending.
-Additional languages are planned.
 
 Daily scores and ghosts are stored **on the device**. Online rankings and a server-synced Daily clock are not implemented.
 

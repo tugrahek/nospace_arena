@@ -216,3 +216,30 @@ func _assert_bundled_text(value: String, font: Font, locale: String, key: String
 		if value.unicode_at(glyph.start) > 32:
 			assert_gt(int(glyph.index), 0, "%s/%s has a glyph" % [locale, key])
 			assert_has(allowed, glyph.font_rid, "%s/%s needs no system font" % [locale, key])
+
+
+func test_b2_b3_catalog_fonts_and_saved_locales() -> void:
+	var parsed: Array = _read_csv()
+	for pair: Array in [["hi_IN", "hi"], ["th_TH", "th"], ["ar_SA", "ar"]]:
+		var locale: String = pair[1]
+		assert_eq(LocaleUtil.resolve("", pair[0]), locale)
+		assert_eq(LocaleUtil.resolve(locale, "en_US"), locale)
+		assert_eq(AudioSettings.from_dict({"language": pair[0]}).language, locale)
+		TranslationServer.set_locale(locale)
+		LocaleFonts.apply(locale)
+		var column: int = parsed[0].find(locale)
+		for path: String in LocaleFonts.LATIN_PATHS:
+			var font: Font = load(path)
+			for row: PackedStringArray in parsed[1]:
+				_assert_bundled_text(row[column].replace("\\n", "\n"), font, locale, row[0])
+	var font: Font = load(LocaleFonts.SCRIPT_FONTS["ar"])
+	var sample := TextLine.new()
+	var value: String = "سلام"
+	sample.add_string(value, font, 30, "ar")
+	var server: TextServer = TextServerManager.get_primary_interface()
+	var contextual: bool = false
+	for glyph: Dictionary in server.shaped_text_get_glyphs(sample.get_rid()):
+		if glyph.index != server.font_get_glyph_index(glyph.font_rid, 30, value.unicode_at(glyph.start), 0):
+			contextual = true
+	assert_true(contextual, "Arabic letters use contextual shaping")
+	_assert_bundled_text("مرحلة 12 • Stalker +50%", load(LocaleFonts.LATIN_PATHS[0]), "ar", "mixed text")

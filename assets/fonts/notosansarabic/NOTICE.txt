@@ -1,0 +1,5 @@
+Source: https://raw.githubusercontent.com/google/fonts/main/ofl/notosansarabic/NotoSansArabic[wdth,wght].ttf
+License: SIL Open Font License 1.1; see OFL.txt.
+Unmodified upstream variable font.
+SHA256: 63111b5b2e074dd48cc67692e0a2726d86ee94c1c37fe8598257b7b4e87e869e
+OFL text: trailing whitespace removed; wording unchanged.
