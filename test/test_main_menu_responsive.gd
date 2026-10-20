@@ -108,8 +108,12 @@ func _assert_header_order(menu: Control) -> void:
 	var settings: Control = menu.get_node(FRAME + "/Header/SettingsButton")
 	var reward: Control = menu.get_node(FRAME + "/Header/RewardEntry")
 	var coins: Control = menu.get_node(FRAME + "/Header/CoinsPanel")
-	assert_lt(settings.get_global_rect().end.x, reward.global_position.x)
-	assert_lt(reward.get_global_rect().end.x, coins.global_position.x)
+	if menu.is_layout_rtl():
+		assert_lt(coins.get_global_rect().end.x, reward.global_position.x)
+		assert_lt(reward.get_global_rect().end.x, settings.global_position.x)
+	else:
+		assert_lt(settings.get_global_rect().end.x, reward.global_position.x)
+		assert_lt(reward.get_global_rect().end.x, coins.global_position.x)
 
 
 func test_practical_phone_touch_targets_and_square_artwork() -> void:

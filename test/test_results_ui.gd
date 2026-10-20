@@ -42,6 +42,22 @@ func test_loss_result_binds_real_score_and_capture_state() -> void:
 		&"HeroButton", "retry is primary on loss")
 
 
+func test_arabic_progress_keeps_ltr_numbers_inside_rtl_results() -> void:
+	TranslationServer.set_locale("ar")
+	var hud: HUD = await _hud()
+	hud.set_target(70.0)
+	hud.call("_on_game_over", 1234)
+	var panel: Control = hud.get_node("ResultPanel")
+	var progress: Label = panel.get_node("SafeArea/Bounds/VBox/ProgressLabel")
+	assert_true(panel.is_layout_rtl(), "Results layout remains Arabic RTL")
+	assert_eq(progress.text_direction, Control.TEXT_DIRECTION_LTR, "only numeric progress is LTR")
+	assert_eq(progress.text, "62 / 70%", "loss values and format stay unchanged")
+	hud.update_percent(74.0)
+	hud.call("_on_run_won", 2600)
+	assert_eq(progress.text, "74 / 70%", "win values and format stay unchanged")
+	assert_true(panel.is_layout_rtl())
+
+
 func test_win_result_keeps_completion_and_campaign_star_binding() -> void:
 	var hud: HUD = await _hud()
 	hud.set_target(70.0)
