@@ -13,7 +13,7 @@ func after_each() -> void:
 	TranslationServer.set_locale("en")
 
 func test_original_single_page_fits_all_locales_with_safe_areas() -> void:
-	for output in [Vector2i(360, 640), Vector2i(393, 852)]:
+	for output in [Vector2i(360, 640), Vector2i(393, 852), Vector2i(720, 1280)]:
 		var host := SubViewportContainer.new()
 		host.size = Vector2(output)
 		add_child_autofree(host)

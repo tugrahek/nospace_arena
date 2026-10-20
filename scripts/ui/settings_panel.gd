@@ -10,6 +10,10 @@ const PALETTE: PaletteData = preload("res://config/palette.tres")
 const LANGUAGE_SELECTOR = preload("res://scripts/ui/settings_language_selector.gd")
 const MAX_CONTENT_WIDTH: float = 800.0
 const FOOTER_GAP: float = 24.0
+const BASE_SECTION_SPACING: int = 8
+const MAX_EXTRA_SECTION_SPACING: int = 16
+const SECTION_GAP_COUNT: int = 3
+const SPARE_HEIGHT_USAGE: float = 0.2
 
 ## When true the panel was opened as an overlay (e.g. from in-run Pause); Back closes it.
 ## When false (launched from MainMenu) Back returns to the main menu.
@@ -97,6 +101,15 @@ func _refresh_layout() -> void:
 	_bottom.offset_right = width * 0.5
 	var content_height: float = _center.get_combined_minimum_size().y
 	var footer_height: float = _bottom.get_combined_minimum_size().y
+	# Reuse a small part of outer whitespace between the existing sections, without scaling controls.
+	var current_spacing: int = _center.get_theme_constant("separation")
+	var base_height: float = content_height - current_spacing * SECTION_GAP_COUNT
+	var spare_height: float = maxf(0.0, _bounds.size.y - base_height - BASE_SECTION_SPACING * SECTION_GAP_COUNT - footer_height - FOOTER_GAP)
+	var extra_spacing: int = mini(MAX_EXTRA_SECTION_SPACING, floori(spare_height * SPARE_HEIGHT_USAGE / SECTION_GAP_COUNT))
+	var spacing: int = BASE_SECTION_SPACING + extra_spacing
+	if current_spacing != spacing:
+		_center.add_theme_constant_override("separation", spacing)
+	content_height = base_height + spacing * SECTION_GAP_COUNT
 	# Center the complete original composition, not two blocks separated by empty space.
 	var top: float = maxf(0.0, (_bounds.size.y - content_height - footer_height - FOOTER_GAP) * 0.5)
 	_center.offset_top = top
