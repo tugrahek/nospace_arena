@@ -89,12 +89,6 @@ func test_pause_settings_round_trip_and_actions_keep_existing_semantics() -> voi
 		assert_true(get_tree().paused)
 		var panel: Control = pause.get("_settings_panel")
 		assert_not_null(panel)
-		for action in ["AudioButton", "ControlsButton"]:
-			panel.get_node("SafeArea/Bounds/Center/Views/Main/" + action).pressed.emit()
-			panel.call("close")
-			assert_true(panel.get_node("SafeArea/Bounds/Center/Views/Main").visible)
-			assert_false(panel.is_queued_for_deletion(), "subview Back returns to Settings")
-			assert_true(get_tree().paused, "subview Back preserves Pause")
 		panel.call("close")
 		await get_tree().process_frame
 		assert_null(pause.get("_settings_panel"), "Settings closes cleanly on each return")
