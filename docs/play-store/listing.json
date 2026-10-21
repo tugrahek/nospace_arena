@@ -1,0 +1,13 @@
+{
+  "status": "DRAFT - publisher and language review required",
+  "en": {
+    "title": "NoSpace: Arena",
+    "short_description": "Close your line, claim the void, and turn captured ground into a defense",
+    "full_description": "Every line is a risk. Move along the arena boundary, enter the void, and reconnect your trail to capture territory. Keep enemies away from your active line.\n\nCaptured ground becomes part of your defense. Pulse, Drag, and Halt give territory different effects, from pulses to slowing and freezing enemies. Unlock characters and arenas with the coins you earn.\n\nFour ways to play:\n- Daily: a date-based arena challenge with your own local best score and ghost replay.\n- Free: play a single arena with your chosen loadout.\n- Endless: clear successive arenas as the pressure increases.\n- Campaign: take on 12 authored stages and earn up to three stars per stage.\n\nComplete rotating missions, collect daily login rewards, and choose swipe, tap-to-turn, or D-pad controls. The portrait interface supports 18 languages.\n\nDaily scores and ghosts are stored on your device. Online rankings and cloud profile sync are not included."
+  },
+  "tr": {
+    "title": "NoSpace: Arena",
+    "short_description": "Çizgiyi kapat, alanı ele geçir ve yaşayan bölgelerle arenayı savun",
+    "full_description": "Her çizgi bir risk. Arena sınırında ilerle, boşluğa gir ve çizgini yeniden sınıra bağlayarak bölge ele geçir. Düşmanları aktif çizginden uzak tut.\n\nEle geçirdiğin alan savunmanın bir parçası olur. Pulse, Drag ve Halt; darbe, yavaşlatma ve dondurma gibi farklı bölge etkileri sunar. Oynayarak kazandığın jetonlarla karakter ve arena aç.\n\nDört oyun biçimi:\n- Günlük: tarihe bağlı arena mücadelesi, cihazındaki kişisel en iyi skor ve kendi koşunun hayalet tekrarı.\n- Serbest: seçtiğin karakter ve arenayla tek arena oyna.\n- Sonsuz: baskı artarken art arda arenaları tamamla.\n- Macera: hazırlanmış 12 bölümü geç ve bölüm başına üç yıldıza kadar kazan.\n\nDönüşümlü görevleri tamamla, günlük giriş ödüllerini topla; kaydırma, dokunarak yön değiştirme veya yön tuşu kontrollerini seç. Dikey arayüz 18 dili destekler.\n\nGünlük skorlar ve hayaletler cihazında saklanır. Çevrimiçi sıralama ve bulut profil eşitleme bulunmaz."
+  }
+}

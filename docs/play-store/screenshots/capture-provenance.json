@@ -1,0 +1,80 @@
+[
+	{
+		"file": "gameplay-en-01.png",
+		"height": 1920,
+		"lives": 3,
+		"locale": "en",
+		"platform": "Windows",
+		"renderer": "gl_compatibility",
+		"score": 0,
+		"source": "normal Free run + keyboard input",
+		"state": 1,
+		"upscaled_bitmap": false,
+		"width": 1080
+	},
+	{
+		"file": "gameplay-en-02.png",
+		"height": 1920,
+		"lives": 3,
+		"locale": "en",
+		"platform": "Windows",
+		"renderer": "gl_compatibility",
+		"score": 37848,
+		"source": "normal Free run + keyboard input",
+		"state": 1,
+		"upscaled_bitmap": false,
+		"width": 1080
+	},
+	{
+		"file": "gameplay-en-03.png",
+		"height": 1920,
+		"lives": 3,
+		"locale": "en",
+		"platform": "Windows",
+		"renderer": "gl_compatibility",
+		"score": 37848,
+		"source": "normal Free run + keyboard input",
+		"state": 1,
+		"upscaled_bitmap": false,
+		"width": 1080
+	},
+	{
+		"file": "gameplay-tr-01.png",
+		"height": 1920,
+		"lives": 3,
+		"locale": "tr",
+		"platform": "Windows",
+		"renderer": "gl_compatibility",
+		"score": 0,
+		"source": "normal Free run + keyboard input",
+		"state": 1,
+		"upscaled_bitmap": false,
+		"width": 1080
+	},
+	{
+		"file": "gameplay-tr-02.png",
+		"height": 1920,
+		"lives": 3,
+		"locale": "tr",
+		"platform": "Windows",
+		"renderer": "gl_compatibility",
+		"score": 37848,
+		"source": "normal Free run + keyboard input",
+		"state": 1,
+		"upscaled_bitmap": false,
+		"width": 1080
+	},
+	{
+		"file": "gameplay-tr-03.png",
+		"height": 1920,
+		"lives": 3,
+		"locale": "tr",
+		"platform": "Windows",
+		"renderer": "gl_compatibility",
+		"score": 37848,
+		"source": "normal Free run + keyboard input",
+		"state": 1,
+		"upscaled_bitmap": false,
+		"width": 1080
+	}
+]

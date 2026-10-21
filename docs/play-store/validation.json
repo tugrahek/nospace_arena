@@ -1,0 +1,129 @@
+{
+  "status": "technical checks passed; visual approval pending",
+  "images": [
+    {
+      "file": "android-launcher/adaptive-background-432.png",
+      "width": 432,
+      "height": 432,
+      "channels": 3,
+      "bytes": 1397,
+      "sha256": "debcb8853b7b03f416588c47d0d3529be054ff3556f85ab4bee4ec058055008c"
+    },
+    {
+      "file": "android-launcher/adaptive-foreground-432.png",
+      "width": 432,
+      "height": 432,
+      "channels": 4,
+      "bytes": 9393,
+      "sha256": "0d215bd9d1141339e1fe757fc4b5e810312bb6102f0045963f8ab16d4bc6abea"
+    },
+    {
+      "file": "android-launcher/adaptive-monochrome-432.png",
+      "width": 432,
+      "height": 432,
+      "channels": 4,
+      "bytes": 3845,
+      "sha256": "8d5ea94544713590b95c1e5c4b3b6baacd9faec4133fbbb1a3604a0dda8c89ef"
+    },
+    {
+      "file": "android-launcher/launcher-192.png",
+      "width": 192,
+      "height": 192,
+      "channels": 3,
+      "bytes": 5961,
+      "sha256": "f263db54cf7f93fad71ff3cc219ae09c85b46c3426e04fa2b6af8a6146ea2c52"
+    },
+    {
+      "file": "android-launcher/mask-preview.review.png",
+      "width": 864,
+      "height": 432,
+      "channels": 3,
+      "bytes": 11351,
+      "sha256": "5c221a04888bf3c91703f06e5e72b64792cd1f31346d16f0411d4ddb50275517"
+    },
+    {
+      "file": "feature/feature-en-1024x500.draft.png",
+      "width": 1024,
+      "height": 500,
+      "channels": 3,
+      "bytes": 19532,
+      "sha256": "c3bfddf6c6d463e8a7616cb0e88e770fd6225ee37eeff0c1c427ab5d39e81509"
+    },
+    {
+      "file": "feature/feature-tr-1024x500.draft.png",
+      "width": 1024,
+      "height": 500,
+      "channels": 3,
+      "bytes": 19918,
+      "sha256": "7e88597e227c765dad327b673fe8307cc6187c3f677cf066bda872ceda11ef12"
+    },
+    {
+      "file": "icon/play-icon-512.png",
+      "width": 512,
+      "height": 512,
+      "channels": 4,
+      "bytes": 18315,
+      "sha256": "b279d10a30d9f2c65765c538a5a730a7c00d2edc218cfdc89edfc86edafe04f3"
+    },
+    {
+      "file": "screenshots/gameplay-en-01.png",
+      "width": 1080,
+      "height": 1920,
+      "channels": 3,
+      "bytes": 24853,
+      "sha256": "5d696a7b4a94ec0bc6618572a71d98618e9d2d65dcb6ef8227fc35d056d790c9"
+    },
+    {
+      "file": "screenshots/gameplay-en-02.png",
+      "width": 1080,
+      "height": 1920,
+      "channels": 3,
+      "bytes": 33619,
+      "sha256": "71150c0d0c7d2d6a69040d5d0fcfc578088a85d746ca9caf1b291f9e3b619cba"
+    },
+    {
+      "file": "screenshots/gameplay-en-03.png",
+      "width": 1080,
+      "height": 1920,
+      "channels": 3,
+      "bytes": 27494,
+      "sha256": "3d2bed45f95e84e1a93cf186aedf322e2a4260a8703baf8c98f417f21e27b229"
+    },
+    {
+      "file": "screenshots/gameplay-tr-01.png",
+      "width": 1080,
+      "height": 1920,
+      "channels": 3,
+      "bytes": 24336,
+      "sha256": "2a96a88aa1d0af0120636365836d0fd36bd1a24d90305e1be3f73be5758140fe"
+    },
+    {
+      "file": "screenshots/gameplay-tr-02.png",
+      "width": 1080,
+      "height": 1920,
+      "channels": 3,
+      "bytes": 33070,
+      "sha256": "6314329a0bf7f8f502b366808d6b0eae29ebb24bf37a4818572dd9795d4c2acb"
+    },
+    {
+      "file": "screenshots/gameplay-tr-03.png",
+      "width": 1080,
+      "height": 1920,
+      "channels": 3,
+      "bytes": 27091,
+      "sha256": "426e98df2c0912aa97536f485ce8945ef0a0c760aed028d4ce639995d1bfa816"
+    }
+  ],
+  "listing": {
+    "en": {
+      "title": 14,
+      "short_description": 72,
+      "full_description": 921
+    },
+    "tr": {
+      "title": 14,
+      "short_description": 66,
+      "full_description": 912
+    }
+  }
+}
