@@ -35,7 +35,7 @@ func _init(sdk: RefCounted, ad_unit_id: String) -> void:
 
 ## SDK completion maps to the initialization request's original token.
 func initialize(token: int) -> void:
-	if not _sdk.is_native_available():
+	if _ad_unit_id.is_empty() or not _sdk.is_native_available():
 		initialized.emit(token, false)
 		return
 	_sdk.initialize(func() -> void: initialized.emit(token, true))

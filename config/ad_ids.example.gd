@@ -1,6 +1,8 @@
-# Copy this file to config/ad_ids.gd and replace placeholder values with real IDs.
-# NEVER commit config/ad_ids.gd — it is in .gitignore.
-# During development, use the test IDs below (already filled in).
+# Reference examples only: this script is NOT read by AdsConfig or the native exporter.
+# Configure the documented ProjectSettings keys in an isolated production workspace.
+# AdMob identifiers are public routing identifiers, not signing secrets; repository policy
+# still keeps real account configuration out of Git. Never put signing credentials here.
+# Development uses the official test IDs below. See docs/android-integrations.md.
 
 extends Node
 

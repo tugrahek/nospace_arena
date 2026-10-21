@@ -280,3 +280,17 @@ func test_unconfigured_production_unit_fails_closed_without_native_load() -> voi
 	assert_signal_emitted_with_parameters(native, "operation_failed", [42, &"ad_config_missing"])
 	assert_true(_sdk.loads.is_empty())
 	assert_eq(AdsConfig.rewarded_id(), AdsConfig.ANDROID_TEST_REWARDED_ID)
+
+
+func test_invalid_production_config_never_initializes_or_loads_even_after_consent() -> void:
+	var blocked_sdk: FakeSDK = FakeSDK.new()
+	var blocked: Service = Service.new()
+	var id: String = AdsConfig.resolve_rewarded_id(false, true, "", "invalid")
+	blocked.configure_backend(NativeBackend.new(blocked_sdk, id))
+	blocked.set_requests_allowed(true)
+	add_child_autofree(blocked)
+	assert_true(blocked_sdk.initializations.is_empty())
+	assert_true(blocked_sdk.loads.is_empty())
+	assert_false(blocked.preload_rewarded())
+	assert_eq(blocked.state, Service.State.UNAVAILABLE)
+	blocked_sdk.release_callbacks()

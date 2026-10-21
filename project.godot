@@ -59,6 +59,7 @@ locale/include_text_server_data=true
 [monetization]
 
 ads/use_test_ads=true
+ads/production_enabled=false
 ads/android_rewarded_id=""
 
 [rendering]

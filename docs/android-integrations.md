@@ -12,6 +12,53 @@ This page keeps the project's Android service and export details out of the port
 - UMP consent information is refreshed each session. Any required consent form is presented before `AdsService` initializes or loads ads. Settings exposes privacy choices only when UMP requires them.
 - Development defaults use Google's official test configuration for the plugin Android App ID and test ads. The production rewarded unit is unset. Configure both production IDs before disabling test mode. Desktop ads use a no-op backend.
 
+### Production configuration gate (R2; production remains disabled)
+
+`config/ads_config.gd` resolves these ProjectSettings together at Android boot:
+
+| Setting | Development default | Future production requirement |
+|---|---|---|
+| `monetization/ads/use_test_ads` | `true` | Explicit boolean `false` |
+| `monetization/ads/production_enabled` | `false` | Explicit boolean `true`, only after release approval |
+| `admob/general/android/app_id` | Plugin's official Google test App ID | Publisher's verified Android App ID |
+| `monetization/ads/android_rewarded_id` | Empty | Verified rewarded unit belonging to that publisher/app |
+
+Test mode always selects Google's rewarded test unit. Production requires both flags
+and an exact-format App ID (`~`) / unit ID (`/`) pair with the same non-test publisher.
+Missing, malformed, mixed-publisher, Google-test or zero-publisher pairs resolve to an
+empty unit; `NativeAdsBackend` then refuses SDK initialization as well as loading.
+Malformed non-boolean mode flags also block requests. This is structural validation;
+it cannot establish ownership, app membership, rewarded format or AdMob approval.
+Configuration is a build/boot snapshot, not a supported live runtime toggle.
+
+For a later authorized production build, create a separate export workspace and set
+all four keys in that workspace's `project.godot` before Godot import/export. Do not
+edit the source project's development defaults or reuse the R1 smoke workspace for
+production. The R1 preparation script intentionally requires test mode and an empty
+production unit. No production config file or real ID is supplied by R2. The old
+`config/ad_ids.example.gd` is a reference, not a loader; copying it does not configure ads.
+
+The plugin exporter maps the App ID setting to manifest metadata
+`com.google.android.gms.ads.APPLICATION_ID`. Inspection of the vendored release AAR's
+`PoingGodotAdMob.initialize` confirms it reads this metadata and passes it to the
+Next-Gen SDK's `InitializationConfig.Builder`; UMP uses the same manifest ID.
+Always inspect the final bundle manifest against the workspace setting before release.
+AdMob IDs are routing identifiers visible in distributed apps, **not signing secrets**.
+Keep real account config out of this public repository per project policy; never mix
+keystore paths/passwords, account tokens or service credentials into these settings.
+
+UMP remains the session consent gate before SDK initialization/loading. Required forms,
+privacy-options availability, pending-form blocking and revocation remain covered by
+the existing injectable integration tests. A config failure blocks ads even if UMP
+allows them; privacy options still use the existing Settings entry when required.
+Native delivery and account-configured messages require device/account acceptance.
+
+Publisher follow-up: confirm real IDs/app/package association, AdMob readiness and
+`app-ads.txt`, message publication and regions, audience/under-age treatment, and the
+policy/Data Safety declarations. Drafts: [privacy policy](privacy-policy.draft.md)
+and [Data Safety worksheet](data-safety-worksheet.md). No production activation or
+public policy URL is included in R2.
+
 ## Google Play billing
 
 - The project vendors [GodotGooglePlayBilling 3.3.0](https://github.com/godot-sdk-integrations/godot-google-play-billing/releases/tag/3.3.0) with Google Play Billing Library 9.1.0 under `addons/GodotGooglePlayBilling/`, including its MIT notice and debug/release AARs.
