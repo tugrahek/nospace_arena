@@ -23,3 +23,75 @@ This page keeps the project's Android service and export details out of the port
 ## Export checklist
 
 Android builds require matching Godot export templates, an Android SDK/JDK, the Gradle build template, and local signing configuration. Keep test ads enabled for development. Before distribution, review application IDs, signing, network permissions, export filters, and the product catalog. Exclude development addons and tests from production exports. iOS export and native-service acceptance are not yet validated.
+
+## Unsigned release preparation
+
+The existing `Android` preset remains the development APK workflow. The separate
+`Android Release AAB` preset uses a release template, AAB output, explicit min SDK
+24 / target SDK 36, arm64, and the same package identity and network permissions.
+Signing is deliberately disabled; its unsigned, test-ad output is not a Play upload.
+No credentials belong in `export_presets.cfg`, which is currently tracked despite
+its ignore rule. Godot stores local signing credentials separately under `.godot/`.
+
+Release exclusions cover `test/`, GUT, documentation, build tools, Android generated
+content and export output. The isolated Android directory also has `.gdignore` to
+prevent rescanning generated assets on repeated exports.
+AdMob/Billing runtime scripts, plugin export hooks and native libraries remain available.
+Legal notices already handle an absent GUT resource. Production ad settings remain unset.
+
+`tools/prepare_android_release.ps1` copies runtime sources and installed 4.6.3
+templates to a new, ignored `export/release-smoke/project` workspace. It refuses an
+existing workspace and private ad config. It never copies `.godot/` credentials or
+changes the development Android template. Import this workspace before exporting:
+
+```powershell
+./tools/prepare_android_release.ps1
+& $godotConsole --headless --path ./export/release-smoke/project --editor --import
+& $godotConsole --headless --path ./export/release-smoke/project --export-release 'Android Release AAB' --quit
+```
+
+`$godotConsole` must point to the matching Godot 4.6.3 console executable. Output is
+`export/release-smoke/project/export/nospace_arena-release-unsigned.aab`.
+
+Godot 4.6.3 ships AGP 8.6.1, while Android documents AGP 8.9.1 as the API 36 minimum.
+Gradle 8.11.1 already meets AGP 8.9's requirement; no wrapper upgrade is needed.
+The preparation script patches only the isolated release template to AGP 8.9.1.
+A complete unsigned export with Godot 4.6.3, AdMob 5.1.0 / ads-mobile-sdk 1.4.0
+and Billing 3.3.0 / billing-ktx 9.1.0 succeeded with this combination. The development
+template remains stock. Use the isolated workspace for this verified release toolchain;
+exporting directly from the source project's preset still uses the local development template.
+Sources: [Godot template](https://github.com/godotengine/godot/blob/4.6.3-stable/platform/android/java/app/config.gradle),
+[Android API/AGP matrix](https://developer.android.com/build/releases/about-agp#api-level-support).
+
+Inspect the final bundle manifest, packaged resources and all native ELF load
+segments, plus the bundle's native-library page-alignment configuration. Build success
+alone does not establish 16 KB compatibility; generated APK alignment and 16 KB
+device/emulator execution remain separate checks. Signing and production-ad activation
+require later explicit configuration; this preparation supplies neither.
+
+R1 artifact inspection: min/target SDK 24/36, version 1 / 0.1.0, package
+`com.tugrahek.nospace`, arm64 only, no signatures, and no test/GUT/docs/tools assets.
+All LOAD segments in `libc++_shared.so` and `libgodot_android.so` have 16,384-byte
+alignment with congruent file offsets / virtual addresses; bundletool reports
+`PAGE_ALIGNMENT_16K`. These are artifact checks, not physical-device acceptance.
+The merged manifest retains the SDK-added ad ID, basic phone state, Billing,
+wake-lock, foreground-service and dynamic-receiver permissions already present in
+the development build. Review them in the later privacy/disclosure step; no SDK or
+Billing functionality is removed here.
+
+The initial repeat-export failure came from six generated Godot import sidecars:
+`android/build/res/{mipmap,mipmap-hdpi-v4,mipmap-mdpi-v4,mipmap-xhdpi-v4,mipmap-xxhdpi-v4,mipmap-xxxhdpi-v4}/icon.webp.import`.
+Their remap data referenced generated Android icons, and they were created before
+the Android `.gdignore` existed. They are ignored build artifacts, not required
+source resources. Gradle rejects these sidecars in Android resource directories.
+The preparation script creates `.gdignore` before the first scan, and `android/*`
+is excluded from the release export. Preserve old evidence and prepare a clean
+workspace with `./tools/prepare_android_release.ps1 -WorkspaceName release-smoke-clean`;
+then substitute `export/release-smoke-clean/project` in the commands above.
+No source icons or import sidecars need deletion.
+
+Verified on 2026-10-21 in the clean workspace: import and unsigned release export
+both exited 0. The final 42,256,389-byte AAB passed the manifest, exclusions,
+unsigned-status and native alignment checks described above; Android resource
+directories contained no `.import` sidecars after import or export. Its SHA-256 is
+`938dbab33085ec2ee280486177c9b829ccb150642bf3a5adf9b700605b3ab7f4`.
