@@ -1,5 +1,5 @@
 {
-  "status": "technical checks passed; visual approval pending",
+  "status": "technical checks passed; branding/feature accepted; physical Android acceptance pending",
   "images": [
     {
       "file": "android-launcher/adaptive-background-432.png",
@@ -82,14 +82,6 @@
       "sha256": "71150c0d0c7d2d6a69040d5d0fcfc578088a85d746ca9caf1b291f9e3b619cba"
     },
     {
-      "file": "screenshots/gameplay-en-03.png",
-      "width": 1080,
-      "height": 1920,
-      "channels": 3,
-      "bytes": 27494,
-      "sha256": "3d2bed45f95e84e1a93cf186aedf322e2a4260a8703baf8c98f417f21e27b229"
-    },
-    {
       "file": "screenshots/gameplay-tr-01.png",
       "width": 1080,
       "height": 1920,
@@ -106,12 +98,20 @@
       "sha256": "6314329a0bf7f8f502b366808d6b0eae29ebb24bf37a4818572dd9795d4c2acb"
     },
     {
-      "file": "screenshots/gameplay-tr-03.png",
+      "file": "screenshots/mode-select-en.png",
       "width": 1080,
       "height": 1920,
       "channels": 3,
-      "bytes": 27091,
-      "sha256": "426e98df2c0912aa97536f485ce8945ef0a0c760aed028d4ce639995d1bfa816"
+      "bytes": 92645,
+      "sha256": "0dc56a80e4df88a1e2947e07f792f9f33549178a04898ff59185da47de2e8791"
+    },
+    {
+      "file": "screenshots/mode-select-tr.png",
+      "width": 1080,
+      "height": 1920,
+      "channels": 3,
+      "bytes": 93655,
+      "sha256": "278f5ea255e914bbb98a2394c81539441b6ad35779c27736d44e63908630a64e"
     }
   ],
   "listing": {
@@ -123,7 +123,20 @@
     "tr": {
       "title": 14,
       "short_description": 66,
-      "full_description": 912
+      "full_description": 990
     }
-  }
+  },
+  "screenshot_order": {
+    "en": [
+      "gameplay-en-02.png",
+      "gameplay-en-01.png",
+      "mode-select-en.png"
+    ],
+    "tr": [
+      "gameplay-tr-02.png",
+      "gameplay-tr-01.png",
+      "mode-select-tr.png"
+    ]
+  },
+  "runtime_launcher_assets": 4
 }

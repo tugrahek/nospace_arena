@@ -1,5 +1,5 @@
 {
-  "status": "DRAFT - publisher and language review required",
+  "status": "Prepared for publisher review; branding and feature graphics accepted for this pass",
   "en": {
     "title": "NoSpace: Arena",
     "short_description": "Close your line, claim the void, and turn captured ground into a defense",
@@ -8,6 +8,6 @@
   "tr": {
     "title": "NoSpace: Arena",
     "short_description": "Çizgiyi kapat, alanı ele geçir ve yaşayan bölgelerle arenayı savun",
-    "full_description": "Her çizgi bir risk. Arena sınırında ilerle, boşluğa gir ve çizgini yeniden sınıra bağlayarak bölge ele geçir. Düşmanları aktif çizginden uzak tut.\n\nEle geçirdiğin alan savunmanın bir parçası olur. Pulse, Drag ve Halt; darbe, yavaşlatma ve dondurma gibi farklı bölge etkileri sunar. Oynayarak kazandığın jetonlarla karakter ve arena aç.\n\nDört oyun biçimi:\n- Günlük: tarihe bağlı arena mücadelesi, cihazındaki kişisel en iyi skor ve kendi koşunun hayalet tekrarı.\n- Serbest: seçtiğin karakter ve arenayla tek arena oyna.\n- Sonsuz: baskı artarken art arda arenaları tamamla.\n- Macera: hazırlanmış 12 bölümü geç ve bölüm başına üç yıldıza kadar kazan.\n\nDönüşümlü görevleri tamamla, günlük giriş ödüllerini topla; kaydırma, dokunarak yön değiştirme veya yön tuşu kontrollerini seç. Dikey arayüz 18 dili destekler.\n\nGünlük skorlar ve hayaletler cihazında saklanır. Çevrimiçi sıralama ve bulut profil eşitleme bulunmaz."
+    "full_description": "Her çizgi bir risk. Arena sınırında ilerle, boşluğa gir ve çizgini yeniden sınıra bağlayarak bölge ele geçir. Düşmanları aktif çizginden uzak tut.\n\nEle geçirdiğin bölgeler savunmanın bir parçasına dönüşür. Pulse, Drag ve Halt; darbe, yavaşlatma ve dondurma gibi farklı bölge etkileri sunar. Oynayarak kazandığın jetonlarla karakter ve arena aç.\n\nDört oyun biçimi:\n- Günlük: tarihe göre belirlenen arena mücadelesinde kişisel rekorunu geliştir ve cihazında kayıtlı en iyi oyununun hayaletiyle yarış.\n- Serbest: seçtiğin karakter ve arenayla tek arena oyna.\n- Sonsuz: baskı artarken art arda arenaları tamamla.\n- Macera: hazırlanmış 12 bölümü tamamla ve bölüm başına üç yıldıza kadar kazan.\n\nDönüşümlü görevleri tamamla, günlük giriş ödüllerini topla; kaydırma, dokunarak yön değiştirme veya yön tuşu kontrollerini seç. Dikey arayüz 18 dili destekler.\n\nGünlük skorların ve en iyi oyunlarının hayalet kayıtları yalnızca cihazında saklanır. Çevrimiçi sıralama ve bulut profil eşitleme bulunmaz."
   }
 }

@@ -1,23 +1,24 @@
 # Google Play asset review package — R3
 
-**DRAFT / VISUAL APPROVAL REQUIRED.** Prepared from `main@39f2bc0` on 21 October
-2026. Nothing was uploaded to Play Console or connected to the app's launcher.
-Game UI, frozen Settings, monetization and export presets are unchanged.
+Final asset integration pass, based on `main@eb95d26`, 26 October 2026.
+Existing branding and EN/TR feature graphics are accepted for this pass and unchanged.
+Both Android profiles now use the approved launcher layers. No Play Console upload
+is implied. Gameplay, frozen Settings and monetization are unchanged.
 
 ## Review assets
 
 | Asset | File / dimensions | Status |
 |---|---|---|
-| Play icon | [512×512 PNG](icon/play-icon-512.png) | Technical PASS; visual approval pending |
-| Android legacy launcher | [192×192](android-launcher/launcher-192.png) | Prepared only; not applied |
+| Play icon | [512×512 PNG](icon/play-icon-512.png) | Accepted identity; technical PASS |
+| Android legacy launcher | [192×192](android-launcher/launcher-192.png) | Applied to development APK and unsigned AAB |
 | Adaptive foreground | [432×432 RGBA](android-launcher/adaptive-foreground-432.png) | Transparent layer; safe-zone PASS |
 | Adaptive background | [432×432 RGB](android-launcher/adaptive-background-432.png) | Full opaque void color |
 | Themed monochrome | [432×432 RGBA](android-launcher/adaptive-monochrome-432.png) | White alpha silhouette; safe-zone PASS |
 | Mask review | [Circle/square preview](android-launcher/mask-preview.review.png) | Review only; not a Play upload asset |
-| Feature graphic EN | [1024×500 RGB](feature/feature-en-1024x500.draft.png) | Draft: approve composition/copy |
-| Feature graphic TR | [1024×500 RGB](feature/feature-tr-1024x500.draft.png) | Draft: approve composition/Turkish glyphs |
-| Gameplay EN | [Drawing](screenshots/gameplay-en-01.png), [capture](screenshots/gameplay-en-02.png), [next cut](screenshots/gameplay-en-03.png) | 3 native 1080×1920 PNGs; approve selection/order |
-| Gameplay TR | [Drawing](screenshots/gameplay-tr-01.png), [capture](screenshots/gameplay-tr-02.png), [next cut](screenshots/gameplay-tr-03.png) | 3 native 1080×1920 PNGs; approve selection/order |
+| Feature graphic EN | [1024×500 RGB](feature/feature-en-1024x500.draft.png) | Accepted; original filename retained |
+| Feature graphic TR | [1024×500 RGB](feature/feature-tr-1024x500.draft.png) | Accepted; original filename retained |
+| Screenshots EN, upload order | [Capture 02](screenshots/gameplay-en-02.png), [drawing 01](screenshots/gameplay-en-01.png), [Mode Select](screenshots/mode-select-en.png) | 3 native 1080×1920 RGB PNGs |
+| Screenshots TR, upload order | [Capture 02](screenshots/gameplay-tr-02.png), [drawing 01](screenshots/gameplay-tr-01.png), [Mode Select](screenshots/mode-select-tr.png) | 3 native 1080×1920 RGB PNGs |
 | Listing text | [EN/TR JSON](listing.json) | Draft; language/publisher approval required |
 | Technical results | [Validation / image hashes](validation.json) | Automated checks only |
 
@@ -53,6 +54,12 @@ Two independent normal runs provide EN/TR captures. The observed 37,848 score an
 territory effect come from an actual completed cut. [Capture provenance](screenshots/capture-provenance.json)
 records the real score/lives/state, locale, framebuffer dimensions and renderer.
 
+The four original gameplay 01/02 captures remain unchanged. The repetitive 03
+frames are replaced by actual `ModeSelect.tscn` renders in both languages, showing
+Daily, Free, Endless and Campaign with the default isolated save (no unlock,
+currency or progress fixtures). [Upload order](screenshots/order.json) is 02, 01,
+Mode Select for each locale. The Mode Select screen is not a campaign-progress claim.
+
 These are **Windows Godot OpenGL renders**, not Android phone captures. The
 SubViewport framebuffer is natively 1080×1920, with the game's normal 720×1280
 logical canvas; vector/UI content is rendered at that framebuffer resolution.
@@ -71,18 +78,30 @@ For fresh gameplay captures, use the matching Godot 4.6.3 executable with a real
 **APPDATA pointed to a dedicated temporary directory**. No real player profile
 should be used. Gameplay evolves normally, so enemy positions/timing may differ.
 This is a render capture command, not a headless test.
+Append `-- --modes-only` to preserve existing gameplay 01/02 captures and their
+provenance while replacing only the two Mode Select renders.
 
 Run `python tools/validate_play_store_assets.py --report docs/play-store/validation.json`.
 It checks PNG CRCs/decoding, dimensions, bit depth/channels, opacity/transparency,
 icon size and adaptive safe-zone geometry, plus EN/TR text limits and capture metadata.
 The package's `.gdignore` and R1 `docs/*` release exclusion keep review art out of
-game exports. No Android build is needed for these unconnected package assets.
+game exports. Four byte-identical runtime copies live in `assets/branding/launcher/`.
 
-After visual approval, a separate integration step can copy the four launcher
-files to an imported runtime asset directory and map them to Godot's
+Both Android profiles map these imported runtime copies to Godot's
 `launcher_icons/main_192x192`, `adaptive_foreground_432x432`,
 `adaptive_background_432x432` and `adaptive_monochrome_432x432` settings. Those
-settings are intentionally unchanged while this package is awaiting review.
+settings. APK format/debug signing and release AAB format/unsigned signing,
+package identity, SDK settings and test-ad defaults are preserved. Validation
+checks the four source/copy identities and both profiles' mappings.
+
+The isolated R1 workflow also produced both exports successfully (import/APK/AAB
+exit 0). [Artifact evidence](android-export-validation.json) records hashes,
+package/SDK values, unsigned AAB status, native ELF load alignment, 16 KB bundle
+configuration, APK signature/zip alignment and 24 packaged launcher WebPs matching
+generated resources in each artifact. Source development AGP remains 8.6.1; the
+isolated R1 workspace uses its verified 8.9.1 override. This is artifact evidence,
+not physical-device or Play Console acceptance. Local logs remain under the
+ignored `export/r3-final-verified/` directory; shutdown ObjectDB warnings are noted.
 
 ## Listing accuracy and alt text
 
@@ -100,16 +119,16 @@ Suggested upload alt text (all below 140 characters):
 | Feature | NoSpace Arena logo and the words Draw a line. Take the void. | NoSpace Arena logosu ve Çizgiyi kapat. Alanı ele geçir. yazısı |
 | Gameplay 01 | The player draws a cyan trail into the dark arena while avoiding an enemy. | Oyuncu, düşmandan kaçınırken karanlık arenaya camgöbeği çizgi çekiyor. |
 | Gameplay 02 | A completed cut fills the captured area and displays the earned score. | Kapanan çizgiyle bölge doluyor ve kazanılan skor görünüyor. |
-| Gameplay 03 | A new trail extends from the boundary beside previously captured territory. | Önceden ele geçirilen bölgenin yanında sınırdan yeni bir çizgi uzanıyor. |
+| Mode Select | Daily, Free, Endless and Campaign modes on the game's mode selection screen. | Oyunun mod seçimi ekranında Günlük, Serbest, Sonsuz ve Macera seçenekleri. |
 
 ## Approval before upload
 
-1. Review the Play icon, circle/square preview and themed silhouette at small sizes;
-   confirm the README mark is the intended launcher identity instead of the old N.
-2. Review both feature drafts and all six full-size screenshots; approve color,
-   wording, image order and whether the capture-wave moment communicates the game.
-3. Approve EN/TR listing text and alt text; later compare screenshots and launcher
-   behavior on a signed physical Android build. No Console upload or approval is implied.
+1. On a signed physical Android build, inspect the launcher at small sizes, under
+   round/squircle masks and Android themed icons; the approved mark must remain legible.
+2. Open Mode Select in EN/TR and compare to these renders; cards/text must match,
+   with no clipping. Compare real gameplay to captures 02/01 and check touch controls.
+3. Review the lightly polished TR listing and local-only ghost description before
+   publishing. Branding/feature acceptance does not imply Console or device acceptance.
 
 Requirements checked against [Play preview assets](https://support.google.com/googleplay/android-developer/answer/9866151),
 [Play icon specification](https://developer.android.com/distribute/google-play/resources/icon-design-specifications),

@@ -1,0 +1,86 @@
+{
+  "package": "com.tugrahek.nospace",
+  "min_sdk": 24,
+  "target_sdk": 36,
+  "adaptive_layers": [
+    "background",
+    "foreground",
+    "monochrome"
+  ],
+  "artifacts": {
+    "nospace_arena.apk": {
+      "bytes": 99049666,
+      "sha256": "669493e8695417e4b47223124447b0dae5750322756392ce649177e6cd45c48b",
+      "packaged_launcher_webps_matching_generated_resources": 24
+    },
+    "nospace_arena-release-unsigned.aab": {
+      "bytes": 42320312,
+      "sha256": "d6c28f2f69ad6855933c2d2e3ba6187591317cbec17aed803e9d1367df68ee14",
+      "packaged_launcher_webps_matching_generated_resources": 24
+    }
+  },
+  "apk_zipalign_16k_exit": 0,
+  "apk_debug_signature_verify_exit": 0,
+  "source_baseline": "main@eb95d26",
+  "validation_date": "2026-10-26",
+  "engine": "Godot 4.6.3 stable",
+  "isolated_workspace": "export/r3-final-verified",
+  "exit_codes": {
+    "import": 0,
+    "apk": 0,
+    "aab": 0
+  },
+  "export_presets_sha256": "0db22b74e0b4ea99071cf53d21f234f20168a2ba2659b53d6a571cc824e7f78a",
+  "aab_unsigned": true,
+  "aab_forbidden_assets": [],
+  "aab_native_libraries": [
+    {
+      "file": "base/lib/arm64-v8a/libc++_shared.so",
+      "sha256": "c4c2fe5cbcb1fba0003a31fc7ab29a9bb12df6cc187ec45a806462540e83d93b",
+      "load_segments": [
+        {
+          "alignment": 16384,
+          "offset": 0,
+          "vaddr": 0
+        },
+        {
+          "alignment": 16384,
+          "offset": 1329912,
+          "vaddr": 1346296
+        },
+        {
+          "alignment": 16384,
+          "offset": 1371016,
+          "vaddr": 1403784
+        }
+      ]
+    },
+    {
+      "file": "base/lib/arm64-v8a/libgodot_android.so",
+      "sha256": "b4085c7f15575246530474b1fa4291c70e4a8177173d2d6fc597300208cac282",
+      "load_segments": [
+        {
+          "alignment": 16384,
+          "offset": 0,
+          "vaddr": 0
+        },
+        {
+          "alignment": 16384,
+          "offset": 68807024,
+          "vaddr": 68823408
+        },
+        {
+          "alignment": 16384,
+          "offset": 70278224,
+          "vaddr": 70310992
+        }
+      ]
+    }
+  ],
+  "bundle_alignment": "PAGE_ALIGNMENT_16K",
+  "device_acceptance": "pending; artifact checks do not establish runtime or Play Console acceptance",
+  "tooling_notes": [
+    "Sandbox-only attempt was blocked by Gradle cache access; final commands passed with required tool access.",
+    "Final import/APK exporter logged ObjectDB leak warnings at shutdown; no project parser or build errors."
+  ]
+}

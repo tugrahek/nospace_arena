@@ -1,5 +1,6 @@
 """Focused PNG, icon-safe-zone and listing checks using Python's standard library."""
 import argparse
+import configparser
 import hashlib
 import json
 from pathlib import Path
@@ -58,7 +59,7 @@ def read_png(path):
 
 
 def validate():
-    report = {"status": "technical checks passed; visual approval pending", "images": [], "listing": {}}
+    report = {"status": "technical checks passed; branding/feature accepted; physical Android acceptance pending", "images": [], "listing": {}}
     images = sorted(PACKAGE.rglob("*.png"))
     assert len(images) == 14, len(images)
     for path in images:
@@ -98,6 +99,36 @@ def validate():
         report["listing"][locale] = counts
     provenance = json.loads((PACKAGE / "screenshots/capture-provenance.json").read_text())
     assert len(provenance) == 6 and all(not p["upscaled_bitmap"] and p["platform"] == "Windows" for p in provenance)
+    order = json.loads((PACKAGE / "screenshots/order.json").read_text())
+    for locale in ("en", "tr"):
+        assert order[locale] == [f"gameplay-{locale}-02.png", f"gameplay-{locale}-01.png", f"mode-select-{locale}.png"]
+        for name in order[locale]:
+            assert (PACKAGE / "screenshots" / name).is_file()
+            record = next(p for p in provenance if p["file"] == name)
+            assert record["locale"] == locale and (record["width"], record["height"]) == (1080, 1920)
+            if name.startswith("mode-select"):
+                assert record["screen"] == "ModeSelect"
+    icons = {"main_192x192": "launcher-192.png",
+        "adaptive_foreground_432x432": "adaptive-foreground-432.png",
+        "adaptive_background_432x432": "adaptive-background-432.png",
+        "adaptive_monochrome_432x432": "adaptive-monochrome-432.png"}
+    presets = configparser.ConfigParser(interpolation=None, strict=False)
+    presets.read(ROOT / "export_presets.cfg", encoding="utf-8")
+    for key, filename in icons.items():
+        relative = "assets/branding/launcher/" + filename
+        assert (ROOT / relative).read_bytes() == (PACKAGE / "android-launcher" / filename).read_bytes()
+        assert 'source_file="res://' + relative + '"' in (ROOT / (relative + ".import")).read_text()
+        for section in ("preset.0.options", "preset.1.options"):
+            assert presets[section]["launcher_icons/" + key] == '"res://' + relative + '"'
+    for section, export_format, signed in (("preset.0.options", "0", "true"), ("preset.1.options", "1", "false")):
+        options = presets[section]
+        assert options["gradle_build/export_format"] == export_format and options["package/signed"] == signed
+        assert options["package/unique_name"] == '"com.tugrahek.nospace"'
+        assert options["architectures/arm64-v8a"] == "true"
+    assert presets["preset.1.options"]["gradle_build/min_sdk"] == '"24"'
+    assert presets["preset.1.options"]["gradle_build/target_sdk"] == '"36"'
+    report["screenshot_order"] = order
+    report["runtime_launcher_assets"] = len(icons)
     return report
 
 
