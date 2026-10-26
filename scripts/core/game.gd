@@ -83,6 +83,7 @@ func _ready() -> void:
 	# only the arena config + enemy set change per stage.
 	_arena.area_captured.connect(_on_area_captured)
 	_player.control_scheme_changed.connect(_on_scheme_changed)
+	_player.dpad_gesture_changed.connect(_dpad_view.set_gesture)
 	_player.loop_closed.connect(_on_loop_closed)
 	_player.self_hit.connect(_on_trail_failed)  # crossing own trail = life loss (same pipeline)
 	GameState.life_lost.connect(_on_life_lost)

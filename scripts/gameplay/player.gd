@@ -12,6 +12,7 @@ signal returned_to_safe()
 signal loop_closed()
 signal self_hit()  # crossed own active trail (non-adjacent) -> life loss (Qix/Volfied rule)
 signal control_scheme_changed(id: int)
+signal dpad_gesture_changed(active: bool, origin: Vector2)
 
 enum SchemeId { TAP_TURN, SWIPE, DPAD }
 
@@ -114,6 +115,7 @@ func set_scheme(id: int) -> void:
 
 
 func _apply_scheme(id: SchemeId) -> void:
+	_cancel_dpad()
 	control_scheme = id
 	_scheme = _make_scheme(id)
 	_kb_was_held = false
@@ -134,6 +136,7 @@ func _make_scheme(id: SchemeId) -> ControlScheme:
 
 func _process(delta: float) -> void:
 	if _arena == null or not GameState.is_playing():
+		_cancel_dpad()
 		return
 	_update_intent()
 	_move_timer += delta
@@ -270,5 +273,37 @@ func _input(event: InputEvent) -> void:
 			KEY_3:
 				_apply_scheme(SchemeId.DPAD)
 				print("Kontrol şeması: DPAD")
-	if _scheme != null:
+	if _scheme is DpadControl:
+		# Owned drag/release must survive GUI consumption when crossing HUD controls.
+		if _scheme.is_held():
+			_feed_dpad(event)
+	elif _scheme != null:
 		_scheme.handle_input(event, get_viewport_rect().size)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	# GUI gets first refusal for a new gesture, including emulated mouse touches.
+	if _scheme is DpadControl and not _scheme.is_held():
+		_feed_dpad(event)
+
+
+func _feed_dpad(event: InputEvent) -> void:
+	if not (event is InputEventScreenTouch or event is InputEventScreenDrag):
+		return
+	if not GameState.is_playing() or get_tree().paused:
+		return
+	_scheme.handle_input(event, get_viewport_rect().size)
+	dpad_gesture_changed.emit(_scheme.is_held(), _scheme.touch_origin)
+
+
+func _cancel_dpad() -> void:
+	if _scheme is DpadControl:
+		_scheme.reset()
+		_direction = Vector2i.ZERO
+		_queued_dir = Vector2i.ZERO
+		dpad_gesture_changed.emit(false, Vector2.ZERO)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED:
+		_cancel_dpad()
