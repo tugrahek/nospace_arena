@@ -1,5 +1,9 @@
 # Android integration notes
 
+Upload-key preflight and the optional credential-safe post-export signer are
+documented in [Android upload signing](android-upload-signing.md). Both original
+APK/unsigned-AAB profiles remain unchanged; no owner key is provisioned here.
+
 This page keeps the project's Android service and export details out of the portfolio overview. It describes the current development setup, not a production release configuration.
 
 ## Ads and consent
