@@ -107,7 +107,7 @@ ignored `export/r3-final-verified/` directory; shutdown ObjectDB warnings are no
 
 The text describes capture/trail risk, actual territory effects, unlocks, four
 modes, 12 campaign stages, missions/login rewards, three controls and 18 languages.
-Daily best scores/ghosts are explicitly local. It promises no online ranking,
+Daily best scores are explicitly local. It promises no online ranking,
 cloud account, roguelite draft, ad-free experience or current production purchase.
 Sources: [project README](../../README.md), `resources/`, `scripts/core/game.gd`,
 `scripts/autoload/SeedManager.gd` and the current EN/TR translation catalog.
@@ -127,7 +127,7 @@ Suggested upload alt text (all below 140 characters):
    round/squircle masks and Android themed icons; the approved mark must remain legible.
 2. Open Mode Select in EN/TR and compare to these renders; cards/text must match,
    with no clipping. Compare real gameplay to captures 02/01 and check touch controls.
-3. Review the lightly polished TR listing and local-only ghost description before
+3. Review the TR listing and local-only Daily score description before
    publishing. Branding/feature acceptance does not imply Console or device acceptance.
 
 Requirements checked against [Play preview assets](https://support.google.com/googleplay/android-developer/answer/9866151),

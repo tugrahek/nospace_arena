@@ -47,8 +47,6 @@ var _mode: int = SeedManager.Mode.FREE
 var _level: LevelData = null  # active Campaign level (CAMPAIGN mode only)
 var _daily_seed: int = 0
 var _leaderboard: Leaderboard = null
-var _recording: GhostTrack = null
-var _ghost: Ghost = null
 var _missions: Array[Mission] = []
 var _mission_date: int = 0
 var _areas_this_run: int = 0
@@ -117,27 +115,20 @@ func _ready() -> void:
 	_start_stage(0)             # configures arena + player + enemies + living/near-miss refs
 	_apply_character(char_idx)  # character is constant across stages (set after arena exists)
 	_on_scheme_changed(int(_player.control_scheme))
-	_setup_leaderboard_and_ghost()
+	_setup_leaderboard()
 	_setup_missions()
 	AudioManager.stop_music()  # in-run is silent (no game-music track); menu music resumes on return
 	if _daily and OS.is_debug_build():
 		print("Daily mode: seed=%d" % _daily_seed)
 
 
-## Daily only: load the leaderboard, show today's best, and play its ghost (recorded
-## path of the best run). Also starts recording this run. Free-play: nothing.
-func _setup_leaderboard_and_ghost() -> void:
+## Daily only: load historical scores and show today's best. Free-play: nothing.
+func _setup_leaderboard() -> void:
 	if not _daily:
 		_hud.set_best(-1)
 		return
 	_leaderboard = LeaderboardStore.load_from(LEADERBOARD_PATH)
-	_recording = GhostTrack.new()
 	_hud.set_best(_leaderboard.best_score(_daily_seed))
-	var best_track: GhostTrack = _leaderboard.best_track(_daily_seed)
-	if best_track != null and not best_track.is_empty():
-		_ghost = Ghost.new()
-		add_child(_ghost)
-		_ghost.play(best_track)
 
 
 ## Builds today's 3 missions (seed-derived, same for everyone) with saved progress.
@@ -183,8 +174,7 @@ func _resolve_boosts() -> Dictionary:
 	return fx
 
 
-## Records the player path at the physics rate (daily only) for the ghost.
-## Pause freezes _physics_process -> no samples while paused -> ghost stays deterministic.
+## Updates game-time clocks, grace and timed effects on live physics steps.
 func _physics_process(delta: float) -> void:
 	# Game-time clock (combo window source): advances only on live physics steps, so pausing
 	# freezes it and slow-mo/hit-stop don't shrink the window in game terms.
@@ -214,22 +204,13 @@ func _physics_process(delta: float) -> void:
 	# Risk reward: accrue exposed time only while drawing in the open (safe/wall == not exposed -> 0).
 	if GameState.is_playing() and _player.is_exposed():
 		_exposed_time += delta
-	# Skip sampling while ANY time effect is active (hit-stop or near-miss slow-mo): time_scale
-	# is reduced there, so samples would cluster and bloat the ghost. Determinism unaffected.
-	if _daily and _recording != null and GameState.is_playing() and not _time_control.is_active():
-		_recording.add_sample(_player.position)
-
-
-## Ghost recording length (frames) — used to verify pause stops sampling.
-func recording_frame_count() -> int:
-	return _recording.length_frames() if _recording != null else 0
 
 
 ## Submits this run's score to the daily leaderboard; persists + updates BEST if new best.
 func _submit_run(score: int) -> void:
-	if not _daily or _leaderboard == null or _recording == null:
+	if not _daily or _leaderboard == null:
 		return
-	if _leaderboard.submit(_daily_seed, score, _recording):
+	if _leaderboard.submit(_daily_seed, score):
 		LeaderboardStore.save_to(LEADERBOARD_PATH, _leaderboard)
 		_hud.set_best(_leaderboard.best_score(_daily_seed))
 
@@ -385,7 +366,7 @@ func _spawn_stage_enemies(spec: Dictionary, override_types: Array = []) -> void:
 			var vel: Vector2 = EnemyMotion.start_velocity_seeded(DailySeed.dir_index(stage_seed, i), speed_px) \
 				if _daily else EnemyMotion.start_velocity(i, speed_px)
 			# Spread spawn positions off-center by index so multiple enemies don't stack (2 -> opposite
-			# sides). Deterministic (index/count only) -> daily/ghost reproduce.
+			# sides). Deterministic (index/count only) -> Daily runs reproduce.
 			var spawn_pos: Vector2 = center + EnemyMotion.spawn_offset(i, count, _arena.cell_size * 3.0)
 			enemy.setup(_arena, spawn_pos, vel, type.behavior, speed_px, variation)
 		enemy.run_speed_scale = _slow_start_scale if _slow_start_timer > 0.0 else 1.0  # Slow Start boost

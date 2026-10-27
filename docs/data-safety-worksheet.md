@@ -8,7 +8,7 @@ başına belirli bir verinin toplandığını kanıtlamaz. Yayıncı nihai formu
 
 | Bileşen | Projede kanıt | Sınır |
 |---|---|---|
-| Yerel profil/tercihler, görev, skor ve ghost | `scripts/meta/`, `Economy.SAVE_PATH`, `SeedManager` | Yayıncı sunucusuna gönderim/hesap açma/ayrı analytics istemcisi bulunmadı; SDK trafiği hariç |
+| Yerel profil/tercihler, görev ve skor | `scripts/meta/`, `Economy.SAVE_PATH`, `SeedManager` | Yayıncı sunucusuna gönderim/hesap açma/ayrı analytics istemcisi bulunmadı; SDK trafiği hariç |
 | Reklam | Poing 5.1.0; `addons/admob/android/bin/ads/poing_godot_admob_ads.gd`: GMA Next-Gen **1.4.0** | Test modu açık, production kapalı; yalnız rewarded proje akışı |
 | UMP | `ads_consent_coordinator.gd`, `poing_ads_bridge.gd`, `settings_panel.gd` | Oturum güncellemesi, gerekli form, koşullu privacy-options erişimi; hesap mesajları bilinmiyor |
 | Billing | Vendored 3.3.0 / Billing 9.1.0; varsayılan katalog boş | Yeni ürün/satış eklenmedi; mevcut SDK kapsamı son formda ayrıca incelenmeli |

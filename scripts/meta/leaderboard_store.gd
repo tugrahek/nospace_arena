@@ -2,12 +2,11 @@ class_name LeaderboardStore
 extends RefCounted
 
 ## Thin JSON persistence for the local leaderboard (user://). Corrupt/missing files
-## load as an empty leaderboard (safe). Prunes ghost tracks before saving so the file
-## doesn't grow without bound. IO is impure; the serialization it relies on is pure
+## load as an empty leaderboard (safe). Saves scores only, preserving all dates.
+## IO is impure; the serialization it relies on is pure
 ## (Leaderboard.to_dict/from_dict, GUT-tested). Step 12's unified save may absorb this.
 
 const LeaderboardScript = preload("res://scripts/meta/leaderboard.gd")
-const KEEP_TRACK_DAYS: int = 5
 
 
 static func load_from(path: String) -> LeaderboardScript:
@@ -25,7 +24,6 @@ static func load_from(path: String) -> LeaderboardScript:
 
 
 static func save_to(path: String, leaderboard: LeaderboardScript) -> void:
-	leaderboard.prune_tracks(KEEP_TRACK_DAYS)
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f == null:
 		return

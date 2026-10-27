@@ -22,14 +22,13 @@
 
 <p align="center"><strong>Move along the boundary → enter the void → close your line → claim territory.</strong></p>
 
-Inspired by **Qix** and **Volfied**, every cut is a risk: enemies can reach your exposed line before you reconnect. Captured ground changes the fight through your character's territory effect.
+Every cut is a risk: enemies can reach your exposed line before you reconnect. Captured ground changes the fight through your character's territory effect.
 
 <p align="center">
   <a href="docs/media/main-menu.png"><img src="docs/media/main-menu.png" width="220" alt="English Main Menu with Play, Store, Missions, Leaderboard, and How to Play"></a>
   <a href="docs/media/gameplay.png"><img src="docs/media/gameplay.png" width="220" alt="English gameplay HUD and a freshly captured region"></a>
   <a href="docs/media/modes.png"><img src="docs/media/modes.png" width="220" alt="English Mode Select with four modes and three pre-run boosts"></a>
 </p>
-<p align="center"><sub>Main Menu · Territory capture · Mode Select<br>Actual Godot gameplay and English UI captures. Select any image to view it at full size.</sub></p>
 
 ---
 
@@ -38,7 +37,7 @@ Inspired by **Qix** and **Volfied**, every cut is a risk: enemies can reach your
 | Feature | In the game |
 |:--|:--|
 | **Living Territory** | Pulse, Drag, and Halt give captured ground distinct defensive effects. |
-| **Daily challenge & personal bests** | Date-based arena selection, local best scores, and a replay of your own best-run ghost. |
+| **Daily challenge & personal bests** | Date-based arena selection and local best scores. |
 | **Progression & rewards** | Campaign stars, rotating missions, coins, daily login rewards, and Supply gifts. |
 | **Your loadout** | Three arenas, unlockable characters, and Extra Life, Coin Bonus, and Slow Start boosts. |
 | **Made for portrait play** | Swipe, tap-to-turn, and D-pad controls; responsive layouts, safe areas, and 18 UI languages. |
@@ -47,7 +46,7 @@ Inspired by **Qix** and **Volfied**, every cut is a risk: enemies can reach your
 
 | Mode | The challenge |
 |:--|:--|
-| **Daily** | A date-based challenge with personal best/ghost tracking. Boosts are disabled. |
+| **Daily** | A date-based challenge with personal best tracking. Boosts are disabled. |
 | **Free** | Play a single arena with your selected character and arena. |
 | **Endless** | Clear successive arenas as enemy pressure and capture targets increase. |
 | **Campaign** | Take on 12 authored stages and earn up to three stars per stage. |
@@ -70,7 +69,7 @@ English, Turkish, German, French, Spanish, Brazilian Portuguese, Italian, Japane
 Simplified Chinese, Traditional Chinese, Russian, Indonesian, Vietnamese, Polish, Hindi, Thai, and Arabic are supported.
 New translations await native-speaker review; physical Android acceptance is pending.
 
-Daily scores and ghosts are stored **on the device**. Online rankings and a server-synced Daily clock are not implemented.
+Daily scores are stored **on the device**. Online rankings and a server-synced Daily clock are not implemented.
 
 ---
 

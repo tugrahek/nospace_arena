@@ -14,7 +14,7 @@ func _ready() -> void:
 	Engine.time_scale = 1.0  # safety on (re)load
 
 
-## True while any time request is active (time_scale != 1.0). Used to gate ghost recording.
+## True while any time request is active (time_scale != 1.0).
 func is_active() -> bool:
 	return not _requests.is_empty()
 

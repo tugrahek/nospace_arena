@@ -15,8 +15,8 @@ geliştirme/smoke build'leri Google test reklamlarını kullanır.
 
 ## Oyun verileri
 
-Mevcut oyun kodu ilerlemeyi, oyun içi parayı, görevleri, yerel skorları/ghost
-kayıtlarını, dil/ses/kontrol tercihlerini cihazda saklar. Oyuncu hesabı açma,
+Mevcut oyun kodu ilerlemeyi, oyun içi parayı, görevleri, yerel skorları,
+dil/ses/kontrol tercihlerini cihazda saklar. Oyuncu hesabı açma,
 bulut profil eşitleme ve sunucuya skor gönderme akışı uygulanmamıştır. Bu tespit
 üçüncü taraf reklam SDK'sının ağ işlemlerini kapsamaz. Reklamdan kazanılan ödül
 oyunun yerel ilerlemesine işlenir; ayrı bir yayıncı analiz servisi bulunmamıştır.

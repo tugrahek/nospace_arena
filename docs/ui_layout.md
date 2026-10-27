@@ -53,7 +53,7 @@ Physical Android/iOS verification is still required when production scenes adopt
 
 ## Gameplay boundary
 
-Keep Arena, Player, Enemy, Ghost, Camera2D and world-space effects outside SafeContent.
+Keep Arena, Player, Enemy, Camera2D and world-space effects outside SafeContent.
 Do not change PLAY_RECT, grid sizing, camera, physics or input coordinates.
 Backgrounds/dimming remain full-screen; the helper itself ignores pointer input.
 Existing child controls retain their own mouse/input behavior.

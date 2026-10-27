@@ -5,7 +5,6 @@ extends GutTest
 const SCENE: PackedScene = preload("res://scenes/ui/Leaderboard.tscn")
 const VIEW = preload("res://scripts/ui/leaderboard_view.gd")
 const BOARD = preload("res://scripts/meta/leaderboard.gd")
-const TRACK = preload("res://scripts/meta/ghost_track.gd")
 const TODAY: int = 20261003
 
 
@@ -19,12 +18,11 @@ func after_each() -> void:
 
 func _board() -> Leaderboard:
 	var board: Leaderboard = BOARD.new()
-	var track: GhostTrack = TRACK.new()
-	board.submit(20260929, 270, track)
-	board.submit(20261001, 820, track)
-	board.submit(TODAY, 710, track)
-	board.submit(20260930, 410, track)
-	board.submit(20261002, 820, track)
+	board.submit(20260929, 270)
+	board.submit(20261001, 820)
+	board.submit(TODAY, 710)
+	board.submit(20260930, 410)
+	board.submit(20261002, 820)
 	return board
 
 
@@ -113,7 +111,7 @@ func test_english_turkish_rows_fit_at_720x1280() -> void:
 			var date_label: Label = _label(entry, "Date")
 			var score_label: Label = _label(entry, "Score")
 			assert_true(scroll.get_global_rect().encloses(entry.get_global_rect()), "row inside %s/%d" % [locale, index])
-			assert_true(date_label.get_global_rect().end.x < score_label.get_global_rect().position.x, "date and score separate %s/%d" % [locale, index])
+			assert_true(date_label.get_global_rect().end.x < score_label.get_global_rect().position.x or score_label.get_global_rect().end.x < date_label.get_global_rect().position.x, "date and score separate in LTR/RTL %s/%d" % [locale, index])
 			if index > 0:
 				assert_true(list.get_child(index - 1).get_global_rect().end.y <= entry.get_global_rect().position.y, "rows do not overlap %s/%d" % [locale, index])
 
@@ -123,9 +121,8 @@ func test_full_year_date_columns_fit_at_720x1280() -> void:
 		TranslationServer.set_locale(locale)
 		var page: Control = await _page()
 		var board: Leaderboard = BOARD.new()
-		var track: GhostTrack = TRACK.new()
-		board.submit(20270622, 7400, track)
-		board.submit(20260622, 6400, track)
+		board.submit(20270622, 7400)
+		board.submit(20260622, 6400)
 		page.call("_render_leaderboard", board, 20271003)
 		await get_tree().process_frame
 		for index in 2:
@@ -135,7 +132,7 @@ func test_full_year_date_columns_fit_at_720x1280() -> void:
 			var year: int = 2027 if index == 0 else 2026
 			assert_eq(date_label.text, VIEW.format_date(year * 10000 + 622))
 			assert_true(date_label.size.x >= date_label.get_combined_minimum_size().x, "full date fits %s/%d" % [locale, index])
-			assert_true(date_label.get_global_rect().end.x < score_label.get_global_rect().position.x, "date and score remain separate %s/%d" % [locale, index])
+			assert_true(date_label.get_global_rect().end.x < score_label.get_global_rect().position.x or score_label.get_global_rect().end.x < date_label.get_global_rect().position.x, "date and score remain separate in LTR/RTL %s/%d" % [locale, index])
 			assert_true(page.get_global_rect().encloses(score_label.get_global_rect()), "score stays on screen %s/%d" % [locale, index])
 
 
@@ -151,7 +148,7 @@ func test_safe_header_back_scroll_and_long_scores_fit_phone_ratios_and_tablet() 
 		assert_true(layout.get_global_rect().encloses(scroll.get_global_rect()), "ranking scroll stays in layout %s" % dimensions)
 		assert_almost_eq(layout.size.x, minf(safe.size.x, 800.0), 0.1, "tablet width remains bounded")
 		var board: Leaderboard = BOARD.new()
-		board.submit(20270622, 9223372036854775807, TRACK.new())
+		board.submit(20270622, 9223372036854775807)
 		page.call("_render_leaderboard", board, TODAY)
 		await get_tree().process_frame
 		var entry: Control = page.get_node("SafeArea/Bounds/Layout/Scroll/Content/List/Entry1")
