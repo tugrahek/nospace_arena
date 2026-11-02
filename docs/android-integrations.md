@@ -67,8 +67,8 @@ public policy URL is included in R2.
 
 - The project vendors [GodotGooglePlayBilling 3.3.0](https://github.com/godot-sdk-integrations/godot-google-play-billing/releases/tag/3.3.0) with Google Play Billing Library 9.1.0 under `addons/GodotGooglePlayBilling/`, including its MIT notice and debug/release AARs.
 - Release ZIP SHA-256: `20d75623d6f337f08d8283c83098b73678d5f575e39247af5a8eb80588b18568`.
-- The editor plugin adds the variant-specific AAR and pinned Maven dependency to Android Gradle exports. `PurchaseService` selects the Android adapter only when the native singleton is available; desktop remains a no-op.
-- The adapter supports non-consumables with one purchase offer and uses Google-provided localized product metadata. The default catalog is empty: no products, consumables, subscriptions, or server-side receipt validation are configured.
+- The editor plugin adds the variant-specific AAR and pinned Maven dependency to Android Gradle exports. `PurchaseService.REAL_PURCHASES_ENABLED=false` now keeps the production autoload on the unavailable no-op backend on all platforms, including Android.
+- The adapter supports non-consumables with one purchase offer and uses Google-provided localized product metadata. The live catalog is empty. Step 32 defines three planned consumable coin packs separately; no native consumable flow, trusted server verification or coin delivery is configured. See [v1 IAP architecture](iap-v1-architecture.md) and the permanent [v1 release tracker](release-v1-checklist.md).
 - Purchase callbacks are correlated with immutable request data and opaque flow markers; purchase tokens identify durable transactions. Checked reward delivery precedes acknowledgement. Owned-purchase queries support restoration and retry failed acknowledgements on a later query.
 
 ## Export checklist

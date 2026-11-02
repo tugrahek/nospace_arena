@@ -59,6 +59,8 @@ Built with **Godot 4.6.3** and **statically typed GDScript**. Procedural 2D visu
 
 ## 🚧 Development Status
 
+Release blockers and remaining acceptance are tracked in the [v1 release checklist](docs/release-v1-checklist.md).
+
 **Playable prototype · Android development builds · Not yet released**
 
 - **Implemented:** the core capture loop, territory effects, four modes, progression, rewards, and multilingual UI.

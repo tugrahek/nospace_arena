@@ -3,6 +3,9 @@ extends Node
 ## Authoritative IAP boundary; Economy owns checked persistence and native code stays in a backend.
 const Backend = preload("res://scripts/monetization/purchase_backend.gd")
 const NoopBackend = preload("res://scripts/monetization/noop_purchase_backend.gd")
+## Release gate: enable only after trusted verification, wallet delivery and recovery ship.
+## This prevents accidental activation; it is not a security boundary against modified clients.
+const REAL_PURCHASES_ENABLED: bool = false
 
 signal initialization_completed(available: bool)
 signal products_queried(token: int)
@@ -35,7 +38,7 @@ var _recovery_query_token: int = 0
 func _ready() -> void:
 	if get_parent() == get_tree().root and name == "PurchaseService":
 		_delivery_handler = Callable(Economy, "_deliver_purchase_transaction")
-		if OS.get_name() == "Android" and Engine.has_singleton("GodotGooglePlayBilling"):
+		if REAL_PURCHASES_ENABLED and OS.get_name() == "Android" and Engine.has_singleton("GodotGooglePlayBilling"):
 			_backend = GooglePlayPurchaseBackend.new()
 	_connect_backend()
 	initialize()
