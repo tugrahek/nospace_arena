@@ -1,6 +1,6 @@
 extends Node
 
-## Authoritative IAP boundary; Economy owns checked persistence and native code stays in a backend.
+## IAP orchestration boundary; unverified coin candidates never reach local delivery.
 const Backend = preload("res://scripts/monetization/purchase_backend.gd")
 const NoopBackend = preload("res://scripts/monetization/noop_purchase_backend.gd")
 ## Release gate: enable only after trusted verification, wallet delivery and recovery ship.
@@ -11,6 +11,8 @@ signal initialization_completed(available: bool)
 signal products_queried(token: int)
 signal purchase_succeeded(token: int, product_id: StringName, transaction_id: String, restored: bool)
 signal purchase_delivery_pending(token: int, product_id: StringName, transaction_id: String)
+## Carries a sensitive unverified token to a future server boundary, never a grant.
+signal purchase_verification_required(token: int, product_id: StringName, purchase_token: String)
 signal purchase_failed(token: int, product_id: StringName, reason: StringName)
 signal purchase_cancelled(token: int, product_id: StringName)
 signal purchase_pending(token: int, product_id: StringName)
@@ -29,6 +31,7 @@ var _active_token: int = 0
 var _operation: StringName = &""
 var _product_id: StringName = &""
 var _seen_transactions: Dictionary = {}
+var _verification_candidates: Dictionary = {}
 var _delivery_handler: Callable
 var _recovery_requested: bool = false
 var _recovery_needs_query: bool = false
@@ -117,6 +120,7 @@ func _can_start() -> bool:
 
 
 func _begin(operation: StringName, next_state: State, product_id: StringName = &"") -> int:
+	_verification_candidates.clear()
 	_next_token += 1
 	_active_token = _next_token
 	_operation = operation
@@ -144,6 +148,7 @@ func _connect_backend() -> void:
 	_backend.initialized.connect(_on_initialized)
 	_backend.products_received.connect(_on_products)
 	_backend.transaction_received.connect(_on_transaction)
+	_backend.verification_required.connect(_on_verification_required)
 	_backend.purchase_pending.connect(_on_pending)
 	_backend.purchase_cancelled.connect(_on_cancelled)
 	_backend.operation_failed.connect(_on_failed)
@@ -181,6 +186,10 @@ func _on_transaction(token: int, product_id: StringName, transaction_id: String)
 	var product: PurchaseProduct = _catalog.find(product_id)
 	if product == null or transaction_id.is_empty():
 		return
+	# Reserved v1 coin IDs cannot enter local delivery even through a wrong callback.
+	if CoinPackDefinition.expected_coins(product_id) > 0:
+		_on_verification_required(token, product_id, transaction_id)
+		return
 	if restoring and product.kind != PurchaseProduct.Kind.NON_CONSUMABLE:
 		return
 	if not restoring and product_id != _product_id:
@@ -205,6 +214,23 @@ func _on_transaction(token: int, product_id: StringName, transaction_id: String)
 	_backend.delivery_confirmed(token, product_id, transaction_id)
 	if not delivery.get("duplicate", false):
 		purchase_succeeded.emit(token, product_id, transaction_id, restoring)
+
+
+func _on_verification_required(token: int, product_id: StringName, identity: String) -> void:
+	var restoring: bool = _matches(token, &"restore")
+	if not restoring and not _matches(token, &"purchase"):
+		return
+	var product: PurchaseProduct = _catalog.find(product_id)
+	if product == null or product.kind != PurchaseProduct.Kind.CONSUMABLE or identity.strip_edges().is_empty():
+		return
+	if CoinPackDefinition.expected_coins(product_id) == 0 or (not restoring and product_id != _product_id):
+		return
+	if _verification_candidates.has(identity):
+		return
+	_verification_candidates[identity] = product_id
+	if not restoring:
+		_finish()
+	purchase_verification_required.emit(token, product_id, identity)
 
 
 func _handle_seen_transaction(token: int, product: PurchaseProduct, identity: String, restoring: bool) -> bool:

@@ -1,6 +1,6 @@
 # v1 coin purchases — secure architecture contract
 
-Status: foundation only, 2026-11-02. **Real purchases are disabled.** This is the
+Status: foundation plus mock-tested candidate adapter, 2026-11-03. **Real purchases are disabled.** This is the
 required future design, not a deployed verification service or a recovery promise.
 Release completion is tracked in [the permanent v1 checklist](release-v1-checklist.md).
 
@@ -28,16 +28,56 @@ approves these names. Service credentials and purchase tokens stay out of Git/lo
 - `PurchaseService.REAL_PURCHASES_ENABLED=false` keeps the production autoload on
   the unavailable no-op backend on every platform. Fake-backend unit tests remain
   injectable. This gate prevents accidental activation, not hostile client edits.
-- The existing Android adapter handles non-consumables, not these consumable packs.
-  The live service catalog remains empty; no Store layout, prices or coin grants
-  are connected to these definitions.
+- The Android adapter now accepts explicitly injected valid coin definitions or
+  approved consumable metadata, alongside existing non-consumables. It queries
+  Play-localized metadata and routes coin candidates separately. The production
+  service catalog remains empty; no Store UI or coin grants are connected.
 - Existing callbacks/flow markers and `Economy` transaction persistence provide
   local orchestration only. The bridge's per-flow obfuscated account marker is
   **not a durable authenticated account ID**. No trusted verification endpoint or
   server ledger exists in this repository.
-- The current local handler can mark a consumable transaction delivered without
-  crediting coins. Do not connect the new SKUs to that handler as fulfillment.
-  Local save deduplication cannot prevent cross-device replay/save rollback.
+- The local handler still cannot fulfill paid coin packs. The service now prevents
+  the three reserved coin IDs from reaching that handler, even through the old
+  transaction callback. Local persistence is not server verification or a wallet.
+
+## Step 33 adapter boundary — implemented, not monetization activation
+
+Explicitly injected `CoinPackDefinition` resources are validated and converted to
+backend metadata; empty configuration stays empty. Unknown consumables and coin IDs
+mislabeled non-consumable cannot launch. The production gate is unchanged.
+
+For coins, metadata requires an INAPP product and exactly one structurally valid
+offer: nonblank Play display price, three-uppercase-letter currency code, positive
+integral price micros, nonblank purchase-option ID and optional string offer ID.
+The pinned bridge passes those exact option/offer IDs to its native purchase API.
+Several valid alternatives are ambiguous and excluded; no cheapest/first selection
+or invented price is used. Duplicate purchasable product details fail the query and clear
+offers. Fresh metadata is required after disconnect. Existing non-consumable
+single-offer behavior remains covered by its regressions.
+
+One explicit quantity is accepted for coin callbacks. Pending callbacks do not
+submit a verification candidate until purchased; cancellation/errors grant nothing.
+Request tokens, native flow markers and pending purchase-token correlation reject
+stale/unrelated callbacks. Invalid arrays/JSON are ignored or fail the operation
+without printing sensitive receipt data.
+
+Purchased coin callbacks and owned-query recovery emit backend
+`verification_required`, forwarded as service
+`purchase_verification_required(request_token, sku, purchase_token)`. **This event
+is unverified input, not success, durable delivery or permission to consume.** It
+does not call the local delivery handler, change balance or emit purchase success.
+No server listener is installed yet. Coin `delivery_confirmed` calls cannot cause
+acknowledgement, including spoofed durable client context. No consumable consume
+method is added to the bridge. Non-consumable delivery/acknowledgement is unchanged.
+
+Startup/reconnection refreshes metadata and queries owned purchases. Purchased,
+unconsumed coins can be resubmitted as candidates; pending owned entries wait for a
+later purchased query. Duplicate candidates within a service request are suppressed,
+but later recovery requests deliberately permit retry. No in-memory set claims
+durable server deduplication. Consumed-history/account recovery still requires the
+future server ledger. Tokens are sensitive: do not log or show these events in UI.
+Mock tests establish callback behavior only; real plugin/Play-device acceptance is
+still pending. Do not enable real purchases while this event has no trusted handler.
 
 ## Platform facts
 
@@ -59,7 +99,7 @@ authenticated Play Developer API access; an order ID or client JSON is insuffici
 ## Required implementation: verify, commit, consume, reconcile
 
 This sequence is the project's proposed v1 design; none of the following server
-components are implemented in Step 32.
+components are implemented by the client-only Steps 32–33.
 
 1. Authenticate the player/wallet owner before checkout. Bind an intent to that
    owner and one approved SKU; use stable, privacy-preserving account attribution.

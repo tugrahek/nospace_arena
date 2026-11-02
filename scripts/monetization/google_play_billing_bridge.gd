@@ -55,7 +55,7 @@ func finish_purchase() -> void:
 		_client.set_obfuscated_account_id("")
 
 
-## Owned purchases are authoritative recovery input, never UI-granted entitlements.
+## Owned queries provide untrusted recovery candidates, never proof of delivery.
 func query_owned(completed: Callable) -> void:
 	_link(&"query_purchases_response", completed, CONNECT_ONE_SHOT)
 	_client.query_purchases(Client.ProductType.INAPP)
@@ -95,8 +95,16 @@ func _route_purchase(response: Dictionary, completed: Callable, marker: String) 
 		completed.call(response)
 		return
 	var matching: Array = []
-	for purchase_data: Dictionary in response.get("purchases", []):
-		var original: Variant = JSON.parse_string(str(purchase_data.get("original_json", "")))
+	var purchases: Variant = response.get("purchases", [])
+	if not purchases is Array:
+		return
+	for purchase_data: Variant in purchases:
+		if not purchase_data is Dictionary:
+			continue
+		var parser: JSON = JSON.new()
+		if parser.parse(str(purchase_data.get("original_json", ""))) != OK:
+			continue  # Invalid input is ignored without logging sensitive purchase data.
+		var original: Variant = parser.data
 		if original is Dictionary and original.get("obfuscatedAccountId", "") == marker:
 			matching.append(purchase_data)
 	if not matching.is_empty():

@@ -1,6 +1,6 @@
 # NoSpace: Arena — permanent v1 release tracker
 
-Last reviewed: **2026-11-02**. Status: **BLOCKED — mandatory v1 IAP is incomplete**.
+Last reviewed: **2026-11-03**. Status: **BLOCKED — mandatory v1 IAP is incomplete**.
 Keep this file current in every release-related step. A checked preparation item
 does not mean signing, account approval, device acceptance or publication passed.
 Attach evidence/date to newly completed items; account-dependent entries stay open
@@ -22,6 +22,9 @@ until the publisher verifies them. No Play Console access/approval is inferred.
   README and store/privacy copy cleaned. Daily seeds and scoring unchanged.
 - [x] Step 32: typed `coins_500/1500/4000` definitions, exact amounts, validation
   tests, explicit disabled native-purchase gate and [secure IAP design](iap-v1-architecture.md).
+- [x] Step 33: mock-tested consumable adapter metadata/offers, single quantity,
+  callback/pending/cancel/reconnect/owned-query candidate recovery. Reserved coins
+  cannot enter local delivery/acknowledgement/consumption; real purchasing stays off.
 
 ## Mandatory v1 IAP — release blockers
 
@@ -35,8 +38,13 @@ until the publisher verifies them. No Play Console access/approval is inferred.
   outbox with retry/backoff, deadlines, monitoring, audit and backups.
 - [ ] Implement versioned wallet projection/idempotent client delivery; never grant
   from an unverified callback or repeat `earn` on retries.
-- [ ] Extend the currently non-consumable native adapter for approved consumable
-  metadata/offers, pending handling and reconnect/recovery; validate plugin support.
+- [x] Extend native adapter for the approved consumable definitions, localized
+  metadata/unambiguous offers and unverified candidate recovery with focused mocks.
+- [ ] Validate actual pinned-plugin/Play responses, offers and callback/reconnect
+  behavior on a signed testing-track device; mock success is not native acceptance.
+- [ ] Connect `purchase_verification_required` to authenticated server verification,
+  including retry/recovery across process death. No listener/durable token queue is
+  implemented yet; a candidate event must never be treated as delivery success.
 - [ ] Implement server consumption after durable fulfillment; handle duplicates,
   already-consumed responses and pending-to-purchased transitions without double credit.
 - [ ] Implement RTDN/reconciliation and Voided Purchases polling, partial refund
