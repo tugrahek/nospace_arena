@@ -1,7 +1,7 @@
 class_name ThemeData
 extends Resource
 
-## Palette for an arena (color data only; sprites/shaders are Step 14). Composes with
+## Palette for an arena (color data only). Composes with
 ## the active character: the theme sets the void/border/trail/enemy ambiance, the
 ## character's accent_color is the captured-territory glow that rides on top.
 

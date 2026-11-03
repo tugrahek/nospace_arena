@@ -48,7 +48,7 @@ func test_sparx_moves_without_stall() -> void:
 
 
 func test_sparx_catches_player_at_edge_every_frame() -> void:
-	# Fix-pass #18: the Sparx-local catch cooldown is gone — death_grace (game) is the single
+	# The Sparx-local catch cooldown is gone — death_grace (game) is the single
 	# owner of post-death invulnerability, so an ignored catch can no longer disarm the Sparx
 	# for a second afterwards. While adjacent, it keeps reporting the catch.
 	var arena := ArenaController.new()
@@ -338,7 +338,7 @@ func _add_game_sparx(game: Node, arena: ArenaController, cell: Vector2i) -> Enem
 
 
 func test_pocket_autocaptures_when_sparx_contained() -> void:
-	# End-to-end reward (fix-pass #10): a capture event that seals the Sparx off fills its pocket
+	# End-to-end reward: a capture event that seals the Sparx off fills its pocket
 	# in the SAME event through the normal pipeline — captured cells, percent, chained combo.
 	# The main region keeps its active enemy (seed) and must stay FREE.
 	SeedManager.enter_free()

@@ -3,7 +3,7 @@ extends Resource
 
 ## A playable character: visual identity + its living-territory effect.
 ## Balanced sidegrade — characters change HOW you control enemies, not raw power.
-## Selection/unlock UI is Step 13; persistence is Step 11. unlock_cost is reserved.
+## Defines localized identity, territory effect and soft-currency unlock cost.
 
 @export var id: StringName
 @export var display_name_key: String  # locale key (player-facing name)

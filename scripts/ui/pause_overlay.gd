@@ -3,7 +3,7 @@ extends CanvasLayer
 ## In-run pause: a pause button (during play) + an overlay (Resume/Restart/Menu). Runs with
 ## process_mode = ALWAYS so Esc toggles BOTH ways (pause and resume) and the overlay buttons
 ## work while the tree is paused. Auto-pauses on app background / focus loss (resume is manual).
-## Functional scaffold — visual polish is Step 15.
+## Pause overlay presentation and navigation.
 
 signal restart_requested()
 signal menu_requested()

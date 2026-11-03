@@ -2,7 +2,7 @@ class_name ArenaCatalog
 extends RefCounted
 
 ## Pure arena helpers (no scene/grid deps, testable): deterministic selection and
-## fit-to-rect sizing. The dev cycle and Step 09's daily seed both route through
+## fit-to-rect sizing. The dev cycle and daily seed both route through
 ## select() — same path, no RNG.
 
 

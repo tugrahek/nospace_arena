@@ -2,7 +2,7 @@ extends Node
 
 ## Owns the persistent player profile (soft currency + unlocked content) and the
 ## runtime API around it. Loads on _ready, auto-saves on every mutation (small file,
-## no data loss). No class_name (autoload singleton). Leaderboard is separate (Step 11).
+## no data loss). No class_name (autoload singleton). Leaderboard is separate.
 
 const SaveStore = preload("res://scripts/meta/save_store.gd")
 const LoginStreak = preload("res://scripts/meta/login_streak.gd")

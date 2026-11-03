@@ -88,7 +88,7 @@ func test_freeplay_stage_seed_zero() -> void:
 	assert_eq(int(StagePlan.compute(false, 0, 0, 3, 3, SR, SC, EAE, ECB, TR)["stage_seed"]), 0)
 
 
-# --- Fix-pass #22: authored Endless onboarding + anchored late ramp ---
+# --- Authored Endless onboarding + anchored late ramp ---
 
 func test_endless_authored_stages_match_b1_r_golden() -> void:
 	var expected: Array[Dictionary] = [

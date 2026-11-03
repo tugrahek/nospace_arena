@@ -1,9 +1,8 @@
 extends GutTest
 
-## Fix-pass #20 — device findings B5 (enemy left standing in captured territory), B6 (Sparx stuck
-## patrolling a sealed pocket forever) and B7 (roam ping-pongs along a captured edge). All three
-## were proven pre-existing (not caused by #17/#18/#19) via git A/B in the diagnosis pass.
-## capture/seed/grid algorithm untouched throughout — only orchestration (which cell a seed/
+## Recovery regressions: enemies stranded in captured territory, Sparx patrolling a sealed
+## pocket forever, and roaming enemies ping-ponging along a captured edge.
+## Exercises orchestration (which cell a seed/
 ## evacuation uses) and enemy motion/behavior change.
 
 const EnemyMotion = preload("res://scripts/gameplay/enemy_motion.gd")
@@ -197,7 +196,7 @@ func _sealed_column_arena() -> Dictionary:
 	g.lay_trail(wall)
 	# Seed BOTH sides: the wall alone (not the seed choice) is what bounds the column's flood size,
 	# so seeding the main area too keeps it FREE for tests that need open space elsewhere, without
-	# changing whether the column itself is small enough to trap (fix-pass #20, B6).
+	# changing whether the column itself is small enough to trap.
 	g.close_and_capture([Vector2i(cols - 3, 20), Vector2i(10, 10)])
 	return {"arena": arena, "start": Vector2i(cols - 3, 20)}
 

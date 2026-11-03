@@ -140,7 +140,7 @@ func finalize_result_rewards() -> void:
 	$ResultPanel/SafeArea/Bounds/VBox/RewardedBonusButton.present()
 
 
-## Shows/hides the daily-mode badge. Full daily UI (countdown etc.) is Step 14.
+## Shows/hides the daily-mode badge.
 func set_daily(active: bool, seed: int) -> void:
 	_daily_active = active
 	_daily_seed = seed

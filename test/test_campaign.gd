@@ -1,6 +1,6 @@
 extends GutTest
 
-## Step 21a: Campaign logic layer — star computation, unlock derivation, boost policy branch,
+## Campaign logic layer — star computation, unlock derivation, boost policy branch,
 ## SaveData persistence, and the authored level catalog. No UI, no game wiring (that is 21b).
 
 const SaveData = preload("res://scripts/meta/save_data.gd")

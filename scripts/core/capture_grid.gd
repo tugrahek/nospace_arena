@@ -1,11 +1,11 @@
 class_name CaptureGrid
 extends RefCounted
 
-## Pure grid-based territory capture logic (Qix/Volfied style).
+## Pure grid-based territory capture logic.
 ## No Node, no rendering — fully unit-testable integer logic.
 ## The outer 1-cell ring is the safe frame; the interior starts FREE.
 ## A 4-connected TRAIL of FREE cells, once closed back onto CAPTURED, seals off
-## every FREE region not reachable from the danger seeds (enemies in Step 04).
+## every FREE region not reachable from the danger seeds (enemies).
 
 enum Cell { FREE = 0, CAPTURED = 1, TRAIL = 2 }
 

@@ -9,7 +9,7 @@ const EpochDay = preload("res://scripts/meta/epoch_day.gd")
 
 signal daily_seed_ready(seed_value: int)
 
-## Play modes. Stage progression (Step 18) belongs ONLY to LEVEL_ENDLESS; DAILY and FREE are
+## Play modes. Stage progression belongs ONLY to LEVEL_ENDLESS; DAILY and FREE are
 ## single-arena. `is_daily` stays as a convenience mirror of (mode == DAILY).
 enum Mode { DAILY, FREE, LEVEL_ENDLESS, CAMPAIGN }
 
@@ -62,7 +62,7 @@ func enter_free() -> void:
 	mode = Mode.FREE
 
 
-## Level-Endless: arenas cycle and escalate until death (Step 18). Personal score, no ghost.
+## Level-Endless: arenas cycle and escalate until death. Personal score, no ghost.
 func enter_level_endless() -> void:
 	is_daily = false
 	mode = Mode.LEVEL_ENDLESS

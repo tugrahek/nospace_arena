@@ -148,7 +148,7 @@ func nearest_player_captured(world_pos: Vector2, max_radius: float) -> Vector2:
 
 ## Nearest FREE cell to `from` (deterministic expanding Chebyshev-ring search; `from` itself first
 ## if already FREE), or (-1,-1) if none within `max_radius`. Orchestration-layer correction for
-## fix-pass #20's B5 safety net (a danger seed / an enemy whose own cell isn't walkable anymore) --
+## the captured-cell safety net (a danger seed / an enemy whose own cell isn't walkable anymore) --
 ## the capture algorithm itself is untouched, only which cell gets handed to/read from it. Pure,
 ## deterministic (fixed ring/scan order, no RNG).
 func nearest_free_cell(from: Vector2i, max_radius: int) -> Vector2i:

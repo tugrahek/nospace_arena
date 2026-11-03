@@ -7,7 +7,7 @@ extends "res://scripts/gameplay/enemy_behavior.gd"
 ## it never presses into the wall the player rests against.
 ## Pure: positions + player state (from input) only, no RNG -> ghost-safe / deterministic.
 ## `variation` offsets the homing angle per enemy so multiple chasers approach from
-## different sides instead of stacking on the exact same point (overlap fix, Step 19a).
+## different sides instead of stacking on the exact same point (overlap prevention).
 
 @export var spread_rad: float = 0.5  # max homing angle offset at |variation| = 1
 ## Hunt only what it can see: with captured territory between them the player is "lost" and the

@@ -1,6 +1,6 @@
 extends GutTest
 
-## Step 20a: boost data + policy + pure effect resolver + SaveData persistence (no UI, no game wiring).
+## Boost data + policy + pure effect resolver + SaveData persistence (no UI, no game wiring).
 
 const SaveData = preload("res://scripts/meta/save_data.gd")
 

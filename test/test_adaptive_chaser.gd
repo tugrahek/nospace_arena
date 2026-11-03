@@ -1,6 +1,6 @@
 extends GutTest
 
-## Fix-pass #19 — adaptive chaser: where the difficulty curve calls for it, the Stalker aims at the
+## Adaptive chaser: where the difficulty curve calls for it, the Stalker aims at the
 ## nearest threat point (head OR the active trail) instead of only the head, so a long line is a
 ## real risk. Off everywhere else, and OFF byte-for-byte (regression guards below).
 

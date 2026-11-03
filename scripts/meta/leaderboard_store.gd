@@ -4,7 +4,7 @@ extends RefCounted
 ## Thin JSON persistence for the local leaderboard (user://). Corrupt/missing files
 ## load as an empty leaderboard (safe). Saves scores only, preserving all dates.
 ## IO is impure; the serialization it relies on is pure
-## (Leaderboard.to_dict/from_dict, GUT-tested). Step 12's unified save may absorb this.
+## (Leaderboard.to_dict/from_dict, GUT-tested).
 
 const LeaderboardScript = preload("res://scripts/meta/leaderboard.gd")
 

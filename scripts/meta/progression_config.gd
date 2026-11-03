@@ -15,7 +15,7 @@ extends Resource
 ## (head OR active trail) instead of just the head. Negative disables it for the whole run.
 @export var chaser_hunts_nearest_stage: int = 5
 
-## Fix-pass #22: authored onboarding followed by an anchored procedural Endless ramp. These
+## Authored onboarding followed by an anchored procedural Endless ramp. These
 ## values are read only by StagePlan.compute_endless; Free, Daily, and Campaign keep their paths.
 @export var early_stages: Array[EndlessStageSpec] = []
 @export var late_enemy_add_every: int = 3

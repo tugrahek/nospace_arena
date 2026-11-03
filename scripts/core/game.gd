@@ -15,7 +15,7 @@ const MISSION_COUNT: int = 3
 const PROGRESSION: ProgressionConfig = preload("res://config/progression.tres")
 const PALETTE: PaletteData = preload("res://config/palette.tres")
 const FreeCompletionPolicy = preload("res://scripts/meta/free_completion_policy.gd")
-## Fix-pass #20 (B5): search radius for the nearest FREE cell when an enemy's own cell isn't
+## Search radius for the nearest FREE cell when an enemy's own cell isn't
 ## walkable anymore -- both for correcting its danger seed before a capture and for evacuating it
 ## afterwards if it still ended up on a CAPTURED cell. Small and rare (only the affected enemy
 ## pays this), never a full-grid scan.
@@ -414,7 +414,7 @@ func _enemy_cells() -> Array:
 			# The enemy's own cell isn't walkable (e.g. a grace-ignored hit left it bounced right
 			# up against a trail wall, or the player's line was drawn under/through it) -- seed
 			# from the nearest FREE cell instead, so its region still doesn't get swallowed with
-			# it (fix-pass #20, B5 safety net; close_and_capture's own algorithm is untouched).
+			# it (captured-cell safety net; close_and_capture's own algorithm is untouched).
 			var nearest: Vector2i = _arena.nearest_free_cell(cell, STUCK_ENEMY_SEARCH_RADIUS)
 			if nearest.x >= 0:
 				cell = nearest
@@ -422,7 +422,7 @@ func _enemy_cells() -> Array:
 	return cells
 
 
-## Safety net (fix-pass #20, B5): after ANY capture, no active non-edge-follow enemy may be left
+## Safety net: after ANY capture, no active non-edge-follow enemy may be left
 ## standing in CAPTURED territory -- it would sit visibly inside the player's own area (device
 ## finding). Deterministic nearest-FREE-cell teleport, debug-logged. Sparx is excluded: it already
 ## self-heals an engulfed cell on its own next PATROL tick (top-of-_patrol engulf check), and a
@@ -518,7 +518,7 @@ func _show_endless_result_stage() -> void:
 
 
 func _on_area_captured(percent: float, cells: Array) -> void:
-	_evacuate_enemies_from_captured_cells()  # fix-pass #20 (B5) -- belt-and-braces, runs every capture
+	_evacuate_enemies_from_captured_cells()  # Evacuate stranded enemies after every capture.
 	_hud.update_percent(percent)
 	_last_percent = percent
 	# Empty capture (e.g. a pocket fill that found nothing to take): state only — no area,
@@ -544,7 +544,7 @@ func _on_area_captured(percent: float, cells: Array) -> void:
 				newly_contained = true
 	if not cells.is_empty():
 		_play_capture_juice(cells, earned)
-	# Trap reward (fix-pass #10): a newly contained Sparx leaves its pocket seedless (contained
+	# Trap reward: a newly contained Sparx leaves its pocket seedless (contained
 	# Sparx is excluded from danger seeds), so one more close_capture fills that pocket through
 	# the NORMAL pipeline — %, score, combo, missions, juice and win/advance all flow from its
 	# own area_captured emission. SYNC inside this signal is safe: the player just closed a

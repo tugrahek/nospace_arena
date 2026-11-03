@@ -14,6 +14,29 @@ android/
 *.keystore
 *.jks
 release.keystore
+*.p12
+*.pfx
+*.key
+*.pem
+*.p8
+*.mobileprovision
+*.provisionprofile
+
+# Service credentials and local environment secrets
+.env
+.env.*
+!.env.example
+!.env.template
+*service-account*.json
+*service_account*.json
+*serviceAccount*.json
+*serviceaccount*.json
+*ServiceAccount*.json
+*-firebase-adminsdk-*.json
+*credentials*.json
+google-services.json
+GoogleService-Info.plist
+.runtimeconfig.json
 
 # Real AdMob / IAP IDs (use config/ad_ids.example.gd as template)
 config/ad_ids.gd
@@ -28,3 +51,5 @@ Thumbs.db
 
 # Local release planning
 /docs/release-v1-checklist.md
+/docs/privacy-policy.draft.md
+/docs/data-safety-worksheet.md

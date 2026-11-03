@@ -1,6 +1,6 @@
 extends GutTest
 
-## Step 22a: localization infrastructure. Catalog completeness (EN + TR columns full — the
+## Localization infrastructure. Catalog completeness (EN + TR columns full — the
 ## string-sweep watchdog), locale round-trip, visible missing-key fallback, the pure language
 ## resolver, and pins for the CSV comma-truncation fixes.
 

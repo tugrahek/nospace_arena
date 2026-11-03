@@ -120,7 +120,7 @@ Suggested upload alt text (all below 140 characters):
 | Gameplay 02 | A completed cut fills the captured area and displays the earned score. | Kapanan çizgiyle bölge doluyor ve kazanılan skor görünüyor. |
 | Mode Select | Daily, Free, Endless and Campaign modes on the game's mode selection screen. | Oyunun mod seçimi ekranında Günlük, Serbest, Sonsuz ve Macera seçenekleri. |
 
-## Approval before upload
+## Device and listing verification
 
 1. On a signed physical Android build, inspect the launcher at small sizes, under
    round/squircle masks and Android themed icons; the approved mark must remain legible.

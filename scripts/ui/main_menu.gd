@@ -74,7 +74,7 @@ func _apply_texts() -> void:
 	_howto_label.text = tr("MENU_HOWTO")
 
 
-## Shows the login-reward popup if a reward is claimable today (Step 15 polishes it).
+## Shows the login-reward popup if a reward is claimable today.
 func _maybe_show_reward() -> bool:
 	var shown: bool = _reward_popup.present(Economy.login_reward_status())
 	_set_reward_context(shown)

@@ -10,7 +10,7 @@ extends Node2D
 signal trail_started()
 signal returned_to_safe()
 signal loop_closed()
-signal self_hit()  # crossed own active trail (non-adjacent) -> life loss (Qix/Volfied rule)
+signal self_hit()  # crossed own active trail (non-adjacent) -> life loss
 signal control_scheme_changed(id: int)
 signal dpad_gesture_changed(active: bool, origin: Vector2)
 

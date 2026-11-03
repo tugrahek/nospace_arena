@@ -1,6 +1,6 @@
 extends GutTest
 
-## Fix-pass #18 (device bugs B1/B2/B3): Sparx catches on CHEBYSHEV adjacency from the drawn cell
+## Collision and line-of-sight regressions: Sparx catches on CHEBYSHEV adjacency from the drawn cell
 ## (corner immunity gone), death_grace is the only post-death invulnerability, the Chaser hunts
 ## only what it can SEE (no more pinning against a wall), and the HUD leaves room for the pause
 ## button. Balance change is deliberate and approved.

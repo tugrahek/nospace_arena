@@ -2,7 +2,7 @@ class_name TerritoryMotion
 extends RefCounted
 
 ## Pure steering/scaling math for living-territory effects — no scene/grid deps, testable.
-## (Step 06 PushMotion genelleştirildi: tüm bölge etkilerinin saf matematiği burada.)
+## Shared motion math for all territory effects.
 
 
 ## Influence strength 0..1 by distance: 1 at the captured edge (dist 0),

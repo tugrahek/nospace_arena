@@ -3,7 +3,7 @@ extends Resource
 
 ## Base living-territory effect: captured territory influences nearby enemies.
 ## Two hooks keep heading changes (persistent) and speed changes (transient) from
-## conflicting. No-op by default; concrete effects / Step 07 characters override one.
+## conflicting. No-op by default; concrete effects / characters override one.
 
 ## Persistent heading change — returns a (same-magnitude) re-aimed velocity.
 func steer(velocity: Vector2, _world_pos: Vector2, _arena: ArenaController) -> Vector2:

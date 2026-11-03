@@ -1,6 +1,6 @@
 extends GutTest
 
-## Fix-Pass #7: crossing your own active trail (non-adjacent) = life loss (self_hit). Backtracking
+## Self-crossing: crossing your own active trail (non-adjacent) = life loss (self_hit). Backtracking
 ## (stepping onto the immediately-previous trail cell) and returning to CAPTURED stay safe.
 
 func _frost() -> ArenaController:

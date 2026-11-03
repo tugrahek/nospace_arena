@@ -57,11 +57,10 @@ the existing injectable integration tests. A config failure blocks ads even if U
 allows them; privacy options still use the existing Settings entry when required.
 Native delivery and account-configured messages require device/account acceptance.
 
-Publisher follow-up: confirm real IDs/app/package association, AdMob readiness and
-`app-ads.txt`, message publication and regions, audience/under-age treatment, and the
-policy/Data Safety declarations. Drafts: [privacy policy](privacy-policy.draft.md)
-and [Data Safety worksheet](data-safety-worksheet.md). No production activation or
-public policy URL is configured.
+Production configuration requires verified IDs/app/package association, AdMob
+readiness and `app-ads.txt`, published consent messages and regions, audience/under-age
+treatment, a public privacy policy and accurate Play Data Safety declarations.
+No production activation or public policy URL is configured.
 
 ## Google Play billing
 
@@ -127,8 +126,8 @@ alignment with congruent file offsets / virtual addresses; bundletool reports
 `PAGE_ALIGNMENT_16K`. These are artifact checks, not physical-device acceptance.
 The merged manifest retains the SDK-added ad ID, basic phone state, Billing,
 wake-lock, foreground-service and dynamic-receiver permissions already present in
-the development build. Review them in the later privacy/disclosure step; no SDK or
-Billing functionality is removed here.
+the development build. Privacy disclosures must account for those permissions and
+actual SDK behavior.
 
 The initial repeat-export failure came from six generated Godot import sidecars:
 `android/build/res/{mipmap,mipmap-hdpi-v4,mipmap-mdpi-v4,mipmap-xhdpi-v4,mipmap-xxhdpi-v4,mipmap-xxxhdpi-v4}/icon.webp.import`.

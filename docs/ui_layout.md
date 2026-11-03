@@ -1,10 +1,13 @@
-# UI layout foundation
+# UI layout and safe areas
 
 The reference viewport remains 720 x 1280 with `canvas_items` and `expand`.
-Production typography and the existing theme remain unchanged.
-This foundation is opt-in; no production scene is migrated yet.
+The shared `SafeAreaMargin` helper is used by MainMenu, HUD, Store, Settings,
+HowToPlay, Missions, Leaderboard, PauseOverlay, LevelSelect, ModeSelect, Credits
+and SupplyPopup. Each scene retains its own content layout and theme.
 
-## Native hierarchy
+## Layout pattern
+
+The hierarchy below is illustrative; scene-specific node names and content differ.
 
 ```text
 Screen (Control, full rect)
@@ -49,7 +52,7 @@ Do not rotate/skew or mirror the safe root; animate its content instead. Positiv
 axis-aligned scales and translations are supported. Unavailable/empty platform
 bounds, zero size or unsupported transforms yield zero platform margins.
 Use the platform safe rectangle conservatively; native ad/UMP forms stay SDK-owned.
-Physical Android/iOS verification is still required when production scenes adopt it.
+Physical Android/iOS verification is required for platform safe-area behavior.
 
 ## Gameplay boundary
 

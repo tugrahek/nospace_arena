@@ -4,7 +4,7 @@ extends RefCounted
 ## Pure deterministic seed helpers for the daily challenge (no RNG, no Godot RNG).
 ## Everything is masked to 32 bits at each step so results are identical across
 ## platforms/versions (no overflow or sign ambiguity) — critical for a shared daily
-## arena + leaderboard (Step 11). Same date -> same seed -> same arena/character/dirs.
+## arena + leaderboard. Same date -> same seed -> same arena/character/dirs.
 
 const MASK: int = 0xFFFFFFFF
 

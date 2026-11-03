@@ -31,10 +31,10 @@ enum SparxState { PATROL, CONTAINED, TELEGRAPH }
 @export var sparx_roll: bool = true            # Sparx square rolls through corner turns (false = static)
 @export var breath_amount: float = 0.06        # Bouncer draw-radius pulse (fraction of radius); 0 = off
 @export var breath_speed: float = 3.0          # Bouncer breath angular speed (rad/s)
-## Adaptive hunt tell (#19): how far the body warms toward the trail color while it is hunting the
+## Adaptive hunt tell: how far the body warms toward the trail color while it is hunting the
 ## LINE instead of the head, so the switch is readable. 0 = no tint (the P1 facing still aims at it).
 @export var trail_hunt_tint: float = 0.35
-# Fix-pass #20 (device findings B6/B7):
+# Trap re-check and roam recovery settings:
 @export var trap_recheck_steps: int = 32       # Sparx: periodic bounded re-check cadence (PATROL grid
                                                 # steps) -- a pocket sealed by a narrow one-cell-gap
                                                 # column is otherwise never re-evaluated between capture
@@ -49,7 +49,7 @@ const POOF_SCENE: PackedScene = preload("res://scenes/fx/CaptureBurst.tscn")
 ## Distinct from (-1,-1), which is a VALID result meaning "no FREE region at all".
 const UNKNOWN_MAIN_SEED := Vector2i(-2, -2)
 
-var shape: int = Shape.CIRCLE  # placeholder type tell (Step 14 sprites)
+var shape: int = Shape.CIRCLE  # Fallback visual shape for this enemy type.
 
 var _arena: ArenaController
 var _behavior: EnemyBehavior = null
@@ -171,7 +171,7 @@ func decide_velocity(player_pos: Vector2, player_exposed: bool, trail: PackedVec
 	# still preventing wall-pin (never home directly into the surface). Freeze path is unchanged.
 	if _recovery_timer > 0.0:
 		desired = _peel_adjust(desired)
-	# Roam unstick (fix-pass #20, B7): a hunting behavior that fell back to roam (not exposed, or
+	# Roam unstick: a hunting behavior that fell back to roam (not exposed, or
 	# lost its target behind captured territory) keeps its CURRENT heading -- an earlier bounce or
 	# peel can leave that perfectly axis-aligned, ping-ponging along a captured edge forever.
 	# Detected from the SAME `exposed` flag the behavior itself branched on, not from the resulting
@@ -292,7 +292,7 @@ func _patrol(delta: float) -> void:
 	while _step_timer >= interval:
 		_step_timer -= interval
 		_grid_cell = _arena.world_to_cell(_step_to)  # arrived at the previous target
-		# Periodic bounded trap re-check (fix-pass #20, B6): the connectivity trap trigger only
+		# Periodic bounded trap re-check: the connectivity trap trigger only
 		# ever runs ON a capture event (on_capture_event). A pocket sealed by a one-cell gap that
 		# the player closes WITHOUT that gap being the capture boundary itself (or a TELEGRAPH
 		# window that made this Sparx skip the one capture that DID seal it) is otherwise never
@@ -301,7 +301,7 @@ func _patrol(delta: float) -> void:
 		# safety net; NOT a full-grid connectivity check -- that stays capture-event-only, see
 		# _is_trapped). Enters CONTAINED directly; does NOT call close_capture (that would wrongly
 		# finalize a live, unclosed player trail if this fires mid-draw) so the pocket-fill reward
-		# (fix-pass #10) stays tied to real capture events, where it is safe to run synchronously.
+		# stays tied to real capture events, where it is safe to run synchronously.
 		if trap_recheck_steps > 0:
 			_steps_since_trap_check += 1
 			if _steps_since_trap_check >= trap_recheck_steps:
@@ -413,7 +413,7 @@ func is_contained() -> bool:
 
 
 ## True for an edge-walker (Sparx), regardless of lifecycle state. Used by orchestration to skip
-## generic captured-cell evacuation (fix-pass #20, B5 safety net) -- Sparx already self-heals an
+## generic captured-cell evacuation (captured-cell safety net) -- Sparx already self-heals an
 ## engulfed cell through its own engulf-check + re-emerge, and a blind position teleport would
 ## desync its internal _grid_cell/_step_from/_step_to state.
 func is_edge_follow() -> bool:
@@ -425,7 +425,7 @@ func is_edge_follow() -> bool:
 ## -- or when its cell was engulfed (captured). Optional size safety: also trap a tiny pocket even
 ## inside the main region. Read-only flood-fill, deterministic; runs only on capture events.
 ## Returns true when this event NEWLY contained the Sparx — the game triggers the pocket
-## auto-capture reward on it (fix-pass #10). Already-contained / not trapped -> false.
+## auto-capture reward on it. Already-contained / not trapped -> false.
 ## `main_seed` (perf-pass): the main FREE region's seed, computed ONCE per capture by the game
 ## and shared across all edge-walkers — N sparx no longer means N full-grid floods. Omitted
 ## (tests/back-compat) -> computed locally; the trap DECISION is identical either way.
@@ -459,7 +459,7 @@ func _is_trapped(main_seed: Vector2i = UNKNOWN_MAIN_SEED) -> bool:
 	return trap_pocket_max_cells > 0 and region.size() <= trap_pocket_max_cells  # tiny-pocket safety
 
 
-## Bounded size check ONLY (fix-pass #20, B6): true when this Sparx's region is engulfed or fits
+## Bounded size check ONLY: true when this Sparx's region is engulfed or fits
 ## within trap_pocket_max_cells. Deliberately NOT the full connectivity check (_is_trapped) --
 ## that needs the main region's seed, a full-grid flood too expensive to repeat periodically for
 ## every patrolling Sparx. The size cap alone already covers a small pocket regardless of which
@@ -654,7 +654,7 @@ func _advance(step: float) -> bool:
 	# ignored the hit during a grace window -- so re-checking the same cells afterwards tells us
 	# which happened. Gone -> fall through and move into the now-FREE cell below, same as any other
 	# free cell. Still there -> the hit was ignored; bounce off it like a wall instead of freezing
-	# on top of it (fix-pass #20, B5): an enemy left standing where the trail becomes CAPTURED
+	# on top of it: an enemy left standing where the trail becomes CAPTURED
 	# drops out as a danger seed and its own region fills in around it (device finding).
 	var hit_x: bool = _state_at(Vector2(next_pos.x, position.y)) == CaptureGrid.Cell.TRAIL
 	var hit_y: bool = _state_at(Vector2(position.x, next_pos.y)) == CaptureGrid.Cell.TRAIL

@@ -1,7 +1,7 @@
 extends GutTest
 
 ## Palette readability: neon accents + text must stand out against the void background.
-## color_contrast reused from ThemeData (Step 08). Loads palette.tres at runtime.
+## color_contrast reused from ThemeData. Loads palette.tres at runtime.
 
 const ThemeData = preload("res://scripts/meta/theme_data.gd")
 const MIN_CONTRAST: float = 0.25
