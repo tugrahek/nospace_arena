@@ -25,13 +25,29 @@ until the publisher verifies them. No Play Console access/approval is inferred.
 - [x] Step 33: mock-tested consumable adapter metadata/offers, single quantity,
   callback/pending/cancel/reconnect/owned-query candidate recovery. Reserved coins
   cannot enter local delivery/acknowledgement/consumption; real purchasing stays off.
+- [x] Step 34A (2026-11-03): approved split-wallet/account/recovery/spend/refund
+  contracts; local TypeScript server SKU/model/Auth boundary and deny-all Firestore
+  rules with focused tests. No backend deployment, credentials, Android Auth SDK,
+  runtime wallet, paid delivery or native/device acceptance is implied.
 
 ## Mandatory v1 IAP — release blockers
 
-- [ ] **Decide account identity and wallet recovery**: login/linking, reinstall and
-  device loss/switch, account switching, deletion/support and offline behavior.
-- [ ] Decide authoritative paid-wallet/spend model and safe migration/merge of
-  existing local earned coins. Preserve approved economy balance; review separately.
+- [x] **Decide account identity and wallet recovery** (Step 34A, 2026-11-03): Google/
+  Firebase UID before IAP; free offline guest play; UID-isolated recovery/switching,
+  deletion/support contracts documented. Implementation and disclosure work remain.
+- [x] Decide authoritative paid-wallet/spend model (Step 34A, 2026-11-03): split
+  wallets, unchanged local earned coins/unlocks, no cloud import, mixed/automatic
+  spending or conversion; paid debits and paid ownership remain server-authoritative.
+- [ ] Provision/configure Firebase Auth/Firestore/backend IAM with owner-controlled
+  accounts; deploy reviewed rules and authenticated APIs only in separately approved
+  work. Local emulator tests do not secure an unconfigured production database.
+- [ ] Implement Google/Firebase login, stable server account attribution and
+  UID/session-isolated wallet projection; keep free offline play login-free.
+- [ ] Implement paid spend idempotency/atomicity, server catalog prices and unique
+  paid unlocks with funding provenance. Validate concurrent devices and exact retries;
+  no client-writable paid balance, implicit wallet selection or local-earned upload.
+- [ ] Implement authenticated account deletion/export, session revocation, token
+  tombstone retention and support recovery with approved published retention terms.
 - [ ] Deploy authenticated Play verification service for the expected package,
   SKU, owner, state, quantity and environment; server credentials stay outside Git/APK.
 - [ ] Implement durable unique-token ledger, atomic wallet credit and consumption
@@ -47,8 +63,12 @@ until the publisher verifies them. No Play Console access/approval is inferred.
   implemented yet; a candidate event must never be treated as delivery success.
 - [ ] Implement server consumption after durable fulfillment; handle duplicates,
   already-consumed responses and pending-to-purchased transitions without double credit.
-- [ ] Implement RTDN/reconciliation and Voided Purchases polling, partial refund
-  policy, spent-coin reversal/support process and operational alerts.
+- [x] Specify refund/reversal/review policy (Step 34A, 2026-11-03): source-funded
+  paid unlocks can be revoked/reviewed; reverse spend once before pack debit,
+  preserve earned rights, avoid double recovery and review ambiguous partial refunds.
+- [ ] Implement RTDN/reconciliation and Voided Purchases polling, refund-linked
+  entitlement reversal/review, residual paid debt/support process and operational
+  alerts. Exercise repeated, out-of-order and multiple-source refunds before release.
 - [ ] Configure the three exact products as consumable one-time products in Play
   Console; approved regional prices/availability/taxes and single-quantity policy.
   Show Google-localized prices only; define missing/stale-offer UI behavior later.

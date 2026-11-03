@@ -1,7 +1,8 @@
 # v1 coin purchases — secure architecture contract
 
-Status: foundation plus mock-tested candidate adapter, 2026-11-03. **Real purchases are disabled.** This is the
-required future design, not a deployed verification service or a recovery promise.
+Status: approved split-wallet contract and backend foundation (Step 34A), 2026-11-03.
+**Real purchases are disabled.** Models, Auth boundary and emulator-tested rules
+are local foundations, not deployed verification, fulfillment or a recovery promise.
 Release completion is tracked in [the permanent v1 checklist](release-v1-checklist.md).
 
 ## Approved product contract
@@ -136,20 +137,82 @@ Test all crash boundaries, duplicate/concurrent deliveries, delayed payment,
 offline return, consumption timeout, backend outage and local persistence failure
 before enabling the release gate.
 
-## BLOCKER: account and wallet recovery decision
+## Approved account, split-wallet and recovery contract — Step 34A
 
-There is currently no player login or cloud wallet. A per-install identifier
-cannot recover consumed paid coins after uninstall, data clearing, device loss
-or switching devices. **No recovery model has been approved.** Decide authenticated
-identity/linking and account switching; authoritative ownership of paid balance
-and spending; migration/merge of existing locally earned coins; offline behavior;
-cross-device conflicts; deletion/export/support and lost-access recovery.
+The owner approved this architecture on 2026-11-03. Its implementation remains a
+release blocker. Step 34A adds only the [backend foundation](../backend/README.md);
+no Android Auth dependency, game save, Economy, Store or Billing callback changes.
 
-An anonymous model would need an explicit, secure recoverable credential/linking
-design and reviewed loss/support policy; it is not a shortcut supplied by Play
-purchase queries. Do not invent that decision or promise restore in the listing.
-This decision and secure delivery are mandatory blockers for v1 IAP activation.
-Step 32 does not change balances, rewards, save schema or progression.
+- Free gameplay and local earned rewards require neither login nor network.
+  Existing earned balance, unlocks, prices, rewards and progression stay unchanged.
+  Existing saves are untrusted for server value: no upload/merge, conversion,
+  one-time paid credit or automatic promotion of local unlocks to cloud ownership.
+- Paid balance and paid-funded permanent character/arena unlocks belong to a
+  Firebase UID on the server. There is no paid boost/consumable spend path in this
+  foundation. Adding one needs a recovery/refund contract before implementation.
+- Before IAP checkout require an online Firebase session signed in with Google.
+  Firebase Admin verifies the ID token for the configured project, including
+  expiry/signature and revoked/disabled sessions; `google.com` is mandatory.
+  Client UID/email, linked-provider lists and a Play account are not authentication.
+  No anonymous paid wallets, email-based merging, account transfer or guest linking.
+- The future Kotlin Godot Android-v2 bridge uses Credential Manager + Firebase Auth;
+  GDScript uses authenticated HTTPS. Backend uses Firebase Admin/Firestore and
+  future TypeScript Cloud Functions. Native SDK/export validation and provisioning
+  are separate work; there is no assumption of a built-in Godot Firebase SDK.
+  [Google Auth](https://firebase.google.com/docs/auth/android/google-signin),
+  [Godot Android plugins](https://docs.godotengine.org/en/stable/tutorials/platform/android/android_plugin.html),
+  [Admin verification](https://firebase.google.com/docs/auth/admin/verify-id-tokens).
+- One explicit wallet per action: local earned OR paid, never combined, converted,
+  automatically selected or used as fallback. UI must identify wallet and total
+  cost before confirmation. Prices remain approved catalog values; the server
+  owns paid item IDs/prices. No client cost or claimed local balance is trusted.
+- Online paid spending atomically checks active account, positive affordable
+  integral cost, nonnegative available balance, not-yet-owned item and request
+  identity; debits, FIFO funding allocations, ledger event, entitlement and wallet
+  version commit together. All quantities/amounts/versions are safe integers.
+  A `(UID, request ID)` permanently binds the request payload/result: exact retries
+  return the result; a changed item/wallet/cost payload is rejected. A unique
+  `(UID, kind, item ID)` entitlement prevents two devices charging for one unlock.
+  A revoked unlock can be repurchased with a new request only after reconciliation.
+- Purchase attribution uses a stable server-generated opaque UID binding, not the
+  current per-flow marker. Intent binds UID/SKU/environment before checkout;
+  missing/mismatched attribution grants nothing and enters support review. Never
+  assign an outstanding token to whichever account happens to be signed in later.
+- All Firestore client reads/writes are denied, including owners and clients
+  claiming `admin`. Future authenticated APIs return only that UID's versioned
+  wallet/entitlement projection, never token records. Admin bypasses rules: IAM,
+  backend authorization, input validation and transactions remain mandatory.
+- Offline paid balance is a labeled last-known, read-only snapshot. No paid
+  purchases, debits or queued offline spending. Last-verified active paid unlocks
+  can be used offline; immediate revocation on a disconnected or modified client
+  cannot be guaranteed. Reconcile before the next online paid operation.
+- Sign-out/switch clears active paid projection and increments a session generation;
+  discard late responses from old UID/generation. Persist caches separately by UID;
+  never copy paid unlocks into the local earned unlock list. Local device progress
+  stays available across sign-in/out and never becomes another account's paid value.
+- Reinstall/device loss: sign into the same Google/Firebase account and fetch the
+  durable paid projection. Consumed coin recovery comes from the server ledger,
+  not repeated Play grants. Earned local saves have no new cloud recovery promise.
+  Crash/timeout retries retain original UID/idempotency key; purchase token queues
+  must persist before submission and contain no loggable tokens. Pending/unknown
+  states give no value, including when Firebase or Play is unavailable.
+- Lost Google access follows Google's recovery; support cannot transfer wallets
+  using an email, device ID, screenshot or order ID alone. Account deletion requires
+  recent verified Google authentication, account closure and session revocation;
+  pending purchases/refunds are resolved before financial cleanup. Provide in-app
+  and web deletion requests and authenticated data export before release. Retain
+  minimal restricted purchase-token deduplication/refund tombstones for the legally
+  reviewed financial retention period; deleting Auth must never permit token reuse.
+  Re-created accounts do not inherit the deleted UID's funds. Retention duration,
+  published disclosures and operator access controls remain release prerequisites.
+
+Compared with one cloud balance, this split avoids trusting offline earnings or
+requiring server validation of every mission/save. The cost is two explicit wallet
+choices and device-local earned progress. Firebase reduces server maintenance but
+still needs Blaze billing for future Functions, usage budgets/alerts, least-privilege
+IAM, backups, consumption-deadline monitoring and refund/support ownership; budget
+alerts are not hard spending caps. No free-operation or deployment readiness claim.
+[Firebase pricing](https://firebase.google.com/pricing).
 
 ## Refunds and chargebacks
 
@@ -159,10 +222,41 @@ notifications may duplicate or arrive out of order. Poll and paginate the
 with durable checkpoints/overlap: its query window is bounded (currently 30 days),
 and quantity-based partial refunds need explicit handling.
 
-Append idempotent compensating ledger entries for confirmed reversals. Never
-delete the original purchase record or let a refund replay debit twice. The
-publisher must decide treatment of already-spent coins, partial refunds, disputes,
-negative paid balances and support corrections. Do not silently wipe earned coins
-or apply a new balance policy in this foundation task. Alert on missed windows,
-unfulfilled charged purchases and consumption backlog. Refund/revocation operations
-need a reviewed operational policy; no automated refund implementation is present.
+Approved policy (contract only; workers are not implemented):
+
+1. Re-query Google before applying a confirmed full-unit refund/chargeback. Record
+   a stable refund event tied to the original global purchase record. Notifications,
+   repeated polling and changed accounts cannot repeat the debit. Keep original
+   purchase/ledger records; never wipe earned balance or locally earned unlocks.
+2. Paid spending records FIFO source-purchase lots. For each active permanent paid
+   unlock funded even partly by the reversed purchase, revoke that paid entitlement
+   and reverse its original entire paid spend exactly once. Then debit the original
+   refunded pack amount exactly once. Commit the ledger, funding release, wallet
+   version and entitlement changes atomically. Released non-refunded funding remains
+   spendable; voided funding never becomes new value. Local earned ownership, if
+   separately present, continues to allow the item without a paid entitlement.
+3. Example: a 500-coin refunded pack plus a valid 500-coin pack funded a 1000-coin
+   unlock, leaving 0. Reverse the unlock (+1000), refund the pack (-500): balance
+   500 and paid unlock revoked. Refunding must not both confiscate the unlock and
+   leave the user owing the same restored spend. Multiple refunded sources reverse
+   the same spend only once, regardless of arrival order.
+4. If Google reports an ambiguous partial monetary refund, missing funding, disputed
+   ownership or an inconsistent old record, mark the wallet and affected paid
+   entitlements `review_required`; block paid spending and paid access after sync.
+   Keep free play available. Do not invent coin-to-currency prorating. An audited
+   support decision records a unique review ID and compensating entries to reverse
+   or explicitly reinstate rights, with the same no-double-recovery invariant.
+5. A residual negative paid balance represents debt; future paid credits offset it
+   and paid spending remains blocked until resolved. There is no forced repurchase;
+   support handles disputes. Valid permanent-unlock reversals should normally restore
+   enough paid funds to avoid debt; anomalies require review rather than silently
+   modifying earned funds. Account switching/deletion never erases obligations.
+6. Reconcile revocation on reconnect/resume and before paid operations; discard stale
+   projections by UID/session/version. Offline cached access may continue until sync.
+   Poll with checkpoints/overlap, alert on missed windows and consumption backlog,
+   and exercise repeated/out-of-order/partial/spent refunds before activation.
+
+The foundation contains no purchase verifier, live API, spend mutation, token
+storage, consumption worker or refund/revocation worker. End-to-end implementation,
+privacy/deletion flows, operational approval and signed-device acceptance are still
+mandatory. `PurchaseService.REAL_PURCHASES_ENABLED` remains **false**.

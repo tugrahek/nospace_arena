@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All reads and mutations go through the authenticated backend API.
+    // Admin SDK bypasses these rules: its IAM and endpoint checks remain mandatory.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
