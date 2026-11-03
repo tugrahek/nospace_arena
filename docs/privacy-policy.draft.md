@@ -48,11 +48,11 @@ veli talepleri ve hukuki dayanak metni hedef kitle belirlendikten sonra tamamlan
 
 ## Uygulamaya bağlama noktası
 
-Settings tasarımı donmuştur. `scripts/ui/settings_panel.gd` içindeki `_open_legal()`
+`scripts/ui/settings_panel.gd` içindeki `_open_legal()`
 mevcut Legal görünümünü açar; `_open_privacy_options()` yalnız UMP seçenekleridir.
-Onaylı HTTPS politika adresi geldikten sonra mevcut Legal içeriğine yerelleştirilmiş
-erişim ekleme noktası ayrı görevde ele alınmalıdır; gerekli mağaza ve uygulama içi
-erişim tamamlanmadan release onayı verilmemelidir. R2 kırık/uydurma link eklemez.
+HTTPS politika adresi, mevcut Legal içeriğinde yerelleştirilmiş erişim üzerinden
+sunulmalıdır. Mağaza ve uygulama içi erişim yayın öncesinde çalışır olmalıdır;
+taslakta henüz bir politika URL'si yapılandırılmamıştır.
 
 Kanıtlar: `scripts/meta/save_data.gd`, `save_store.gd`, `settings_store.gd`,
 `leaderboard_store.gd`, `scripts/autoload/Economy.gd`, reklam/UMP servisleri.

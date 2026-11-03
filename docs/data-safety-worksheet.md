@@ -12,14 +12,14 @@ başına belirli bir verinin toplandığını kanıtlamaz. Yayıncı nihai formu
 | Reklam | Poing 5.1.0; `addons/admob/android/bin/ads/poing_godot_admob_ads.gd`: GMA Next-Gen **1.4.0** | Test modu açık, production kapalı; yalnız rewarded proje akışı |
 | UMP | `ads_consent_coordinator.gd`, `poing_ads_bridge.gd`, `settings_panel.gd` | Oturum güncellemesi, gerekli form, koşullu privacy-options erişimi; hesap mesajları bilinmiyor |
 | Billing | Vendored 3.3.0 / Billing 9.1.0; varsayılan katalog boş | Yeni ürün/satış eklenmedi; mevcut SDK kapsamı son formda ayrıca incelenmeli |
-| Android izinleri | R1 final manifest: internet/network state, iki ad-ID izni, basic phone state, Billing, wake lock, foreground service, dynamic receiver | Kod kamera/konum/rehber/mikrofon izni istemiyor; SDK ekleri final manifestten tekrar kontrol edilmeli |
+| Android izinleri | Final manifest: internet/network state, iki ad-ID izni, basic phone state, Billing, wake lock, foreground service, dynamic receiver | Kod kamera/konum/rehber/mikrofon izni istemiyor; SDK ekleri final manifestten tekrar kontrol edilmeli |
 
 ## SDK veri eşlemesi — yayıncı teyidi gerekli
 
 [Google'ın GMA açıklaması](https://developers.google.com/admob/android/next-gen/privacy/play-data-disclosure)
 **yalnız en güncel sürüm içindir**; güncel kurulum rehberi 1.5.0 gösterirken proje
 1.4.0 kullanır. Aşağıdakiler beyan adaylarıdır; 1.4.0'a ait kesin trafik ölçümü
-veya nihai Console yanıtı olarak okunmamalıdır. SDK güncellemesi R2 kapsamına alınmadı.
+veya nihai Console yanıtı olarak okunmamalıdır. Proje hâlen 1.4.0 kullanır.
 
 | Veri / önerilen Play alanı | Google belgesine dayalı aday | Onaylanacak |
 |---|---|---|

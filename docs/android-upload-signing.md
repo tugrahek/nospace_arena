@@ -1,4 +1,4 @@
-# Android upload-signing preparation — R4
+# Android upload signing
 
 Development APK and `Android Release AAB` presets are unchanged. The latter still
 produces an **unsigned, test-ad** AAB. Signing does not activate production ads or
@@ -45,7 +45,7 @@ workflow, and nothing is uploaded.
    existing keystore and proves private-key access in memory, never exports key
    bytes. Pinning and owner review matter: arbitrary custom test keys cannot be
    recognized from their names alone.
-4. Produce and review a fresh unsigned AAB using the unchanged [R1 isolated
+4. Produce and review a fresh unsigned AAB using the [isolated export
    workflow](android-integrations.md), in a **separate process without signing
    credentials**. Check package/SDK, non-debuggable manifest, assets and hash.
    After approving that exact input, run in the signing process:
@@ -68,7 +68,7 @@ The preflight/signer uses Godot's supported release variable names, but does not
 pass them to Godot/Gradle. Signed Gradle build failure diagnostics can expose
 command arguments; keeping `package/signed=false` separates credentials from that
 path. The [Godot 4.6.3 Android exporter](https://github.com/godotengine/godot/blob/4.6.3-stable/platform/android/export/export_plugin.cpp)
-and local R1 workflow are the implementation references.
+and local export workflow are the implementation references.
 
 The signer uses JDK [jarsigner environment-password
 options](https://docs.oracle.com/en/java/javase/17/docs/specs/man/jarsigner.html),
@@ -80,10 +80,10 @@ Environment credentials remain accessible to sufficiently privileged local
 processes; this does not protect a compromised workstation.
 
 The tool verifies integrity and identity, not binary Android manifest semantics:
-approve the unsigned hash only after R1 artifact checks. It does not establish
+approve the unsigned hash only after artifact checks. It does not establish
 production-ad, Android runtime, Play account or store readiness.
 
-## Validation and remaining owner actions
+## Validation
 
 `python tools/test_android_upload_signing.py` runs focused negative tests using
 mocks and synthetic AAB fixtures, without creating/reading/deleting any keystore.
@@ -94,21 +94,21 @@ not imply that positive signing has been validated.
 Verified on 2026-10-27 from `main@81f9b8b`: 19 focused tooling tests passed;
 the real JDK compiled/executed the helper and rejected missing environment and
 an existing PNG supplied as an invalid store (no keystore touched). The unchanged
-R1 workflow imported and exported with exit 0 in `export/r4-signing-unsigned/`.
+export workflow imported and exported with exit 0 in `export/r4-signing-unsigned/`.
 Final unsigned AAB: 42,321,445 bytes; SHA-256
 `f4766d6a15e4a1ace293531460e522b6ae033b7421202f8e835d80693b2df7ca`.
 Manifest: `com.tugrahek.nospace`, min/target 24/36, non-debuggable, arm64 only;
 no signature or test/GUT/docs/tools assets. Both native libraries' six load
 segments remain 16 KB aligned and bundle configuration is `PAGE_ALIGNMENT_16K`.
-Both export profiles and R1 preparation script are byte-identical to baseline.
+Both export profiles and the preparation script are byte-identical to baseline.
 These are unsigned-artifact checks; owner-key signing and device acceptance are
 still pending. Local detailed evidence is `export/r4-signing-unsigned/r4-evidence.json`.
 
 [Android signing guidance](https://developer.android.com/studio/publish/app-signing)
 distinguishes the owner-held upload key from the app-signing key managed through
 Play App Signing. The owner retains key/backup responsibility and confirms the
-account certificate association. This step does not configure Console or upload.
+account certificate association. The signing tool does not configure Console or upload.
 
-Tuğra acceptance: after later owner-side signing/Play delivery, install the
+Device validation: after signing/Play delivery, install the
 exported device build, verify identity/update behavior, controls, pause/resume and
 the existing consent flow. Physical-device acceptance remains pending.

@@ -1,9 +1,7 @@
 # v1 coin purchases — secure architecture contract
 
-Status: approved split-wallet contract and backend foundation (Step 34A), 2026-11-03.
 **Real purchases are disabled.** Models, Auth boundary and emulator-tested rules
 are local foundations, not deployed verification, fulfillment or a recovery promise.
-Release completion is tracked in [the permanent v1 checklist](release-v1-checklist.md).
 
 ## Approved product contract
 
@@ -21,8 +19,8 @@ No real-money price is authored here. Future UI must show current localized Play
 ProductDetails/offer prices and handle unavailable or stale offers safely.
 The backend must maintain its own reviewed, versioned SKU-to-amount table;
 client resource values and client-supplied amounts are never authoritative.
-Identifiers are public product metadata, not signing secrets; this task explicitly
-approves these names. Service credentials and purchase tokens stay out of Git/logs.
+Identifiers are public product metadata, not signing secrets. Service credentials
+and purchase tokens stay out of Git/logs.
 
 ## Verified repository state
 
@@ -41,7 +39,7 @@ approves these names. Service credentials and purchase tokens stay out of Git/lo
   the three reserved coin IDs from reaching that handler, even through the old
   transaction callback. Local persistence is not server verification or a wallet.
 
-## Step 33 adapter boundary — implemented, not monetization activation
+## Consumable adapter boundary
 
 Explicitly injected `CoinPackDefinition` resources are validated and converted to
 backend metadata; empty configuration stays empty. Unknown consumables and coin IDs
@@ -97,10 +95,10 @@ The [ProductPurchaseV2 API](https://developers.google.com/android-publisher/api-
 provides purchase/consumption state using package and token. The server must use
 authenticated Play Developer API access; an order ID or client JSON is insufficient.
 
-## Required implementation: verify, commit, consume, reconcile
+## Server transaction protocol: verify, commit, consume, reconcile
 
-This sequence is the project's proposed v1 design; none of the following server
-components are implemented by the client-only Steps 32–33.
+The server protocol below specifies the required transaction and recovery behavior.
+The current client adapter does not implement server verification or persistence.
 
 1. Authenticate the player/wallet owner before checkout. Bind an intent to that
    owner and one approved SKU; use stable, privacy-preserving account attribution.
@@ -124,7 +122,7 @@ components are implemented by the client-only Steps 32–33.
 5. Client reads an authenticated wallet snapshot/version or idempotent delivery
    event; it must not call `Economy.earn(amount)` again on every callback/retry.
    Wallet-cache persistence failure, crash or reinstall fetches the same server
-   result. The current local economy path needs a separately reviewed integration.
+   result. Paid wallet projections remain separate from the local earned economy.
 6. Reconcile on session resume/reconnect and with server notification workers.
    Owned-purchase queries can recover outstanding unconsumed purchases, but are
    not a history of consumed currency. A consumed purchase requires the durable
@@ -137,11 +135,11 @@ Test all crash boundaries, duplicate/concurrent deliveries, delayed payment,
 offline return, consumption timeout, backend outage and local persistence failure
 before enabling the release gate.
 
-## Approved account, split-wallet and recovery contract — Step 34A
+## Account, split-wallet and recovery contract
 
-The owner approved this architecture on 2026-11-03. Its implementation remains a
-release blocker. Step 34A adds only the [backend foundation](../backend/README.md);
-no Android Auth dependency, game save, Economy, Store or Billing callback changes.
+The [backend foundation](../backend/README.md) defines server-side models, the Auth
+boundary and Firestore rules. The client has no Google/Firebase login or cloud
+wallet integration.
 
 - Free gameplay and local earned rewards require neither login nor network.
   Existing earned balance, unlocks, prices, rewards and progression stay unchanged.
@@ -149,7 +147,7 @@ no Android Auth dependency, game save, Economy, Store or Billing callback change
   one-time paid credit or automatic promotion of local unlocks to cloud ownership.
 - Paid balance and paid-funded permanent character/arena unlocks belong to a
   Firebase UID on the server. There is no paid boost/consumable spend path in this
-  foundation. Adding one needs a recovery/refund contract before implementation.
+  foundation. Such a path requires its own recovery/refund contract.
 - Before IAP checkout require an online Firebase session signed in with Google.
   Firebase Admin verifies the ID token for the configured project, including
   expiry/signature and revoked/disabled sessions; `google.com` is mandatory.
@@ -158,7 +156,7 @@ no Android Auth dependency, game save, Economy, Store or Billing callback change
 - The future Kotlin Godot Android-v2 bridge uses Credential Manager + Firebase Auth;
   GDScript uses authenticated HTTPS. Backend uses Firebase Admin/Firestore and
   future TypeScript Cloud Functions. Native SDK/export validation and provisioning
-  are separate work; there is no assumption of a built-in Godot Firebase SDK.
+  are required for integration; there is no built-in Godot Firebase SDK assumed.
   [Google Auth](https://firebase.google.com/docs/auth/android/google-signin),
   [Godot Android plugins](https://docs.godotengine.org/en/stable/tutorials/platform/android/android_plugin.html),
   [Admin verification](https://firebase.google.com/docs/auth/admin/verify-id-tokens).
@@ -222,7 +220,7 @@ notifications may duplicate or arrive out of order. Poll and paginate the
 with durable checkpoints/overlap: its query window is bounded (currently 30 days),
 and quantity-based partial refunds need explicit handling.
 
-Approved policy (contract only; workers are not implemented):
+Reversal policy (contract only; workers are not implemented):
 
 1. Re-query Google before applying a confirmed full-unit refund/chargeback. Record
    a stable refund event tied to the original global purchase record. Notifications,
@@ -258,5 +256,5 @@ Approved policy (contract only; workers are not implemented):
 
 The foundation contains no purchase verifier, live API, spend mutation, token
 storage, consumption worker or refund/revocation worker. End-to-end implementation,
-privacy/deletion flows, operational approval and signed-device acceptance are still
-mandatory. `PurchaseService.REAL_PURCHASES_ENABLED` remains **false**.
+privacy/deletion flows and signed-device verification are required for production.
+`PurchaseService.REAL_PURCHASES_ENABLED` remains **false**.

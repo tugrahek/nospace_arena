@@ -25,3 +25,6 @@ config/ad_ids.gd
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# Local release planning
+/docs/release-v1-checklist.md

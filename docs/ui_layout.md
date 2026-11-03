@@ -57,4 +57,4 @@ Keep Arena, Player, Enemy, Camera2D and world-space effects outside SafeContent.
 Do not change PLAY_RECT, grid sizing, camera, physics or input coordinates.
 Backgrounds/dimming remain full-screen; the helper itself ignores pointer input.
 Existing child controls retain their own mouse/input behavior.
-Moving a D-pad requires separate approval and a shared visual/input-center change.
+D-pad visual and input centers must move together.

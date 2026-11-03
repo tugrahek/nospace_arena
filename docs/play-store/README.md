@@ -1,9 +1,8 @@
-# Google Play asset review package — R3
+# Google Play asset package
 
-Final asset integration pass, based on `main@eb95d26`, 26 October 2026.
-Existing branding and EN/TR feature graphics are accepted for this pass and unchanged.
-Both Android profiles now use the approved launcher layers. No Play Console upload
-is implied. Gameplay, frozen Settings and monetization are unchanged.
+The package contains launcher layers, EN/TR feature graphics and rendered game
+screenshots. Both Android export profiles use the launcher layers. The assets have
+not been uploaded to Play Console.
 
 ## Review assets
 
@@ -84,7 +83,7 @@ provenance while replacing only the two Mode Select renders.
 Run `python tools/validate_play_store_assets.py --report docs/play-store/validation.json`.
 It checks PNG CRCs/decoding, dimensions, bit depth/channels, opacity/transparency,
 icon size and adaptive safe-zone geometry, plus EN/TR text limits and capture metadata.
-The package's `.gdignore` and R1 `docs/*` release exclusion keep review art out of
+The package's `.gdignore` and `docs/*` release exclusion keep review art out of
 game exports. Four byte-identical runtime copies live in `assets/branding/launcher/`.
 
 Both Android profiles map these imported runtime copies to Godot's
@@ -94,12 +93,12 @@ settings. APK format/debug signing and release AAB format/unsigned signing,
 package identity, SDK settings and test-ad defaults are preserved. Validation
 checks the four source/copy identities and both profiles' mappings.
 
-The isolated R1 workflow also produced both exports successfully (import/APK/AAB
+The isolated export workflow produced both exports successfully (import/APK/AAB
 exit 0). [Artifact evidence](android-export-validation.json) records hashes,
 package/SDK values, unsigned AAB status, native ELF load alignment, 16 KB bundle
 configuration, APK signature/zip alignment and 24 packaged launcher WebPs matching
 generated resources in each artifact. Source development AGP remains 8.6.1; the
-isolated R1 workspace uses its verified 8.9.1 override. This is artifact evidence,
+isolated export workspace uses its verified 8.9.1 override. This is artifact evidence,
 not physical-device or Play Console acceptance. Local logs remain under the
 ignored `export/r3-final-verified/` directory; shutdown ObjectDB warnings are noted.
 

@@ -16,7 +16,7 @@ This page keeps the project's Android service and export details out of the port
 - UMP consent information is refreshed each session. Any required consent form is presented before `AdsService` initializes or loads ads. Settings exposes privacy choices only when UMP requires them.
 - Development defaults use Google's official test configuration for the plugin Android App ID and test ads. The production rewarded unit is unset. Configure both production IDs before disabling test mode. Desktop ads use a no-op backend.
 
-### Production configuration gate (R2; production remains disabled)
+### Production configuration gate
 
 `config/ads_config.gd` resolves these ProjectSettings together at Android boot:
 
@@ -37,9 +37,9 @@ Configuration is a build/boot snapshot, not a supported live runtime toggle.
 
 For a later authorized production build, create a separate export workspace and set
 all four keys in that workspace's `project.godot` before Godot import/export. Do not
-edit the source project's development defaults or reuse the R1 smoke workspace for
-production. The R1 preparation script intentionally requires test mode and an empty
-production unit. No production config file or real ID is supplied by R2. The old
+edit the source project's development defaults or reuse a smoke-test workspace for
+production. The preparation script requires test mode and an empty production
+unit. No production config file or real ID is supplied. The old
 `config/ad_ids.example.gd` is a reference, not a loader; copying it does not configure ads.
 
 The plugin exporter maps the App ID setting to manifest metadata
@@ -61,17 +61,17 @@ Publisher follow-up: confirm real IDs/app/package association, AdMob readiness a
 `app-ads.txt`, message publication and regions, audience/under-age treatment, and the
 policy/Data Safety declarations. Drafts: [privacy policy](privacy-policy.draft.md)
 and [Data Safety worksheet](data-safety-worksheet.md). No production activation or
-public policy URL is included in R2.
+public policy URL is configured.
 
 ## Google Play billing
 
 - The project vendors [GodotGooglePlayBilling 3.3.0](https://github.com/godot-sdk-integrations/godot-google-play-billing/releases/tag/3.3.0) with Google Play Billing Library 9.1.0 under `addons/GodotGooglePlayBilling/`, including its MIT notice and debug/release AARs.
 - Release ZIP SHA-256: `20d75623d6f337f08d8283c83098b73678d5f575e39247af5a8eb80588b18568`.
 - The editor plugin adds the variant-specific AAR and pinned Maven dependency to Android Gradle exports. `PurchaseService.REAL_PURCHASES_ENABLED=false` now keeps the production autoload on the unavailable no-op backend on all platforms, including Android.
-- The adapter retains non-consumables and now accepts the three approved consumable coin packs when explicitly configured. It supports localized metadata/unambiguous offers, single quantity and unverified callback/recovery candidates only. The live catalog is empty; no server verification, coin delivery or consumable acknowledgement/consumption is configured. See [v1 IAP architecture](iap-v1-architecture.md) and the permanent [v1 release tracker](release-v1-checklist.md).
+- The adapter retains non-consumables and accepts the three defined consumable coin packs when explicitly configured. It supports localized metadata/unambiguous offers, single quantity and unverified callback/recovery candidates only. The live catalog is empty; no server verification, coin delivery or consumable acknowledgement/consumption is configured. See [v1 IAP architecture](iap-v1-architecture.md).
 - Purchase callbacks are correlated with immutable request data and opaque flow markers. Non-consumable local delivery still precedes acknowledgement, with owned-query restoration/retry. Consumable tokens instead surface as `purchase_verification_required` candidates; they never authorize delivery, acknowledgement or consumption. Tokens/flow markers do not replace server verification or account authentication.
 
-## Export checklist
+## Export requirements
 
 Android builds require matching Godot export templates, an Android SDK/JDK, the Gradle build template, and local signing configuration. Keep test ads enabled for development. Before distribution, review application IDs, signing, network permissions, export filters, and the product catalog. Exclude development addons and tests from production exports. iOS export and native-service acceptance are not yet validated.
 
@@ -120,7 +120,7 @@ alone does not establish 16 KB compatibility; generated APK alignment and 16 KB
 device/emulator execution remain separate checks. Signing and production-ad activation
 require later explicit configuration; this preparation supplies neither.
 
-R1 artifact inspection: min/target SDK 24/36, version 1 / 0.1.0, package
+Unsigned artifact inspection: min/target SDK 24/36, version 1 / 0.1.0, package
 `com.tugrahek.nospace`, arm64 only, no signatures, and no test/GUT/docs/tools assets.
 All LOAD segments in `libc++_shared.so` and `libgodot_android.so` have 16,384-byte
 alignment with congruent file offsets / virtual addresses; bundletool reports

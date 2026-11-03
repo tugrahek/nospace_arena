@@ -1,12 +1,11 @@
-# Wallet foundation — Step 34A
+# Wallet foundation
 
 Local-only TypeScript/Firebase foundation, **not a payment service**. No Firebase
 project is provisioned or selected, no credentials are included, and nothing is
 deployed. No Functions handlers are exported or configured for deployment.
 `PurchaseService.REAL_PURCHASES_ENABLED=false` remains unchanged in the game.
 The authoritative product/recovery/spend/refund contract is
-[the IAP architecture](../docs/iap-v1-architecture.md); release blockers remain in
-[the checklist](../docs/release-v1-checklist.md).
+[the IAP architecture](../docs/iap-v1-architecture.md).
 
 ## Included boundary
 
@@ -83,13 +82,13 @@ Rules tests try create/replace/update/delete, nested records, owner/other/guest,
 anonymous and fake-admin sessions, private reads, batch/transaction escalation and
 unchanged seed state. Rules prevent direct client access, not privileged Admin bugs.
 
-## Remaining work and operation
+## Integration requirements
 
-Separately implement: server project/least-privilege IAM, Google sign-in bridge,
+Production integration requires least-privilege server IAM, Google sign-in,
 checkout attribution, verification and idempotent transactional credit/spend,
-protected token queue, consumption worker, RTDN/polling and refund/review operations,
-account deletion/export, and explicit wallet UI. No Android dependencies are added
-by Step 34A. Keep real purchases disabled throughout this foundation.
+protected token queue, consumption, RTDN/polling, refund/review processing,
+account deletion/export and explicit wallet selection. The foundation includes no
+Android Auth dependencies. Real purchases remain disabled.
 
 Future Functions need Blaze billing; monitor usage, quotas, consume deadlines,
 unfulfilled charges and refund polling. Budget alerts do not cap bills. Establish
